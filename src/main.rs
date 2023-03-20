@@ -97,8 +97,16 @@ fn treefold(
 					0 => {},
 					1 => {},
 					2 => {
-						let last: tokenize::Token = new.pop_back().unwrap();
-						let next: tokenize::Token = g_inner.pop_front().unwrap().clone();
+						let mut last: tokenize::Token = new.pop_back().unwrap();
+						let mut next: tokenize::Token = g_inner.pop_front().unwrap().clone();
+
+						// TODO: append to t_vec, do this without recursion.
+						if let tokenize::Token::Group(_) = last {
+							last = treefold(last, check, op_type, new_token).unwrap();
+						}
+						if let tokenize::Token::Group(_) = next {
+							next = treefold(next, check, op_type, new_token).unwrap();
+						}
 
 						let mut new_token_args: VecDeque<tokenize::Token> = VecDeque::with_capacity(2);
 						new_token_args.push_back(last);
@@ -127,6 +135,17 @@ fn is_mult(t: &tokenize::Token) -> bool {
 
 fn new_mult(v: VecDeque<tokenize::Token>) -> tokenize::Token {
 	tokenize::Token::Mult(v)
+}
+
+fn is_add(t: &tokenize::Token) -> bool {
+	match t {
+		tokenize::Token::Operator(s) => {s == "+"},
+		_ => false
+	}
+}
+
+fn new_add(v: VecDeque<tokenize::Token>) -> tokenize::Token {
+	tokenize::Token::Add(v)
 }
 
 fn main() -> Result<(), std::io::Error> {
@@ -164,64 +183,9 @@ fn main() -> Result<(), std::io::Error> {
 		//writeln!(stdout, "Tokenized: {exp:#?}")?;
 
 
-		let q = treefold(
-			exp,
-			is_mult,
-			2,
-			new_mult
-		);
+		let mut q = treefold(exp, is_mult, 2, new_mult).unwrap();
+		q = treefold(q, is_add, 2, new_add).unwrap();
 		writeln!(stdout, "{q:#?}")?;
-
-
-		/*
-		// Groups to process
-		let mut t_vec: VecDeque<tokenize::Token> = VecDeque::with_capacity(32);
-		t_vec.push_back(exp);
-		
-		while t_vec.len() > 0 {
-			let g: tokenize::Token = t_vec.pop_front().unwrap();
-			let mut g_inner: Vec<tokenize::Token> = match g {
-				tokenize::Token::Group(x) => x,
-				_ => panic!()
-			};
-
-			let mut new: Vec<tokenize::Token> = Vec::with_capacity(8);
-
-			// Parse binary operators
-			for o in ["*", "/", "+", "-"] {
-				let mut i = g_inner.iter();
-				loop {
-					let t = match i.next() {
-						Some(o) => o,
-						None => break
-					};
-		
-					match t {
-						tokenize::Token::Operator(s) => {
-							if s == o {
-								let last = new.pop().unwrap();
-								let next = i.next().unwrap();
-	
-								new.push(tokenize::Token::Op(
-									String::from(s),
-									Box::new(last.clone()),
-									Box::new(next.clone())
-								))
-							} else {
-								new.push(t.clone());
-							}
-						},
-						_ => {
-							new.push(t.clone());
-						}
-					}
-				}
-				g_inner = new.clone();
-				new = Vec::with_capacity(8);
-			}
-			writeln!(stdout, "{:?}", g_inner)?;
-		}
-		*/
 	}
 
 	writeln!(stdout, "Exiting.")?;

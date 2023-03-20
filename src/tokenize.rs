@@ -16,8 +16,8 @@ pub enum Token {
 	Word(String),
 
 	// Only used in tree
-	Op(String, Box<Token>, Box<Token>),
-	Mult(VecDeque<Token>)
+	Mult(VecDeque<Token>),
+	Add(VecDeque<Token>)
 }
 
 
