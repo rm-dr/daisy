@@ -6,22 +6,22 @@ use std::collections::VecDeque;
 pub enum Token {
 
 	// Only used after tokenizing
-	Negative,
-	Factorial,
-	Group(VecDeque<Token>), // Will be expanded during tree folding
-	Operator(String),       // Will become Ops during tree folding
-
-	// Used in both
-	Number(String),
-	Word(String),
+	PreGroup(VecDeque<Token>),
+	PreOperator(String),
+	PreNumber(String),
+	PreWord(String),
 
 	// Only used in tree
 	Multiply(VecDeque<Token>),
 	Divide(VecDeque<Token>),
 	Add(VecDeque<Token>),
 	Subtract(VecDeque<Token>),
-	Fac(VecDeque<Token>),
-	Neg(VecDeque<Token>)
+	Factorial(VecDeque<Token>),
+	Negative(VecDeque<Token>),
+	Power(VecDeque<Token>),
+	Modulo(VecDeque<Token>),
+
+	//Function(String, VecDeque<Token>),
 }
 
 
@@ -37,21 +37,21 @@ pub enum Token {
 pub fn tokenize(input: &String) -> Result<Token, ()> {
 	let mut t: Option<Token> = None; // The current token we're reading
 	let mut g: Vec<Token> = Vec::with_capacity(8); // Vector of "grouping levels"
-	g.push(Token::Group(VecDeque::with_capacity(8)));
+	g.push(Token::PreGroup(VecDeque::with_capacity(8)));
 
 
 	for c in input.chars() {
 
 		// The grouping level we're on now
 		let g_now: &mut VecDeque<Token> = match g.last_mut().unwrap() {
-			Token::Group(ref mut x) => x,
+			Token::PreGroup(ref mut x) => x,
 			_ => panic!()
 		};
 
 		match c {
 			'!' => {
 				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
-				g_now.push_back(Token::Factorial);
+				g_now.push_back(Token::PreOperator(String::from("!")));
 			},
 
 			// Minus sign can be both a Negative and an Operator.
@@ -61,14 +61,14 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 				match g_now.back() {
 					// If previous token was any of the following,
 					// this is the "minus" operator
-					Some(Token::Number(_)) |
-					Some(Token::Group(_)) |
-					Some(Token::Word(_)) => {
-						g_now.push_back(Token::Operator(String::from(c)));
+					Some(Token::PreNumber(_)) |
+					Some(Token::PreGroup(_)) |
+					Some(Token::PreWord(_)) => {
+						g_now.push_back(Token::PreOperator(String::from(c)));
 					},
 
 					// Otherwise, this is a negative sign.
-					_ => { g_now.push_back(Token::Negative); }
+					_ => { g_now.push_back(Token::PreOperator(String::from("neg"))); }
 				};
 			},
 
@@ -78,7 +78,7 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 				match &mut t {
 					// If we're already building a number,
 					// append.
-					Some(Token::Number(val)) => {
+					Some(Token::PreNumber(val)) => {
 						val.push(if c == ',' {'.'} else {c});
 					},
 
@@ -86,7 +86,7 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 					// previous token and start one.
 					_ => {
 						if t.is_some() { g_now.push_back(t.unwrap()); }
-						t = Some(Token::Number(String::from(c)));
+						t = Some(Token::PreNumber(String::from(c)));
 					}
 				};
 			},
@@ -97,7 +97,7 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 				match &mut t {
 					// If we're already building a number,
 					// append.
-					Some(Token::Word(val)) => {
+					Some(Token::PreWord(val)) => {
 						val.push(c);
 					},
 
@@ -105,7 +105,7 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 					// previous token and start one.
 					_ => {
 						if t.is_some() { g_now.push_back(t.unwrap()); }
-						t = Some(Token::Word(String::from(c)));
+						t = Some(Token::PreWord(String::from(c)));
 					}
 				};
 			},
@@ -113,24 +113,28 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 
 			// Operation
 			// Always one character
-			'+' | '*' | '/' | '^' => {
+			'+' |
+			'*' |
+			'/' |
+			'^' |
+			'%' => {
 				// Finalize previous token
 				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
-				g_now.push_back(Token::Operator(String::from(c)));
+				g_now.push_back(Token::PreOperator(String::from(c)));
 			}
 			
 			// Groups
 			// Always one character
 			'(' => {
 				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
-				g.push(Token::Group(VecDeque::with_capacity(8)));
+				g.push(Token::PreGroup(VecDeque::with_capacity(8)));
 			},
 			')' => {
 				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
 				let new_group: Token = g.pop().unwrap();
 
 				let g_now: &mut VecDeque<Token> = match g.last_mut().unwrap() {
-					Token::Group(ref mut x) => x,
+					Token::PreGroup(ref mut x) => x,
 					_ => panic!()
 				};
 		
@@ -149,7 +153,7 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 
 	
 	let g_now: &mut VecDeque<Token> = match g.last_mut().unwrap() {
-		Token::Group(ref mut x) => x,
+		Token::PreGroup(ref mut x) => x,
 		_ => panic!()
 	};
 	if t.is_some() { g_now.push_back(t.unwrap()); }

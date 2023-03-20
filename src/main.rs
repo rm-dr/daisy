@@ -79,7 +79,7 @@ fn main() -> Result<(), std::io::Error> {
 
 		// Tokenize input.
 		// Fail if we encounter invalid characters.
-		let mut exp = match parser::tokenize::tokenize(&input) {
+		let mut g = match parser::tokenize::tokenize(&input) {
 			Ok(v) => v,
 			Err(_) => {
 				continue;
@@ -92,9 +92,9 @@ fn main() -> Result<(), std::io::Error> {
 		stdout.reset()?;
 		write!(stdout, "Got {input}\n\n\n")?;
 
-		parser::treefold::treefold(&mut exp).expect("Could not fold");
+		parser::parse(&mut g).expect("Could not fold");
 
-		writeln!(stdout, "Tokenized: {exp:#?}")?;
+		writeln!(stdout, "Tokenized: {g:#?}")?;
 	}
 
 	writeln!(stdout, "Exiting.")?;
