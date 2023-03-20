@@ -1,12 +1,25 @@
+use std::collections::VecDeque;
+
+
 #[derive(Debug)]
 #[derive(Clone)]
 pub enum Token {
+
+	// Only used after tokenizing
 	Negative,
+	Factorial,
+	Group(VecDeque<Token>), // Will be expanded during tree folding
+	Operator(String),  // Will become Ops during tree folding
+
+	// Used in both.
 	Number(String),
-	Operator(String),
 	Word(String),
-	Group(Vec<Token>),
+
+	// Only used in tree
+	Op(String, Box<Token>, Box<Token>),
+	Mult(VecDeque<Token>)
 }
+
 
 /// Turn a string into a set of tokens.
 /// Does not check syntax. Fails if `input` contains an invalid character.
@@ -18,33 +31,40 @@ pub enum Token {
 // * `Ok(Vec<token>)` if we were successful.
 // * `Err(())` if we couldn't tokenize this string.
 pub fn tokenize(input: &String) -> Result<Token, ()> {
-	let mut t: Option<Token> = None;
-	let mut g: Vec<Token> = Vec::with_capacity(8);
-	g.push(Token::Group(Vec::with_capacity(8)));
+	let mut t: Option<Token> = None; // The current token we're reading
+	let mut g: Vec<Token> = Vec::with_capacity(8); // Vector of "grouping levels"
+	g.push(Token::Group(VecDeque::with_capacity(8)));
 
 
 	for c in input.chars() {
-		let v_now: &mut Vec<Token> = match g.last_mut().unwrap() {
+
+		// The grouping level we're on now
+		let g_now: &mut VecDeque<Token> = match g.last_mut().unwrap() {
 			Token::Group(ref mut x) => x,
 			_ => panic!()
 		};
 
 		match c {
+			'!' => {
+				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
+				g_now.push_back(Token::Factorial);
+			},
+
 			// Minus sign can be both a Negative and an Operator.
 			// Needs special treatment.
 			'-' => {
-				if t.is_some() { v_now.push(t.unwrap()); t = None; }
-				match v_now.last() {
+				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
+				match g_now.back() {
 					// If previous token was any of the following,
 					// this is the "minus" operator
 					Some(Token::Number(_)) |
 					Some(Token::Group(_)) |
 					Some(Token::Word(_)) => {
-						v_now.push(Token::Operator(String::from(c)));
+						g_now.push_back(Token::Operator(String::from(c)));
 					},
 
 					// Otherwise, this is a negative sign.
-					_ => { t = Some(Token::Negative); }
+					_ => { g_now.push_back(Token::Negative); }
 				};
 			},
 
@@ -61,7 +81,7 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 					// If we're not building a number, finalize
 					// previous token and start one.
 					_ => {
-						if t.is_some() { v_now.push(t.unwrap()); }
+						if t.is_some() { g_now.push_back(t.unwrap()); }
 						t = Some(Token::Number(String::from(c)));
 					}
 				};
@@ -80,7 +100,7 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 					// If we're not building a number, finalize
 					// previous token and start one.
 					_ => {
-						if t.is_some() { v_now.push(t.unwrap()); }
+						if t.is_some() { g_now.push_back(t.unwrap()); }
 						t = Some(Token::Word(String::from(c)));
 					}
 				};
@@ -91,31 +111,31 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 			// Always one character
 			'+' | '*' | '/' | '^' => {
 				// Finalize previous token
-				if t.is_some() { v_now.push(t.unwrap()); t = None; }
-				v_now.push(Token::Operator(String::from(c)));
+				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
+				g_now.push_back(Token::Operator(String::from(c)));
 			}
 			
 			// Groups
 			// Always one character
 			'(' => {
-				if t.is_some() { v_now.push(t.unwrap()); t = None; }
-				g.push(Token::Group(Vec::with_capacity(8)));
+				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
+				g.push(Token::Group(VecDeque::with_capacity(8)));
 			},
 			')' => {
-				if t.is_some() { v_now.push(t.unwrap()); t = None; }
+				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
 				let new_group: Token = g.pop().unwrap();
 
-				let v_now: &mut Vec<Token> = match g.last_mut().unwrap() {
+				let g_now: &mut VecDeque<Token> = match g.last_mut().unwrap() {
 					Token::Group(ref mut x) => x,
 					_ => panic!()
 				};
 		
-				v_now.push(new_group);
+				g_now.push_back(new_group);
 			},
 
 			// Space. Basic seperator.
 			' ' => {
-				if t.is_some() { v_now.push(t.unwrap()); t = None; }
+				if t.is_some() { g_now.push_back(t.unwrap()); t = None; }
 			}
 
 			// Invalid token
@@ -124,11 +144,11 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 	}
 
 	
-	let v_now: &mut Vec<Token> = match g.last_mut().unwrap() {
+	let g_now: &mut VecDeque<Token> = match g.last_mut().unwrap() {
 		Token::Group(ref mut x) => x,
 		_ => panic!()
 	};
-	if t.is_some() { v_now.push(t.unwrap()); }
+	if t.is_some() { g_now.push_back(t.unwrap()); }
 
-	return Ok(Token::Group(v_now.to_vec()));
+	return Ok(g.pop().unwrap());
 }
