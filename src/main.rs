@@ -2,7 +2,6 @@ use std::io;
 use std::io::Write;
 //use std::io::Read;
 use std::sync::Arc;
-use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use termcolor::{
@@ -13,7 +12,7 @@ use termcolor::{
 	WriteColor
 };
 
-pub mod tokenize;
+mod parser;
 
 const PROMPT_PREFIX: &str = "==> ";
 
@@ -61,93 +60,6 @@ fn prompt(
 }
 
 
-fn treefold(
-	mut exp: tokenize::Token, // Must be a group
-	check: fn(&tokenize::Token) -> bool,
-	op_type: u8,
-	new_token: fn(VecDeque<tokenize::Token>) -> tokenize::Token,
-) -> Result<tokenize::Token, ()> {
-
-	// Groups to process
-	let mut t_vec: VecDeque<&mut tokenize::Token> = VecDeque::with_capacity(32);
-	t_vec.push_back(&mut exp);
-
-	let mut out: Option<tokenize::Token> = None;
-
-	while t_vec.len() > 0 {
-
-		// The group we're currently working with
-		let g: &mut tokenize::Token = t_vec.pop_front().unwrap();
-		let g_inner: &mut VecDeque<tokenize::Token> = match g {
-			tokenize::Token::Group(ref mut x) => x,
-			_ => panic!()
-		};
-
-		let mut new: VecDeque<tokenize::Token> = VecDeque::with_capacity(8);
-
-		// Build new group array
-		while g_inner.len() > 0 {
-			let t: tokenize::Token = match g_inner.pop_front() {
-				Some(o) => o,
-				None => break
-			};
-
-			if check(&t) {
-				match op_type {
-					0 => {},
-					1 => {},
-					2 => {
-						let mut last: tokenize::Token = new.pop_back().unwrap();
-						let mut next: tokenize::Token = g_inner.pop_front().unwrap().clone();
-
-						// TODO: append to t_vec, do this without recursion.
-						if let tokenize::Token::Group(_) = last {
-							last = treefold(last, check, op_type, new_token).unwrap();
-						}
-						if let tokenize::Token::Group(_) = next {
-							next = treefold(next, check, op_type, new_token).unwrap();
-						}
-
-						let mut new_token_args: VecDeque<tokenize::Token> = VecDeque::with_capacity(2);
-						new_token_args.push_back(last);
-						new_token_args.push_back(next);
-						new.push_back(new_token(new_token_args));
-					},
-					_ => panic!()
-				};
-			} else {
-				new.push_back(t.clone());
-			}
-		}
-
-		*g_inner = new;
-	}
-	return Ok(exp);
-}
-
-
-fn is_mult(t: &tokenize::Token) -> bool {
-	match t {
-		tokenize::Token::Operator(s) => {s == "*"},
-		_ => false
-	}
-}
-
-fn new_mult(v: VecDeque<tokenize::Token>) -> tokenize::Token {
-	tokenize::Token::Mult(v)
-}
-
-fn is_add(t: &tokenize::Token) -> bool {
-	match t {
-		tokenize::Token::Operator(s) => {s == "+"},
-		_ => false
-	}
-}
-
-fn new_add(v: VecDeque<tokenize::Token>) -> tokenize::Token {
-	tokenize::Token::Add(v)
-}
-
 fn main() -> Result<(), std::io::Error> {
 
 	let mut stdout = StandardStream::stdout(ColorChoice::Always);
@@ -167,7 +79,7 @@ fn main() -> Result<(), std::io::Error> {
 
 		// Tokenize input.
 		// Fail if we encounter invalid characters.
-		let exp = match tokenize::tokenize(&input) {
+		let mut exp = match parser::tokenize::tokenize(&input) {
 			Ok(v) => v,
 			Err(_) => {
 				continue;
@@ -180,12 +92,9 @@ fn main() -> Result<(), std::io::Error> {
 		stdout.reset()?;
 		write!(stdout, "Got {input}\n\n\n")?;
 
-		//writeln!(stdout, "Tokenized: {exp:#?}")?;
+		parser::treefold::treefold(&mut exp).expect("Could not fold");
 
-
-		let mut q = treefold(exp, is_mult, 2, new_mult).unwrap();
-		q = treefold(q, is_add, 2, new_add).unwrap();
-		writeln!(stdout, "{q:#?}")?;
+		writeln!(stdout, "Tokenized: {exp:#?}")?;
 	}
 
 	writeln!(stdout, "Exiting.")?;

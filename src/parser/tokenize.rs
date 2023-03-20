@@ -9,15 +9,19 @@ pub enum Token {
 	Negative,
 	Factorial,
 	Group(VecDeque<Token>), // Will be expanded during tree folding
-	Operator(String),  // Will become Ops during tree folding
+	Operator(String),       // Will become Ops during tree folding
 
-	// Used in both.
+	// Used in both
 	Number(String),
 	Word(String),
 
 	// Only used in tree
-	Mult(VecDeque<Token>),
-	Add(VecDeque<Token>)
+	Multiply(VecDeque<Token>),
+	Divide(VecDeque<Token>),
+	Add(VecDeque<Token>),
+	Subtract(VecDeque<Token>),
+	Fac(VecDeque<Token>),
+	Neg(VecDeque<Token>)
 }
 
 
