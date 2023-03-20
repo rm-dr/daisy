@@ -3,6 +3,15 @@ name = "calc"
 version = "0.1.0"
 edition = "2021"
 
+[profile.release]
+opt-level = 3
+debug = 0
+debug-assertions = false
+strip = "symbols"
+lto = "fat"
+codegen-units = 1 
+panic = "abort"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
