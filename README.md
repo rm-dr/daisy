@@ -1,12 +1,13 @@
 # TODO
- - Fix documentation on target
- - group negatives
- - evaluate left-associative
+ - Fix documentation and variable names
+ - implicit multiply
+ - Function application
+ - Syntax check (parenthesis, argument type)
 
 # Eventually
  - rationals
+ - commands
+ - better prompt
  - units
- - implicit multiply
- - operator words: to, mod
- - assignement
+ - assignment
  - function definitions
