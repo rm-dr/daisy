@@ -20,6 +20,14 @@ pub fn replace_words(g: &mut Token) -> Result<(), ()> {
 				replace_words(&mut t)?;
 				new.push_back(t);
 			},
+			Token::PreNumber(ref s) => {
+				let n = match s.parse() {
+					Ok(n) => n,
+					Err(_) => panic!()
+				};
+
+				new.push_back(Token::Number(n));
+			}
 			Token::PreWord(ref s) => {
 				if s == "to" {
 					new.push_back(Token::PreOperator(String::from("to")));

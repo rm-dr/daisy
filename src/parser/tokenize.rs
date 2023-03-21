@@ -11,7 +11,13 @@ pub enum Token {
 	PreNumber(String),
 	PreWord(String),
 
+	// All PreGroups should vanish after operator folding
+	// All PreOperators should become Operators
+	// All PreNumbers should become Numbers
+	// All PreWords should become TODO.
+
 	// Only used in tree
+	Number(f64),
 	Multiply(VecDeque<Token>),
 	Divide(VecDeque<Token>),
 	Add(VecDeque<Token>),

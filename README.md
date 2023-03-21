@@ -2,7 +2,7 @@
  - Fix documentation and variable names
  - implicit multiply
  - Function application
- - Syntax check (parenthesis, argument type)
+ - Syntax check (parenthesis, argument type, position of error)
 
 # Eventually
  - rationals
