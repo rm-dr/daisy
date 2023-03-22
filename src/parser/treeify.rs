@@ -14,7 +14,6 @@ pub fn treeify(
 		Token::PreGroup(_, ref mut x) => x,
 		_ => panic!()
 	};
-	let mut new: VecDeque<Token> = VecDeque::with_capacity(8);
 
 	let mut i = 1;
 	while g_inner.len() > 1 {
@@ -53,8 +52,8 @@ pub fn treeify(
 			let this = g_inner.remove(i-1).unwrap();
 			let right = g_inner.remove(i-1).unwrap();
 
-			let (l, k) = match this {
-				Token::PreOperator(l, k) => (l, k),
+			let k = match this {
+				Token::PreOperator(_, k) => k,
 				_ => panic!()
 			};
 
@@ -71,10 +70,8 @@ pub fn treeify(
 					Operators::Multiply => Token::Multiply(new_token_args),
 					Operators::ImplicitMultiply => Token::Multiply(new_token_args),
 					Operators::Modulo => Token::Modulo(new_token_args),
-					Operators::Power => Token::Power(new_token_args),
 					Operators::ModuloLong => Token::Modulo(new_token_args),
-					Operators::Negative => panic!(),
-					Operators::Factorial => panic!(),
+					Operators::Power => Token::Power(new_token_args),
 					Operators::Null => panic!()
 				}
 			);

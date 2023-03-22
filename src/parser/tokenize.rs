@@ -13,7 +13,10 @@ fn update_line_location(mut t: Token, stop_i: usize) -> Token {
 		Token::PreGroup(ref mut l, _) |
 		Token::PreOperator(ref mut l, _) |
 		Token::PreNumber(ref mut l, _) |
-		Token::PreWord(ref mut l, _) => {
+		Token::PreWord(ref mut l, _) |
+		Token::PreNegative(ref mut l) |
+		Token::PreFactorial(ref mut l)
+		=> {
 			let LineLocation{pos, .. } = l;
 			*l = LineLocation{
 				pos: *pos,
@@ -27,30 +30,33 @@ fn update_line_location(mut t: Token, stop_i: usize) -> Token {
 }
 
 
-/// Look at the last two elements of `g`:
-/// - if one is an operator, do nothing.
-/// - if they are a valid implicit multiplication pair, add an ImplicitMultiply between them
-/// - if they aren't, throw an error.
+/// Looks backwards at the elements of g.
+/// - Inserts ImplicitMultiply
+/// - Removes multiple PreNegatives
+/// - Applies PreNegative to Numbers
+/// - Parses factorials
+/// - Checks syntax
 #[inline(always)]
-fn insert_implicit(
+fn lookback(
 	g: &mut VecDeque<Token>
 ) -> Result<(), (LineLocation, ParserError)> {
 	if g.len() >= 2 {
 		let b: Token = g.pop_back().unwrap();
-		let a: &Token = g.back().unwrap();
+		let a: Token = g.pop_back().unwrap();
 
-		match (a, &b) {
+		match (&a, &b) {
 
-			// Not implicit multiplication, ignore
-			(Token::PreOperator(_,_), _) |
-			(_, Token::PreOperator(_,_))
-			=> { g.push_back(b); },
+			( // Delete consecutive negatives
+				Token::PreNegative(_),
+				Token::PreNegative(_)
+			) => {},
 
-			// Valid implicit multiplications
-			(Token::PreGroup(_,_), Token::PreGroup(ref l,_)) |
-			(Token::PreGroup(_,_), Token::Number(ref l,_)) |
-			(Token::Number(_,_), Token::PreGroup(ref l,_))
+			// Insert ImplicitMultiply
+			(Token::PreGroup(_,_), Token::PreGroup(l ,_)) |
+			(Token::PreGroup(_,_), Token::Number(l,_)) |
+			(Token::Number(_,_), Token::PreGroup(l,_))
 			=> {
+				g.push_back(a);
 				let LineLocation { pos: i, .. } = l;
 				g.push_back(Token::PreOperator(
 					LineLocation{pos: i-1, len: 0},
@@ -59,16 +65,35 @@ fn insert_implicit(
 				g.push_back(b);
 			},
 
-			// Invalid implicit multiplications
-			(Token::Number(_,_), Token::Number(l,_))
+			// The following are syntax errors
+			(Token::PreOperator(la,_), Token::PreOperator(lb,_)) |
+			(Token::Number(la, _), Token::Number(lb,_)) |
+			(Token::PreNegative(la), Token::PreOperator(lb,_)) |
+			(Token::PreOperator(la, _), Token::PreFactorial(lb)) |
+			(Token::PreNegative(la), Token::PreFactorial(lb))
 			=> {
-				let LineLocation { pos: i, .. } = l;
+				let LineLocation { pos: posa, .. } = *la;
+				let LineLocation { pos: posb, len: lenb } = *lb;
 				return Err((
-					LineLocation{pos: i-1, len: 2},
-					ParserError::InvalidImplicitMultiply
+					LineLocation{pos: posa, len: posb - posa + lenb},
+					ParserError::Syntax
 				));
-			},
+			}
 
+			// The following are fine
+			(Token::PreOperator(_,_), Token::PreNegative(_)) |
+			(Token::PreOperator(_,_), Token::Number(_,_)) |
+			(Token::Number(_,_), Token::PreOperator(_,_)) |
+			(Token::PreOperator(_,_), Token::PreGroup(_,_)) |
+			(Token::PreGroup(_,_), Token::PreOperator(_,_)) |
+			(Token::PreNegative(_), Token::PreGroup(_,_)) |
+			(Token::PreNegative(_), Token::Number(_,_)) |
+			(Token::PreGroup(_,_), Token::PreFactorial(_)) |
+			(Token::Number(_,_), Token::PreFactorial(_))
+			=> { g.push_back(a); g.push_back(b); },
+
+			// If we get this far, we found a Token
+			// that shouldn't be here.
 			_ => panic!()
 		}
 	};
@@ -105,9 +130,13 @@ fn push_token(
 				}
 			},
 			Token::PreOperator(_, _) => t,
+			Token::PreGroup(_, _) => t,
+			Token::PreNegative(_) => t,
+			Token::PreFactorial(_) => t,
 			_ => panic!()
 		});
-		insert_implicit(g_now)?;
+
+		lookback(g_now)?;
 	}
 	return Ok(());
 }
@@ -130,41 +159,29 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 
 		match c {
 			'!' => {
-				if t.is_some() { g_now.push_back(update_line_location(t.unwrap(), i)); t = None; }
-				g_now.push_back(
-					Token::PreOperator(
-						LineLocation{pos: i, len: 1},
-						Operators::Factorial
-					)
-				);
+				push_token(g_now, i, t)?;
+				t = Some(Token::PreFactorial(LineLocation{pos: i, len: 1}));
 			},
 
 			// The minus sign can be both a Negative and an Operator.
 			// Needs special treatment.
 			'-' => {
-				push_token(g_now, i, t)?; t = None;
+				push_token(g_now, i, t)?;
 				match g_now.back() {
 					// If previous token was any of the following,
 					// this is the "minus" operator
-					Some(Token::PreNumber(_, _)) |
+					Some(Token::Number(_, _)) |
 					Some(Token::PreGroup(_, _)) |
 					Some(Token::PreWord(_, _)) => {
-						g_now.push_back(
-							Token::PreOperator(
-								LineLocation{pos: i, len: 1},
-								Operators::Subtract
-							)
-						);
+						t = Some(Token::PreOperator(
+							LineLocation{pos: i, len: 1},
+							Operators::Subtract
+						));
 					},
 
 					// Otherwise, this is a negative sign.
 					_ => {
-						g_now.push_back(
-							Token::PreOperator(
-								LineLocation{pos: i, len: 1},
-								Operators::Negative
-							)
-						);
+						t = Some(Token::PreNegative(LineLocation{pos: i, len: 1}));
 					}
 				};
 			},
@@ -192,16 +209,12 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 			'A'..='Z' |
 			'a'..='z' => {
 				match &mut t {
-					// If we're already building a number,
-					// append.
 					Some(Token::PreWord(_, val)) => {
 						val.push(c);
 					},
 
-					// If we're not building a number, finalize
-					// previous token and start one.
 					_ => {
-						if t.is_some() { g_now.push_back(update_line_location(t.unwrap(), i)); }
+						push_token(g_now, i, t)?;
 						t = Some(Token::PreWord(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
@@ -210,21 +223,18 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 			// Operator
 			// Always one character
 			'+' | '*' | '/' | '^' | '%' => {
-				// Finalize previous token
-				push_token(g_now, i, t)?; t = None;
-				g_now.push_back(
-					Token::PreOperator(
-						LineLocation{pos: i, len: 1},
-						match c {
-							'^' => Operators::Power,
-							'%' => Operators::Modulo,
-							'*' => Operators::Multiply,
-							'/' => Operators::Divide,
-							'+' => Operators::Add,
-							_ => panic!()
-						}
-					)
-				);
+				push_token(g_now, i, t)?;
+				t = Some(Token::PreOperator(
+					LineLocation{pos: i, len: 1},
+					match c {
+						'^' => Operators::Power,
+						'%' => Operators::Modulo,
+						'*' => Operators::Multiply,
+						'/' => Operators::Divide,
+						'+' => Operators::Add,
+						_ => panic!()
+					}
+				));
 			}
 			
 			// Group
@@ -233,15 +243,8 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 				g.push(Token::PreGroup(LineLocation{pos: i, len: 0}, VecDeque::with_capacity(8)));
 			},
 			')' => {
-				push_token(g_now, i, t)?; t = None;
-				let new_group: Token = g.pop().unwrap();
-
-				let g_now: &mut VecDeque<Token> = match g.last_mut().unwrap() {
-					Token::PreGroup(_, ref mut x) => x,
-					_ => panic!()
-				};
-		
-				g_now.push_back(update_line_location(new_group, i+1));
+				push_token(g_now, i, t)?;
+				t = Some(g.pop().unwrap());
 			},
 
 			// Space. Basic seperator.

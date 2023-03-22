@@ -30,14 +30,16 @@ pub enum Token {
 	/// PreGroups aren't needed once we have a tree.
 	PreGroup(LineLocation, VecDeque<Token>),
 
+	PreNegative(LineLocation),
+	PreFactorial(LineLocation),
 
 	Number(LineLocation, f64),
 	Multiply(VecDeque<Token>),
 	Divide(VecDeque<Token>),
 	Add(VecDeque<Token>),
 	Subtract(VecDeque<Token>),
-	Factorial(VecDeque<Token>),
-	Negative(VecDeque<Token>),
+	//Factorial(VecDeque<Token>),
+	//Negative(VecDeque<Token>),
 	Power(VecDeque<Token>),
 	Modulo(VecDeque<Token>),
 }
@@ -56,9 +58,7 @@ pub enum Operators {
 	Multiply,
 	ImplicitMultiply,
 	Modulo, // Mod invoked with %
-	Power,
-	Negative,
-	Factorial,
+	Power
 }
 
 /// Specifies the location of a token in an input string.
@@ -77,7 +77,6 @@ pub enum ParserError {
 	InvalidChar,
 	MissingCloseParen,
 	Syntax,
-	InvalidImplicitMultiply,
 	BadNumber 
 }
 
