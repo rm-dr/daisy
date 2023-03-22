@@ -1,12 +1,14 @@
-use crate::parser::tokenize::Token;
+use crate::parser::Token;
+use crate::parser::ParserError;
+use crate::parser::LineLocation;
 
-pub fn unwrap_groups(g: &mut Token) -> Result<(), ()> {
+pub fn unwrap_groups(g: &mut Token) -> Result<(), (LineLocation, ParserError)> {
 
 	match g {
 		// If g is a PreGroup, unwrap it
-		Token::PreGroup(_, ref mut vec) => {
+		Token::PreGroup(l, ref mut vec) => {
 			if vec.len() != 1 {
-				panic!();
+				return Err((*l, ParserError::Syntax));
 			}
 			
 			let mut i = vec.pop_front().unwrap();

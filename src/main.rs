@@ -4,6 +4,8 @@ use std::io::Write;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+
+
 use termcolor::{
 	Color,
 	ColorChoice,
@@ -13,6 +15,9 @@ use termcolor::{
 };
 
 mod parser;
+use crate::parser::Token;
+//use crate::parser::ParserError;
+use crate::parser::LineLocation;
 
 const PROMPT_PREFIX: &str = "==> ";
 
@@ -77,23 +82,26 @@ fn main() -> Result<(), std::io::Error> {
 			continue;
 		}
 
-		// Tokenize input.
+		// Parse input.
 		// Fail if we encounter invalid characters.
-		let mut g = match parser::tokenize::tokenize(&input) {
-			Ok(v) => v,
-			Err(_) => {
+		let g: Token = match parser::parse(&input) {
+			Ok(g) => g,
+			Err((l, e)) => {
+				let LineLocation{pos, len} = l;
+	
+				let s = " ";
+				let m = "^";
+				println!("{}{} {:?}", s.repeat(pos + 4), m.repeat(len), e);
+				stdout.flush()?;
 				continue;
 			}
 		};
-
 
 		stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
 		write!(stdout, "\n  => ")?;
 		stdout.reset()?;
 		write!(stdout, "Got {input}\n\n\n")?;
-		
-		parser::parse(&mut g).expect("Could not parse");
-
+	
 		writeln!(stdout, "Tokenized: {g:#?}")?;
 	}
 

@@ -1,5 +1,10 @@
 use std::collections::VecDeque;
-use crate::parser::tokenize::Token;
+
+use crate::parser::Token;
+use crate::parser::LineLocation;
+use crate::parser::ParserError;
+
+
 
 enum OperatorType {
 	Binary,    // A binary operator, like a + b
@@ -12,7 +17,7 @@ fn fold_operators_once(
 	op_type: &OperatorType,
 	check: fn(&str) -> bool,
 	new_token: fn(&str, VecDeque<Token>) -> Token,
-) -> Result<(), ()> {
+) -> Result<(), (LineLocation, ParserError)> {
 
 	// Groups to process
 	let mut t_vec: VecDeque<&mut Token> = VecDeque::with_capacity(32);
@@ -122,7 +127,7 @@ fn fold_operators_once(
 	return Ok(());
 }
 
-pub fn fold_operators(exp: &mut Token) -> Result<(), ()> {
+pub fn fold_operators(exp: &mut Token) -> Result<(), (LineLocation, ParserError)> {
 	fold_operators_once(
 		exp, &OperatorType::UnaryLeft,
 		|s| s=="!",

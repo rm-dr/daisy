@@ -1,6 +1,9 @@
-use crate::parser::tokenize::Token;
+use crate::parser::Token;
+use crate::parser::LineLocation;
+use crate::parser::ParserError;
 
-pub fn replace_pre(g: &mut Token) -> Result<(), ()> {
+
+pub fn replace_pre(g: &mut Token) -> Result<(), (LineLocation, ParserError)> {
 
 	match g {
 		Token::PreGroup(_, ref mut vec) => {
@@ -8,10 +11,10 @@ pub fn replace_pre(g: &mut Token) -> Result<(), ()> {
 				replace_pre(i)?;
 			}
 		},
-		Token::PreNumber(_, s) => {
+		Token::PreNumber(l, s) => {
 			let n = match s.parse() {
 				Ok(n) => n,
-				Err(_) => panic!()
+				Err(_) => return Err((*l, ParserError::BadNumber))
 			};
 			*g = Token::Number(n);
 		}
@@ -19,8 +22,7 @@ pub fn replace_pre(g: &mut Token) -> Result<(), ()> {
 			if s == "mod" {
 				*g = Token::PreOperator(*l, String::from("mod"));
 			} else {
-				return Err(());
-				//new.push_back(t);
+				return Err((*l, ParserError::Syntax));
 			}
 		},
 		Token::PreOperator(_, _) => {},

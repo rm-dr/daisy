@@ -1,44 +1,8 @@
 use std::collections::VecDeque;
 
-#[derive(Debug)]
-#[derive(Copy, Clone)]
-pub struct LineLocation {
-	pos: usize,
-	len: usize
-}
-
-#[derive(Debug)]
-pub enum Token {
-
-	// Only used after tokenizing
-	PreGroup(LineLocation, VecDeque<Token>),
-	PreOperator(LineLocation, String),
-	PreNumber(LineLocation, String),
-	PreWord(LineLocation, String),
-
-	// All PreGroups should vanish after operator folding
-	// All PreOperators should become Operators
-	// All PreNumbers should become Numbers
-	// All PreWords should become TODO.
-
-	// Only used in tree
-
-	Number(f64),
-
-	// Functions
-
-	// Operators	
-	Multiply(VecDeque<Token>),
-	Divide(VecDeque<Token>),
-	Add(VecDeque<Token>),
-	Subtract(VecDeque<Token>),
-	Factorial(VecDeque<Token>),
-	Negative(VecDeque<Token>),
-	Power(VecDeque<Token>),
-	Modulo(VecDeque<Token>),
-
-	//Function(String, VecDeque<Token>),
-}
+use crate::parser::Token;
+use crate::parser::LineLocation;
+use crate::parser::ParserError;
 
 #[inline(always)]
 fn update_line_location(mut t: Token, stop_i: usize) -> Token {
@@ -60,16 +24,8 @@ fn update_line_location(mut t: Token, stop_i: usize) -> Token {
 }
 
 
-/// Turn a string into a set of tokens.
-/// Does not check syntax. Fails if `input` contains an invalid character.
-//
-// # Arguments:
-// `input`: A string like `(-3*2.2)/3`
-//
-// # Returns:
-// * `Ok(Vec<token>)` if we were successful.
-// * `Err(())` if we couldn't tokenize this string.
-pub fn tokenize(input: &String) -> Result<Token, ()> {
+
+pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 	let mut t: Option<Token> = None; // The current token we're reading
 	let mut g: Vec<Token> = Vec::with_capacity(8); // Vector of "grouping levels"
 	g.push(Token::PreGroup(LineLocation{pos: 0, len: 0}, VecDeque::with_capacity(8)));
@@ -190,7 +146,7 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 					_ => panic!()
 				};
 		
-				g_now.push_back(update_line_location(new_group, i));
+				g_now.push_back(update_line_location(new_group, i+1));
 			},
 
 			// Space. Basic seperator.
@@ -199,7 +155,7 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 			}
 
 			// Invalid token
-			_ => { return Err(()); }
+			_ => { return Err((LineLocation{pos: i, len: 1}, ParserError::InvalidChar)); }
 		};
 	}
 
@@ -209,6 +165,22 @@ pub fn tokenize(input: &String) -> Result<Token, ()> {
 		_ => panic!()
 	};
 	if t.is_some() { g_now.push_back(update_line_location(t.unwrap(), input.len())); }
+
+	if g.len() != 1 {
+		let q: LineLocation = match g.last_mut().unwrap() {
+			Token::PreGroup(l, _) => *l,
+			_ => panic!()
+		};
+
+		let LineLocation{pos:p, ..} = q;
+		return Err((
+			LineLocation{
+				pos: p,
+				len: input.len() - p
+			},
+			ParserError::MissingCloseParen
+		))
+	}
 
 	return Ok(g.pop().unwrap());
 }
