@@ -1,34 +1,37 @@
 mod tokenize;
-mod replace_pre;
-mod fold_operators;
-mod unwrap_groups;
+mod treeify;
 
 use crate::parser::tokenize::tokenize;
-use crate::parser::replace_pre::replace_pre;
-use crate::parser::fold_operators::fold_operators;
-use crate::parser::unwrap_groups::unwrap_groups;
+use crate::parser::treeify::treeify;
 
 use std::collections::VecDeque;
 
 
+/// Tokens represent logical objects in an expession.
+/// 
+/// Tokens starting with `Pre*` are intermediate tokens, and
+/// will never show up in a fully-parsed expression tree.
 #[derive(Debug)]
 pub enum Token {
 
-	// Used only while tokenizing.
-	// All of these are replaced with one of the tokens below.
-	//
-	// If parsing is successful,
-	//  - all PreGroups will vanish
-	//  - all PreOperators will become Operators
-	//  - all PreNumbers will become Numbers
-	PreGroup(LineLocation, VecDeque<Token>),
-	PreOperator(LineLocation, String),
+	/// Used only while tokenizing.
+	/// Will be replaced with a Number once we finish.
 	PreNumber(LineLocation, String),
+
+	/// Used only while tokenizing.
+	/// Will be replaced with one of the Tokens below once we finish.
 	PreWord(LineLocation, String),
 
-	Number(f64),
+	/// Used only until operators are parsed.
+	/// Each of these will become one of the operators below.
+	PreOperator(LineLocation, Operators),
 
-	// Operators
+	/// Used only until operators are parsed.
+	/// PreGroups aren't needed once we have a tree.
+	PreGroup(LineLocation, VecDeque<Token>),
+
+
+	Number(LineLocation, f64),
 	Multiply(VecDeque<Token>),
 	Divide(VecDeque<Token>),
 	Add(VecDeque<Token>),
@@ -39,6 +42,27 @@ pub enum Token {
 	Modulo(VecDeque<Token>),
 }
 
+
+/// Operator types, in order of increasing priority.
+/// The Null operator MUST be equal to zero.
+#[derive(Debug)]
+#[derive(Copy, Clone)]
+pub enum Operators {
+	Null = 0,
+	ModuloLong, // Mod invoked with "mod"
+	Subtract,
+	Add,
+	Divide,
+	Multiply,
+	ImplicitMultiply,
+	Modulo, // Mod invoked with %
+	Power,
+	Negative,
+	Factorial,
+}
+
+/// Specifies the location of a token in an input string.
+/// Used to locate ParserErrors.
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 pub struct LineLocation {
@@ -46,22 +70,34 @@ pub struct LineLocation {
 	pub len: usize
 }
 
+/// Types of parser errors.
+/// If we cannot parse a string, one of these is returned.
 #[derive(Debug)]
 pub enum ParserError {
 	InvalidChar,
 	MissingCloseParen,
 	Syntax,
-	BadNumber  // Cannot parse a number
+	InvalidImplicitMultiply,
+	BadNumber 
 }
 
 
-
+/// Parse a user string. This is the only method that should be used
+/// outside this module.
+/// 
+/// # Arguments:
+/// `s`: the string to parse. Must be trimmed.
+/// 
+/// # Returns:
+/// - `Err(LineLocation, ParserError)` if we couldn't parse this string.
+/// `LineLocation` specifies *where* the error is, and `ParserError` specifies
+/// *what* the error is.
+/// 
+/// - `Ok(Token)` otherwise, where `Token` is the top of an expression tree.
 pub fn parse(s: &String) -> Result<Token, (LineLocation, ParserError)> {
 
 	let mut g: Token = tokenize(s)?;
-	replace_pre(&mut g)?;
-	fold_operators(&mut g)?;
-	unwrap_groups(&mut g)?;
+	treeify(&mut g)?;
 	
 	return Ok(g);
 }

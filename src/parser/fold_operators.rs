@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+/*use std::collections::VecDeque;
 
 use crate::parser::Token;
 use crate::parser::LineLocation;
@@ -176,4 +176,4 @@ pub fn fold_operators(exp: &mut Token) -> Result<(), (LineLocation, ParserError)
 	)?;
 
 	return Ok(());
-}
+}*/
