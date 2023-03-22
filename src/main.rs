@@ -91,8 +91,8 @@ fn main() -> Result<(), std::io::Error> {
 		write!(stdout, "\n  => ")?;
 		stdout.reset()?;
 		write!(stdout, "Got {input}\n\n\n")?;
-
-		parser::parse(&mut g).expect("Could not fold");
+		
+		parser::parse(&mut g).expect("Could not parse");
 
 		writeln!(stdout, "Tokenized: {g:#?}")?;
 	}

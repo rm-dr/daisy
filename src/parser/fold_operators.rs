@@ -23,7 +23,15 @@ fn fold_operators_once(
 		// The group we're currently working with
 		let g: &mut Token = t_vec.pop_front().unwrap();
 		let g_inner: &mut VecDeque<Token> = match g {
-			Token::PreGroup(ref mut x) => x,
+			Token::PreGroup(_, ref mut x) |
+			Token::Multiply(ref mut x) |
+			Token::Divide(ref mut x) |
+			Token::Add(ref mut x) |
+			Token::Subtract(ref mut x) |
+			Token::Factorial(ref mut x) |
+			Token::Negative(ref mut x) |
+			Token::Power(ref mut x) |
+			Token::Modulo(ref mut x) => x,
 			_ => panic!()
 		};
 
@@ -31,15 +39,29 @@ fn fold_operators_once(
 
 		// Build new group array
 		while g_inner.len() > 0 {
-			let t: Token = match g_inner.pop_front() {
+			let mut t: Token = match g_inner.pop_front() {
 				Some(o) => o,
 				None => break
 			};
 
 			let s: &str;
-			if let Token::PreOperator(ref x) = t {
+			if let Token::PreOperator(_, ref x) = t {
 				s = x;
 			} else {
+				match t {
+					Token::PreGroup(_, _) |
+					Token::Multiply(_) |
+					Token::Divide(_) |
+					Token::Add(_) |
+					Token::Subtract(_) |
+					Token::Factorial(_) |
+					Token::Negative(_) |
+					Token::Power(_) |
+					Token::Modulo(_) => {
+						fold_operators_once(&mut t, op_type, check, new_token)?;
+					},
+					_ => {}
+				};
 				new.push_back(t);
 				continue;
 			}
@@ -49,8 +71,8 @@ fn fold_operators_once(
 					OperatorType::UnaryLeft => {
 						let mut last: Token = new.pop_back().unwrap();
 
-						if let Token::PreGroup(_) = last {
-							fold_operators_once(&mut last, op_type, check, new_token).unwrap();
+						if let Token::PreGroup(_, _) = last {
+							fold_operators_once(&mut last, op_type, check, new_token)?;
 						}
 
 						let mut new_token_args: VecDeque<Token> = VecDeque::with_capacity(1);
@@ -60,8 +82,8 @@ fn fold_operators_once(
 					OperatorType::UnaryRight => {
 						let mut next: Token = g_inner.pop_front().unwrap();
 
-						if let Token::PreGroup(_) = next {
-							fold_operators_once(&mut next, op_type, check, new_token).unwrap();
+						if let Token::PreGroup(_, _) = next {
+							fold_operators_once(&mut next, op_type, check, new_token)?;
 						}
 
 						let mut new_token_args: VecDeque<Token> = VecDeque::with_capacity(1);
@@ -73,11 +95,11 @@ fn fold_operators_once(
 						let mut next: Token = g_inner.pop_front().unwrap();
 
 						// TODO: append to t_vec and do this without recursion.
-						if let Token::PreGroup(_) = last {
-							fold_operators_once(&mut last, op_type, check, new_token).unwrap();
+						if let Token::PreGroup(_, _) = last {
+							fold_operators_once(&mut last, op_type, check, new_token)?;
 						}
-						if let Token::PreGroup(_) = next {
-							fold_operators_once(&mut next, op_type, check, new_token).unwrap();
+						if let Token::PreGroup(_, _) = next {
+							fold_operators_once(&mut next, op_type, check, new_token)?;
 						}
 
 						let mut new_token_args: VecDeque<Token> = VecDeque::with_capacity(2);
@@ -87,6 +109,9 @@ fn fold_operators_once(
 					}
 				};
 			} else {
+				if let Token::PreGroup(_, _) = t {
+					fold_operators_once(&mut t, op_type, check, new_token)?;
+				}
 				new.push_back(t);
 			}
 		}
@@ -138,7 +163,6 @@ pub fn fold_operators(exp: &mut Token) -> Result<(), ()> {
 			_=>panic!()
 		}
 	)?;
-
 
 	fold_operators_once(
 		exp, &OperatorType::Binary,
