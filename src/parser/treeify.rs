@@ -376,6 +376,9 @@ pub fn treeify(
 		Token::PreOperator(l, _) => {
 			return Err((*l, ParserError::Syntax));
 		},
+		Token::PreGroup(_,_) => {
+			treeify(g)?;
+		}
 		_ => {}
 	};
 
