@@ -1,10 +1,10 @@
 # TODO
  - Fix documentation and variable names
- - implicit multiply
  - Function application
- - Syntax check (parenthesis, argument type, position of error)
+ - Syntax check (parenthesis, argument type)
 
 # Eventually
+ - tests
  - rationals
  - commands
  - better prompt
