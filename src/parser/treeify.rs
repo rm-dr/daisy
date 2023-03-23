@@ -39,11 +39,20 @@ fn treeify_binary(
 ) -> Result<usize, (LineLocation, ParserError)> {
 
 	let this: &Token = &g_inner[i];
+
+	if i == 0 {
+		// This binary operator is at the end of an expression.
+		let l = match this {
+			Token::PreOperator(l, _) => l,
+			_ => panic!()
+		};
+		return Err((*l, ParserError::Syntax));
+	}
+
 	let right: &Token = {
 		if i < g_inner.len()-1 {
 			&g_inner[i+1]
 		} else {
-			// This binary operator is at the end of the expression.
 			let l = match this {
 				Token::PreOperator(l, _) => l,
 				_ => panic!()
@@ -102,9 +111,11 @@ fn treeify_binary(
 
 		if right_val.is_none() || this_val > right_val.unwrap() {
 			// This operator has higher precedence, it takes both arguments
-			let left = g_inner.remove(i-1).unwrap();
+			let mut left = g_inner.remove(i-1).unwrap();
 			let this = g_inner.remove(i-1).unwrap();
-			let right = g_inner.remove(i-1).unwrap();
+			let mut right = g_inner.remove(i-1).unwrap();
+			if let Token::PreGroup(_, _) = right { treeify(&mut right)?; }
+			if let Token::PreGroup(_, _) = left { treeify(&mut left)?; }
 
 			let k = match this {
 				Token::PreOperator(_, k) => k,
@@ -197,7 +208,8 @@ fn treeify_unaryleft(
 
 		if right_val.is_none() || this_val > right_val.unwrap() {
 			let this = g_inner.remove(i).unwrap();
-			let right = g_inner.remove(i).unwrap();
+			let mut right = g_inner.remove(i).unwrap();
+			if let Token::PreGroup(_, _) = right { treeify(&mut right)?; }
 
 			let k = match this {
 				Token::PreOperator(_, k) => k,
@@ -296,7 +308,8 @@ fn treeify_unaryright(
 
 		if left_val.is_none() || this_val > left_val.unwrap() {
 			let this = g_inner.remove(i).unwrap();
-			let left = g_inner.remove(i-1).unwrap();
+			let mut left = g_inner.remove(i-1).unwrap();
+			if let Token::PreGroup(_, _) = left { treeify(&mut left)?; }
 
 			let k = match this {
 				Token::PreOperator(_, k) => k,
@@ -354,6 +367,17 @@ pub fn treeify(
 
 		};
 	}
+
+	*g = g_inner.pop_front().unwrap();
+
+	// Catch the edge case where the entire group we're given
+	// consists of one operator. This is always a syntax error.
+	match g {
+		Token::PreOperator(l, _) => {
+			return Err((*l, ParserError::Syntax));
+		},
+		_ => {}
+	};
 
 	return Ok(());
 }
