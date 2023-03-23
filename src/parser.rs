@@ -75,6 +75,8 @@ pub struct LineLocation {
 pub enum ParserError {
 	InvalidChar,
 	MissingCloseParen,
+	ExtraCloseParen,
+	EmptyGroup,
 	Syntax,
 	BadNumber 
 }

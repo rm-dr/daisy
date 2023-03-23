@@ -128,6 +128,7 @@ fn push_token(
 pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 	let mut t: Option<Token> = None; // The current token we're reading
 	let mut g: Vec<Token> = Vec::with_capacity(8); // Vector of "grouping levels"
+	let mut i_level = 0;
 	g.push(Token::PreGroup(LineLocation{pos: 0, len: 0}, VecDeque::with_capacity(8)));
 
 
@@ -229,8 +230,29 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 			'(' => {
 				push_token(g_now, i, t)?; t = None;
 				g.push(Token::PreGroup(LineLocation{pos: i, len: 0}, VecDeque::with_capacity(8)));
+				i_level += 1;
 			},
 			')' => {
+				// Catch extra close parens
+				if i_level == 0 {
+					return Err((
+						LineLocation{pos: i, len: 1},
+						ParserError::ExtraCloseParen
+					))
+				}
+				i_level -= 1;
+
+				// Catch empty groups
+				if t.is_none() {
+					let mut last = g.pop().unwrap();
+					last = update_line_location(last, i+1);
+					let Token::PreGroup(l, _) = last else {panic!()};
+					return Err((
+						l,
+						ParserError::EmptyGroup
+					))
+				}
+
 				push_token(g_now, i, t)?;
 				t = Some(g.pop().unwrap());
 			},
