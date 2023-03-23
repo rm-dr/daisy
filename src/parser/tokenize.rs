@@ -13,9 +13,7 @@ fn update_line_location(mut t: Token, stop_i: usize) -> Token {
 		Token::PreGroup(ref mut l, _) |
 		Token::PreOperator(ref mut l, _) |
 		Token::PreNumber(ref mut l, _) |
-		Token::PreWord(ref mut l, _) |
-		Token::PreNegative(ref mut l) |
-		Token::PreFactorial(ref mut l)
+		Token::PreWord(ref mut l, _)
 		=> {
 			let LineLocation{pos, .. } = l;
 			*l = LineLocation{
@@ -45,12 +43,6 @@ fn lookback(
 		let a: Token = g.pop_back().unwrap();
 
 		match (&a, &b) {
-
-			( // Delete consecutive negatives
-				Token::PreNegative(_),
-				Token::PreNegative(_)
-			) => {},
-
 			// Insert ImplicitMultiply
 			(Token::PreGroup(_,_), Token::PreGroup(l ,_)) |
 			(Token::PreGroup(_,_), Token::Number(l,_)) |
@@ -66,11 +58,7 @@ fn lookback(
 			},
 
 			// The following are syntax errors
-			(Token::PreOperator(la,_), Token::PreOperator(lb,_)) |
-			(Token::Number(la, _), Token::Number(lb,_)) |
-			(Token::PreNegative(la), Token::PreOperator(lb,_)) |
-			(Token::PreOperator(la, _), Token::PreFactorial(lb)) |
-			(Token::PreNegative(la), Token::PreFactorial(lb))
+			(Token::Number(la, _), Token::Number(lb,_))
 			=> {
 				let LineLocation { pos: posa, .. } = *la;
 				let LineLocation { pos: posb, len: lenb } = *lb;
@@ -81,15 +69,11 @@ fn lookback(
 			}
 
 			// The following are fine
-			(Token::PreOperator(_,_), Token::PreNegative(_)) |
+			(Token::PreOperator(_,_), Token::PreOperator(_,_)) |
 			(Token::PreOperator(_,_), Token::Number(_,_)) |
 			(Token::Number(_,_), Token::PreOperator(_,_)) |
 			(Token::PreOperator(_,_), Token::PreGroup(_,_)) |
-			(Token::PreGroup(_,_), Token::PreOperator(_,_)) |
-			(Token::PreNegative(_), Token::PreGroup(_,_)) |
-			(Token::PreNegative(_), Token::Number(_,_)) |
-			(Token::PreGroup(_,_), Token::PreFactorial(_)) |
-			(Token::Number(_,_), Token::PreFactorial(_))
+			(Token::PreGroup(_,_), Token::PreOperator(_,_))
 			=> { g.push_back(a); g.push_back(b); },
 
 			// If we get this far, we found a Token
@@ -131,8 +115,6 @@ fn push_token(
 			},
 			Token::PreOperator(_, _) => t,
 			Token::PreGroup(_, _) => t,
-			Token::PreNegative(_) => t,
-			Token::PreFactorial(_) => t,
 			_ => panic!()
 		});
 
@@ -160,7 +142,10 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 		match c {
 			'!' => {
 				push_token(g_now, i, t)?;
-				t = Some(Token::PreFactorial(LineLocation{pos: i, len: 1}));
+				t = Some(Token::PreOperator(
+					LineLocation{pos: i, len: 1},
+					Operators::Factorial
+				));
 			},
 
 			// The minus sign can be both a Negative and an Operator.
@@ -181,7 +166,10 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 
 					// Otherwise, this is a negative sign.
 					_ => {
-						t = Some(Token::PreNegative(LineLocation{pos: i, len: 1}));
+						t = Some(Token::PreOperator(
+							LineLocation{pos: i, len: 1},
+							Operators::Negative
+						));
 					}
 				};
 			},

@@ -30,16 +30,13 @@ pub enum Token {
 	/// PreGroups aren't needed once we have a tree.
 	PreGroup(LineLocation, VecDeque<Token>),
 
-	PreNegative(LineLocation),
-	PreFactorial(LineLocation),
-
 	Number(LineLocation, f64),
 	Multiply(VecDeque<Token>),
 	Divide(VecDeque<Token>),
 	Add(VecDeque<Token>),
 	Subtract(VecDeque<Token>),
-	//Factorial(VecDeque<Token>),
-	//Negative(VecDeque<Token>),
+	Factorial(VecDeque<Token>),
+	Negative(VecDeque<Token>),
 	Power(VecDeque<Token>),
 	Modulo(VecDeque<Token>),
 }
@@ -50,15 +47,17 @@ pub enum Token {
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 pub enum Operators {
-	Null = 0,
-	ModuloLong, // Mod invoked with "mod"
+	ModuloLong = 0, // Mod invoked with "mod"
 	Subtract,
 	Add,
 	Divide,
 	Multiply,
 	ImplicitMultiply,
 	Modulo, // Mod invoked with %
-	Power
+	Power,
+
+	Negative,
+	Factorial
 }
 
 /// Specifies the location of a token in an input string.
