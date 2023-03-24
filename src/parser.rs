@@ -152,24 +152,7 @@ impl Eval for Token {
 				} else { panic!(); }
 			},
 
-			Token::Root(ref v) => {
-				if v.len() != 2 {panic!()};
-				let a = &v[0];
-				let b = &v[1];
-
-				if let Token::Number(la, va) = a {
-					if let Token::Number(lb, vb) = b {
-						let LineLocation{pos: posa, ..} = *la;
-						let LineLocation{pos: posb, len: lenb} = lb;
-						Token::Number(
-							LineLocation { pos: posa, len: posb - posa + lenb },
-							va.powf(1f64 / *vb)
-						)
-					} else { panic!(); }
-				} else { panic!(); }
-			},
-
-			Token::Factorial(ref v) => { todo!() },
+			Token::Factorial(ref _v) => { todo!() },
 			_ => panic!()
 		}
 	}

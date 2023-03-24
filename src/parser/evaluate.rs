@@ -1,10 +1,9 @@
-use std::collections::VecDeque;
-
 use crate::parser::Token;
 use crate::parser::Eval;
 use crate::parser::LineLocation;
 use crate::parser::ParserError;
 
+#[inline(always)]
 fn get_at_coords<'a>(g: &'a mut Token, coords: &Vec<usize>) -> &'a mut Token {
 	let mut h = &mut *g;
 
@@ -69,13 +68,13 @@ pub fn evaluate(
 		}
 
 		match h {
-			Token::Multiply(v) |
-			Token::Divide(v) |
-			Token::Add(v) |
-			Token::Factorial(v) |
-			Token::Negative(v) |
-			Token::Power(v) |
-			Token::Modulo(v)
+			Token::Multiply(_) |
+			Token::Divide(_) |
+			Token::Add(_) |
+			Token::Factorial(_) |
+			Token::Negative(_) |
+			Token::Power(_) |
+			Token::Modulo(_)
 			=> {
 				coords.push(0);
 				continue 'outer;
