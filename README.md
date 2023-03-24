@@ -4,8 +4,12 @@
  - CLI Options
  - Branding
 
+# Internals
+ - Non-recursive treeify
+ - Tokens with impl: get line, get args, ::new
+ - Fix names (Root isn't sqrt!)
+
 # Features
- - Evaluation
  - Function application
  - variable definitons
  - function definitions
