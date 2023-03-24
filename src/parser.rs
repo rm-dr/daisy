@@ -51,6 +51,14 @@ pub enum Token {
 impl Eval for Token {
 	fn eval(&self) -> Token {
 		match self {
+			Token::Root(ref v) => {
+				if v.len() != 1 {panic!()};
+
+				if let Token::Number(l, v) = v[0] {
+					Token::Number(l, v)
+				} else { panic!(); }
+			},
+
 			Token::Negative(ref v) => {
 				if v.len() != 1 {panic!()};
 

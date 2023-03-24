@@ -6,15 +6,15 @@ use termion::raw::RawTerminal;
 use termion::{color, style};
 
 mod parser;
-//use crate::parser::Token;
+use crate::parser::Token;
 //use crate::parser::ParserError;
 use crate::parser::LineLocation;
+use crate::parser::Eval;
 
 
 fn draw_line(stdout: &mut RawTerminal<std::io::Stdout>, s: &String) -> Result<(), std::io::Error> {
 	write!(
-		stdout,
-		"\r{}{}==>{}{} {s} {}",
+		stdout, "\r{}{}==>{}{} {s} {}",
 		style::Bold,
 		color::Fg(color::Blue),
 		color::Fg(color::Reset),
@@ -56,16 +56,22 @@ fn main() -> Result<(), std::io::Error> {
 						RawTerminal::activate_raw_mode(&stdout)?;
 
 						match g {
-							Ok(g) => {
-								RawTerminal::suspend_raw_mode(&stdout)?;
-								writeln!(stdout, "Tokenized: {g:#?}")?;
-								RawTerminal::activate_raw_mode(&stdout)?;
+							Ok(g) => {					
+								let n = g.eval();
+								if let Token::Number(_, v) = n {
+									write!(
+										stdout, "\r\n  {}{}={} {v}{}\r\n\n",
+										style::Bold,
+										color::Fg(color::Green),
+										style::Reset,
+										color::Fg(color::Reset)
+									)?;
+								} else { panic!(); }
 							},
 							Err((l, e)) => {
 								let LineLocation{pos, len} = l;
 								write!(
-									stdout,
-									"{}{}{} {e:?}{}\r\n",
+									stdout, "{}{}{} {e:?}{}\r\n",
 									color::Fg(color::Red),
 									" ".repeat(pos + 4),
 									"^".repeat(len),
