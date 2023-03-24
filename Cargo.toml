@@ -15,7 +15,5 @@ panic = "abort"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#dialoguer = "0.10.3"
-#colored = "2.0.0"
-termcolor = "1.2.0"
 signal-hook = "0.3.15"
+termion = "2.0.1"

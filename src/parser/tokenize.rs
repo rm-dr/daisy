@@ -211,15 +211,18 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 
 			// Operator
 			// Always one character
-			'+' | '*' | '/' | '^' | '%' => {
+			
+			'*'|'×'|
+			'/'|'÷'|
+			'+'|'%'|'^' => {
 				push_token(g_now, i, t)?;
 				t = Some(Token::PreOperator(
 					LineLocation{pos: i, len: 1},
 					match c {
 						'^' => Operators::Power,
 						'%' => Operators::Modulo,
-						'*' => Operators::Multiply,
-						'/' => Operators::Divide,
+						'*'|'×' => Operators::Multiply,
+						'/'|'÷' => Operators::Divide,
 						'+' => Operators::Add,
 						_ => panic!()
 					}
