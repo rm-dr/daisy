@@ -18,9 +18,18 @@ fn get_line_location(t: &Token) -> &LineLocation {
 }
 
 #[inline(always)]
-fn select_op(k: Operators, new_token_args: VecDeque<Token>) -> Token {
+fn select_op(k: Operators, mut new_token_args: VecDeque<Token>) -> Token {
 	match k {
-		Operators::Subtract => Token::Subtract(new_token_args),
+		Operators::Subtract => {
+			let a = new_token_args.pop_front().unwrap();
+			let b = new_token_args.pop_front().unwrap();
+
+			Token::Add(
+			VecDeque::from(vec!(
+					a,
+					Token::Negative(VecDeque::from(vec!(b)))
+			)))
+		},
 		Operators::Add => Token::Add(new_token_args),
 		Operators::Divide => Token::Divide(new_token_args),
 		Operators::Multiply => Token::Multiply(new_token_args),
@@ -114,8 +123,8 @@ fn treeify_binary(
 			let mut left = g_inner.remove(i-1).unwrap();
 			let this = g_inner.remove(i-1).unwrap();
 			let mut right = g_inner.remove(i-1).unwrap();
-			if let Token::PreGroup(_, _) = right { treeify(&mut right)?; }
-			if let Token::PreGroup(_, _) = left { treeify(&mut left)?; }
+			if let Token::PreGroup(_, _) = right { right = inner_treeify(right)?; }
+			if let Token::PreGroup(_, _) = left { left = inner_treeify(left)?; }
 
 			let k = match this {
 				Token::PreOperator(_, k) => k,
@@ -209,7 +218,7 @@ fn treeify_unaryleft(
 		if right_val.is_none() || this_val > right_val.unwrap() {
 			let this = g_inner.remove(i).unwrap();
 			let mut right = g_inner.remove(i).unwrap();
-			if let Token::PreGroup(_, _) = right { treeify(&mut right)?; }
+			if let Token::PreGroup(_, _) = right { right = inner_treeify(right)?; }
 
 			let k = match this {
 				Token::PreOperator(_, k) => k,
@@ -309,7 +318,7 @@ fn treeify_unaryright(
 		if left_val.is_none() || this_val > left_val.unwrap() {
 			let this = g_inner.remove(i).unwrap();
 			let mut left = g_inner.remove(i-1).unwrap();
-			if let Token::PreGroup(_, _) = left { treeify(&mut left)?; }
+			if let Token::PreGroup(_, _) = left { left = inner_treeify(left)?; }
 
 			let k = match this {
 				Token::PreOperator(_, k) => k,
@@ -332,9 +341,9 @@ fn treeify_unaryright(
 	};
 }
 
-pub fn treeify(
-	g: &mut Token,
-) -> Result<(), (LineLocation, ParserError)> {
+fn inner_treeify(
+	mut g: Token,
+) -> Result<Token, (LineLocation, ParserError)> {
 
 	let g_inner: &mut VecDeque<Token> = match g {
 		Token::PreGroup(_, ref mut x) => x,
@@ -368,19 +377,28 @@ pub fn treeify(
 		};
 	}
 
-	*g = g_inner.pop_front().unwrap();
+	g = g_inner.pop_front().unwrap();
 
 	// Catch the edge case where the entire group we're given
 	// consists of one operator. This is always a syntax error.
 	match g {
 		Token::PreOperator(l, _) => {
-			return Err((*l, ParserError::Syntax));
+			return Err((l, ParserError::Syntax));
 		},
 		Token::PreGroup(_,_) => {
-			treeify(g)?;
+			g = treeify(g)?;
 		}
 		_ => {}
 	};
 
-	return Ok(());
+	return Ok(g);
+}
+
+pub fn treeify(
+	mut g: Token,
+) -> Result<Token, (LineLocation, ParserError)> {
+	let mut v: VecDeque<Token> = VecDeque::new();
+	v.push_back(inner_treeify(g)?);
+	g = Token::Root(v);
+	return Ok(g);
 }

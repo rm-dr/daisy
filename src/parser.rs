@@ -1,8 +1,10 @@
 mod tokenize;
 mod treeify;
+mod evaluate;
 
 use crate::parser::tokenize::tokenize;
 use crate::parser::treeify::treeify;
+use crate::parser::evaluate::evaluate;
 
 use std::collections::VecDeque;
 
@@ -11,6 +13,11 @@ use std::collections::VecDeque;
 /// 
 /// Tokens starting with `Pre*` are intermediate tokens, and
 /// will never show up in a fully-parsed expression tree.
+
+pub trait Eval {
+	fn eval(&self) -> Token;
+}
+
 #[derive(Debug)]
 pub enum Token {
 
@@ -30,15 +37,142 @@ pub enum Token {
 	/// PreGroups aren't needed once we have a tree.
 	PreGroup(LineLocation, VecDeque<Token>),
 
+	Root(VecDeque<Token>),
 	Number(LineLocation, f64),
 	Multiply(VecDeque<Token>),
 	Divide(VecDeque<Token>),
 	Add(VecDeque<Token>),
-	Subtract(VecDeque<Token>),
 	Factorial(VecDeque<Token>),
 	Negative(VecDeque<Token>),
 	Power(VecDeque<Token>),
 	Modulo(VecDeque<Token>),
+}
+
+impl Eval for Token {
+	fn eval(&self) -> Token {
+		match self {
+			Token::Negative(ref v) => {
+				if v.len() != 1 {panic!()};
+
+				if let Token::Number(l, v) = v[0]{
+					Token::Number(l, -v)
+				} else { panic!(); }
+			},
+
+			Token::Add(ref v) => {
+				let mut sum: f64 = 0f64;
+				let mut new_pos: usize = 0;
+				let mut new_len: usize = 0;
+				for i in v.iter() {
+					if let Token::Number(l, v) = i {
+						let LineLocation{pos, len} = *l;
+						if new_pos == 0 {new_pos = pos};
+						new_len = new_len + len;
+						sum += v;
+					} else {
+						panic!();
+					}
+				}
+
+				Token::Number(
+					LineLocation { pos: new_pos, len: new_len },
+					sum
+				)
+			},
+
+			Token::Multiply(ref v) => {
+				let mut prod: f64 = 1f64;
+				let mut new_pos: usize = 0;
+				let mut new_len: usize = 0;
+				for i in v.iter() {
+					if let Token::Number(l, v) = i {
+						let LineLocation{pos, len} = *l;
+						if new_pos == 0 {new_pos = pos};
+						new_len = new_len + len;
+						prod *= v;
+					} else {
+						panic!();
+					}
+				}
+
+				Token::Number(
+					LineLocation { pos: new_pos, len: new_len },
+					prod
+				)
+			},
+
+			Token::Divide(ref v) => {
+				if v.len() != 2 {panic!()};
+				let a = &v[0];
+				let b = &v[1];
+
+				if let Token::Number(la, va) = a {
+					if let Token::Number(lb, vb) = b {
+						let LineLocation{pos: posa, ..} = *la;
+						let LineLocation{pos: posb, len: lenb} = lb;
+						Token::Number(
+							LineLocation { pos: posa, len: posb - posa + lenb },
+							va/vb
+						)
+					} else { panic!(); }
+				} else { panic!(); }
+			},
+
+			Token::Modulo(ref v) => {
+				if v.len() != 2 {panic!()};
+				let a = &v[0];
+				let b = &v[1];
+
+				if let Token::Number(la, va) = a {
+					if let Token::Number(lb, vb) = b {
+						let LineLocation{pos: posa, ..} = *la;
+						let LineLocation{pos: posb, len: lenb} = lb;
+						Token::Number(
+							LineLocation { pos: posa, len: posb - posa + lenb },
+							va%vb
+						)
+					} else { panic!(); }
+				} else { panic!(); }
+			},
+
+			Token::Power(ref v) => {
+				if v.len() != 2 {panic!()};
+				let a = &v[0];
+				let b = &v[1];
+
+				if let Token::Number(la, va) = a {
+					if let Token::Number(lb, vb) = b {
+						let LineLocation{pos: posa, ..} = *la;
+						let LineLocation{pos: posb, len: lenb} = lb;
+						Token::Number(
+							LineLocation { pos: posa, len: posb - posa + lenb },
+							va.powf(*vb)
+						)
+					} else { panic!(); }
+				} else { panic!(); }
+			},
+
+			Token::Root(ref v) => {
+				if v.len() != 2 {panic!()};
+				let a = &v[0];
+				let b = &v[1];
+
+				if let Token::Number(la, va) = a {
+					if let Token::Number(lb, vb) = b {
+						let LineLocation{pos: posa, ..} = *la;
+						let LineLocation{pos: posb, len: lenb} = lb;
+						Token::Number(
+							LineLocation { pos: posa, len: posb - posa + lenb },
+							va.powf(1f64 / *vb)
+						)
+					} else { panic!(); }
+				} else { panic!(); }
+			},
+
+			Token::Factorial(ref v) => { todo!() },
+			_ => panic!()
+		}
+	}
 }
 
 
@@ -97,7 +231,8 @@ pub enum ParserError {
 pub fn parse(s: &String) -> Result<Token, (LineLocation, ParserError)> {
 
 	let mut g: Token = tokenize(s)?;
-	treeify(&mut g)?;
-	
+	g = treeify(g)?;
+	g = evaluate(g)?;
+
 	return Ok(g);
 }
