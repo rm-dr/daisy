@@ -2,7 +2,6 @@ use std::collections::VecDeque;
 
 use crate::parser::Token;
 use crate::parser::LineLocation;
-use crate::parser::ParserError;
 use crate::parser::Operator;
 
 /// Updates the length of a Token's LineLocation.
@@ -10,7 +9,8 @@ use crate::parser::Operator;
 #[inline(always)]
 fn update_line_location(mut t: Token, stop_i: usize) -> Token {
 	match t {
-		Token::PreGroup(ref mut l, _) |
+		Token::PreGroupStart(ref mut l) |
+		Token::PreGroupEnd(ref mut l) |
 		Token::PreOperator(ref mut l, _) |
 		Token::PreNumber(ref mut l, _) |
 		Token::PreWord(ref mut l, _)
@@ -27,137 +27,20 @@ fn update_line_location(mut t: Token, stop_i: usize) -> Token {
 	return t;
 }
 
-
-/// Looks backwards at the elements of g.
-/// - Inserts ImplicitMultiply
-/// - Removes multiple PreNegatives
-/// - Applies PreNegative to Numbers
-/// - Parses factorials
-/// - Checks syntax
-#[inline(always)]
-fn lookback(
-	g: &mut VecDeque<Token>
-) -> Result<(), (LineLocation, ParserError)> {
-	if g.len() >= 2 {
-		let b: Token = g.pop_back().unwrap();
-		let a: Token = g.pop_back().unwrap();
-
-		match (&a, &b) {
-			// Insert ImplicitMultiply
-			(Token::PreGroup(_,_), Token::PreGroup(l ,_)) |
-			(Token::PreGroup(_,_), Token::Number(l,_)) |
-			(Token::Number(_,_), Token::PreGroup(l,_)) |
-			(Token::Constant(_,_,_), Token::Number(l,_)) |
-			(Token::Number(_,_), Token::Constant(l,_,_)) |
-			(Token::Constant(_,_,_), Token::PreGroup(l,_)) |
-			(Token::PreGroup(_,_), Token::Constant(l,_,_)) |
-			(Token::Constant(_,_,_), Token::Constant(l,_,_))
-			=> {
-				g.push_back(a);
-				let LineLocation { pos: i, .. } = l;
-				g.push_back(Token::PreOperator(
-					LineLocation{pos: i-1, len: 0},
-					Operator::ImplicitMultiply
-				));
-				g.push_back(b);
-			},
-
-			// The following are syntax errors
-			(Token::Number(la, _), Token::Number(lb,_))
-			=> {
-				let LineLocation { pos: posa, .. } = *la;
-				let LineLocation { pos: posb, len: lenb } = *lb;
-				return Err((
-					LineLocation{pos: posa, len: posb - posa + lenb},
-					ParserError::Syntax
-				));
-			}
-
-			// The following are fine
-			(Token::PreOperator(_,_), _) |
-			(_, Token::PreOperator(_,_))
-			=> { g.push_back(a); g.push_back(b); },
-
-			// If we get this far, we found a Token
-			// that shouldn't be here.
-			_ => panic!()
-		}
-	};
-	return Ok(());
-}
-
-
-
-/// Pushes (and potentially processes) a token we just read to a vector.
-/// - Converts all `PreNumbers` to `Numbers`, returning a BadNumber error if necessary
-/// - Converts all `PreWords` to other tokens.
-fn push_token(
-	g_now: &mut VecDeque<Token>,
-	i: usize,
-	t: Option<Token>
-) -> Result<(), (LineLocation, ParserError)>{
-	if t.is_none() {
-		return Ok(());
-	} else {
-		let t: Token = update_line_location(t.unwrap(), i);
-		g_now.push_back(match t {
-			Token::PreNumber(l, s) => {
-				let n = match s.parse() {
-					Ok(n) => n,
-					Err(_) => return Err((l, ParserError::BadNumber))
-				};
-				Token::Number(l, n)
-			},
-			Token::PreWord(l, s) => {
-				if s == "mod" {
-					Token::PreOperator(l, Operator::ModuloLong)
-				} else if s == "pi" {
-					Token::Constant(l, 3.141592653, String::from("π"))
-				} else {
-					return Err((l, ParserError::Syntax));
-				}
-			},
-			Token::PreOperator(_, _) => t,
-			Token::PreGroup(_, _) => t,
-			_ => panic!()
-		});
-
-		lookback(g_now)?;
-	}
-	return Ok(());
-}
-
-
 /// Turns a string into Tokens. First stage of parsing.
-pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
+pub fn p_tokenize(input: &String) -> VecDeque<Token> {
 	let mut t: Option<Token> = None; // The current token we're reading
-	let mut g: Vec<Token> = Vec::with_capacity(8); // Vector of "grouping levels"
-	let mut i_level = 0;
-	g.push(Token::PreGroup(LineLocation{pos: 0, len: 0}, VecDeque::with_capacity(8)));
+	let mut g: VecDeque<Token> = VecDeque::with_capacity(32); 
 
 
 	for (i, c) in input.chars().enumerate() {
 
-		// The grouping level we're on now
-		let g_now: &mut VecDeque<Token> = match g.last_mut().unwrap() {
-			Token::PreGroup(_, ref mut x) => x,
-			_ => panic!()
-		};
-
 		match c {
-			'!' => {
-				push_token(g_now, i, t)?;
-				t = Some(Token::PreOperator(
-					LineLocation{pos: i, len: 1},
-					Operator::Factorial
-				));
-			},
-
 			// The minus sign can be both a Negative and an Operator.
 			// Needs special treatment.
 			'-' => {
-				push_token(g_now, i, t)?;
-				match g_now.back() {
+				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
+				match g.back() {
 					// If previous token was any of the following,
 					// this is the "minus" operator
 					Some(Token::Number(_, _)) |
@@ -192,42 +75,28 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 					// If we're not building a number, finalize
 					// previous token and start one.
 					_ => {
-						push_token(g_now, i, t)?;
+						if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
 						t = Some(Token::PreNumber(LineLocation{pos: i, len: 0}, String::from(c)));
-					}
-				};
-			},
-
-			// Word
-			'A'..='Z' |
-			'a'..='z' => {
-				match &mut t {
-					Some(Token::PreWord(_, val)) => {
-						val.push(c);
-					},
-
-					_ => {
-						push_token(g_now, i, t)?;
-						t = Some(Token::PreWord(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
 			},
 
 			// Operator
 			// Always one character
-			
 			'*'|'×'|
 			'/'|'÷'|
-			'+'|'%'|'^' => {
-				push_token(g_now, i, t)?;
+			'+'|'%'|
+			'^'|'!' => {
+				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
 				t = Some(Token::PreOperator(
-					LineLocation{pos: i, len: 1},
+					LineLocation{pos: i, len: 0},
 					match c {
 						'^' => Operator::Power,
 						'%' => Operator::Modulo,
 						'*'|'×' => Operator::Multiply,
 						'/'|'÷' => Operator::Divide,
 						'+' => Operator::Add,
+						'!' => Operator::Factorial,
 						_ => panic!()
 					}
 				));
@@ -235,67 +104,41 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 			
 			// Group
 			'(' => {
-				push_token(g_now, i, t)?; t = None;
-				g.push(Token::PreGroup(LineLocation{pos: i, len: 0}, VecDeque::with_capacity(8)));
-				i_level += 1;
+				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
+				t = Some(Token::PreGroupStart(LineLocation{pos: i, len: 0}));
 			},
 			')' => {
-				// Catch extra close parens
-				if i_level == 0 {
-					return Err((
-						LineLocation{pos: i, len: 1},
-						ParserError::ExtraCloseParen
-					))
-				}
-				i_level -= 1;
-
-				// Catch empty groups
-				if t.is_none() {
-					let mut last = g.pop().unwrap();
-					last = update_line_location(last, i+1);
-					let Token::PreGroup(l, _) = last else {panic!()};
-					return Err((
-						l,
-						ParserError::EmptyGroup
-					))
-				}
-
-				push_token(g_now, i, t)?;
-				t = Some(g.pop().unwrap());
+				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
+				t = Some(Token::PreGroupEnd(LineLocation{pos: i, len: 0}));
 			},
 
 			// Space. Basic seperator.
 			' ' => {
-				push_token(g_now, i, t)?; t = None;
+				if t.is_some() {
+					g.push_back(update_line_location(t.unwrap(), i));
+					t = None;
+				}
 			}
 
-			// Invalid character
-			_ => { return Err((LineLocation{pos: i, len: 1}, ParserError::InvalidChar)); }
+			// Word
+			//'A'..='Z' |
+			//'a'..='z' 
+			_ => {
+				match &mut t {
+					Some(Token::PreWord(_, val)) => {
+						val.push(c);
+					},
+
+					_ => {
+						if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
+						t = Some(Token::PreWord(LineLocation{pos: i, len: 0}, String::from(c)));
+					}
+				};
+			}
 		};
 	}
 
-	
-	let g_now: &mut VecDeque<Token> = match g.last_mut().unwrap() {
-		Token::PreGroup(_, ref mut x) => x,
-		_ => panic!()
-	};
-	push_token(g_now, input.len(), t)?;
+	if t.is_some() { g.push_back(update_line_location(t.unwrap(), input.len())); }
 
-	if g.len() != 1 {
-		let q: LineLocation = match g.last_mut().unwrap() {
-			Token::PreGroup(l, _) => *l,
-			_ => panic!()
-		};
-
-		let LineLocation{pos:p, ..} = q;
-		return Err((
-			LineLocation{
-				pos: p,
-				len: input.len() - p
-			},
-			ParserError::MissingCloseParen
-		))
-	}
-
-	return Ok(g.pop().unwrap());
+	return g;
 }

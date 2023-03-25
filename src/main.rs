@@ -73,7 +73,7 @@ fn main() -> Result<(), std::io::Error> {
 
 						RawTerminal::suspend_raw_mode(&stdout)?;
 						write!(stdout, "\n")?;
-						let g = parser::parse(&s);
+						let g = parser::evaluate(&s);
 						RawTerminal::activate_raw_mode(&stdout)?;
 
 						match g {

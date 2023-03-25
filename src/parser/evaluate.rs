@@ -26,7 +26,7 @@ fn get_at_coords<'a>(g: &'a mut Token, coords: &Vec<usize>) -> &'a mut Token {
 }
 
 
-pub fn evaluate(
+pub fn p_evaluate(
 	mut g: Token,
 ) -> Result<Token, (LineLocation, ParserError)> {
 	let mut coords: Vec<usize> = Vec::with_capacity(16);
@@ -89,6 +89,8 @@ pub fn evaluate(
 			Token::PreWord(_,_) |
 			Token::PreOperator(_,_) |
 			Token::PreGroup(_,_) |
+			Token::PreGroupStart(_) |
+			Token::PreGroupEnd(_) |
 			Token::Root(_)
 			=> panic!()
 		};

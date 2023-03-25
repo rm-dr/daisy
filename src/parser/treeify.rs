@@ -346,7 +346,7 @@ fn inner_treeify(
 ) -> Result<Token, (LineLocation, ParserError)> {
 
 	let g_inner: &mut VecDeque<Token> = match g {
-		Token::PreGroup(_, ref mut x) => x,
+		Token::Root(ref mut x) => x,
 		_ => panic!()
 	};
 
@@ -394,7 +394,7 @@ fn inner_treeify(
 	return Ok(g);
 }
 
-pub fn treeify(
+pub fn p_treeify(
 	mut g: Token,
 ) -> Result<Token, (LineLocation, ParserError)> {
 	let mut v: VecDeque<Token> = VecDeque::new();

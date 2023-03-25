@@ -1,10 +1,12 @@
 mod tokenize;
 mod treeify;
+mod groupify;
 mod evaluate;
 
-use crate::parser::tokenize::tokenize;
-use crate::parser::treeify::treeify;
-use crate::parser::evaluate::evaluate;
+use crate::parser::tokenize::p_tokenize;
+use crate::parser::groupify::p_groupify;
+use crate::parser::treeify::p_treeify;
+use crate::parser::evaluate::p_evaluate;
 
 use std::collections::VecDeque;
 
@@ -29,6 +31,8 @@ pub enum Token {
 	/// Each of these will become one of the operators below.
 	PreOperator(LineLocation, Operator),
 
+	PreGroupStart(LineLocation),
+	PreGroupEnd(LineLocation),
 	/// Used only until operators are parsed.
 	/// PreGroups aren't needed once we have a tree.
 	PreGroup(LineLocation, VecDeque<Token>),
@@ -212,7 +216,6 @@ pub struct LineLocation {
 /// If we cannot parse a string, one of these is returned.
 #[derive(Debug)]
 pub enum ParserError {
-	InvalidChar,
 	MissingCloseParen,
 	ExtraCloseParen,
 	EmptyGroup,
@@ -233,11 +236,12 @@ pub enum ParserError {
 /// *what* the error is.
 /// 
 /// - `Ok(Token)` otherwise, where `Token` is the top of an expression tree.
-pub fn parse(s: &String) -> Result<Token, (LineLocation, ParserError)> {
+pub fn evaluate(s: &String) -> Result<Token, (LineLocation, ParserError)> {
 
-	let mut g: Token = tokenize(s)?;
-	g = treeify(g)?;
-	g = evaluate(g)?;
+	let tokens = p_tokenize(s);
+	let mut g = p_groupify(tokens)?;
+	g = p_treeify(g)?;
+	g = p_evaluate(g)?;
 
 	return Ok(g);
 }
