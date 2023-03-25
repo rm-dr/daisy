@@ -40,6 +40,10 @@ impl PromptBuffer {
 		self.buffer_changed = false;
 
 		if s != "" { self.hist.push_back(s.clone()); }
+		while self.hist.len() > self.hist_maxlen {
+			self.hist.pop_front();
+		}
+
 		return s;
 	}
 
