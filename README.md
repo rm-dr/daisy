@@ -3,6 +3,7 @@
  - Tests
  - CLI Options
  - Branding
+ - Compile to WASM => webapp
 
 # Internals
  - Non-recursive treeify
