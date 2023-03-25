@@ -12,7 +12,7 @@ use crate::promptbuffer::PromptBuffer;
 
 use crate::parser::Token;
 //use crate::parser::ParserError;
-use crate::parser::LineLocation;
+//use crate::parser::LineLocation;
 
 
 fn draw_line(
@@ -54,14 +54,13 @@ fn main() -> Result<(), std::io::Error> {
 
 	'outer: loop {
 
+		let s = parser::substitute(&pb.get_contents());
 		draw_line(
-			&mut stdout,
-			pb.get_contents(),
-			if pb.get_contents().len() >= last_len
-			{ 0 } else {last_len - pb.get_contents().len()}
+			&mut stdout, &s,
+			if s.chars().count() >= last_len
+			{ 0 } else {last_len - s.chars().count()}
 		)?;
-		last_len = pb.get_contents().len();
-		
+		last_len = s.chars().count();
 
 		let stdin = stdin();
 		for c in stdin.keys() {
@@ -102,8 +101,6 @@ fn main() -> Result<(), std::io::Error> {
 
 						break;
 					},
-					'/' => { pb.add_char('÷'); },
-					'*' => { pb.add_char('×'); },
 					_ => { pb.add_char(*q); }
 				};
 			} else {
@@ -121,13 +118,13 @@ fn main() -> Result<(), std::io::Error> {
 				};
 			};
 
+			let s = parser::substitute(&pb.get_contents());
 			draw_line(
-				&mut stdout,
-				pb.get_contents(),
-				if pb.get_contents().len() >= last_len
-				{ 0 } else {last_len - pb.get_contents().len()}
+				&mut stdout, &s,
+				if s.chars().count() >= last_len
+				{ 0 } else {last_len - s.chars().count()}
 			)?;
-			last_len = pb.get_contents().len();
+			last_len = s.chars().count();
 		}
 	}
 

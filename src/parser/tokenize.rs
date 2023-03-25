@@ -82,10 +82,9 @@ pub fn p_tokenize(input: &String) -> VecDeque<Token> {
 
 			// Operator
 			// Always one character
-			'*'|'×'|
-			'/'|'÷'|
-			'+'|'%'|
-			'^'|'!' => {
+			'*'|'/'|'+'|
+			'^'|'!'|'%'
+			=> {
 				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
 				t = Some(Token::PreOperator(
 					LineLocation{pos: i, len: 0},

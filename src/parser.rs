@@ -2,11 +2,13 @@ mod tokenize;
 mod treeify;
 mod groupify;
 mod evaluate;
+mod find_subs;
 
 use crate::parser::tokenize::p_tokenize;
 use crate::parser::groupify::p_groupify;
 use crate::parser::treeify::p_treeify;
 use crate::parser::evaluate::p_evaluate;
+use crate::parser::find_subs::p_find_subs;
 
 use std::collections::VecDeque;
 
@@ -264,4 +266,22 @@ pub fn evaluate(s: &String) -> Result<Token, (LineLocation, ParserError)> {
 	g = p_evaluate(g)?;
 
 	return Ok(g);
+}
+
+
+pub fn substitute(s: &String) -> String{
+	if s == "" { return s.clone() }
+	let mut new_s = s.clone();
+
+	let tokens = p_tokenize(s);
+	let subs = p_find_subs(tokens);
+
+	for r in subs.iter() {
+		new_s.replace_range(
+			r.0.pos..r.0.pos+r.0.len,
+			&r.1[..]
+		)
+	}
+
+	return new_s;
 }
