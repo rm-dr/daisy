@@ -15,6 +15,43 @@ use crate::parser::Token;
 //use crate::parser::LineLocation;
 
 
+/*
+  ######  @@@@@@
+ #     ##@@     @
+ ##     #@     @@
+   #@@@@@@@@@@@#
+ @@     @#     ##
+ @     @@##     #
+  @@@@@@  ######
+
+  Mariposa 0.0.1
+*/
+#[inline(always)]
+fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
+	write!(
+		stdout,
+	"\n \
+	{a} ###### {b} @@@@@@\r\n \
+	{a}#     ##{b}@@     @\r\n \
+	{a}##     #{b}@     @@\r\n \
+	{a}  #{b}@@@@@@@@@@@{a}#\r\n \
+	{b}@@     @{a}#     ##\r\n \
+	{b}@     @@{a}##     #\r\n \
+	{b} @@@@@@ {a} ###### {r}\r\n \
+	\n \
+	{t}Mariposa{r} {v}0.0.1{r}\r\n\n",
+		a = color::Fg(color::Magenta),
+		b = color::Fg(color::White),
+		t = format!("{}{}", color::Fg(color::White), style::Bold),
+		v = format!("{}{}", color::Fg(color::White), style::Italic),
+
+		r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+	)?;
+
+	return Ok(());
+}
+
+
 fn draw_line(
 	stdout: &mut RawTerminal<std::io::Stdout>,
 	s: &String,
@@ -45,6 +82,8 @@ fn draw_line(
 
 fn main() -> Result<(), std::io::Error> {
 	let mut stdout = stdout().into_raw_mode().unwrap();
+
+	draw_greeter(&mut stdout)?;
 
 	//let size = termion::terminal_size().unwrap();  
 	//write!(stdout, "{:?}", size).unwrap();
