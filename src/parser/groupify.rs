@@ -141,5 +141,5 @@ pub fn p_groupify(mut g: VecDeque<Token>) -> Result<Token, (LineLocation, Parser
 	}
 
 	let (_, v) = levels.pop().unwrap();
-	return Ok(Token::Root(v));
+	return Ok(Token::PreGroup(LineLocation{pos:0, len:0}, v));
 }

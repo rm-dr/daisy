@@ -51,6 +51,8 @@ pub enum Token {
 }
 
 impl Token {
+
+	#[inline(always)]
 	fn as_number(&self) -> Token {
 		match self {
 			Token::Number(l,v) => {
@@ -65,15 +67,6 @@ impl Token {
 
 	pub fn eval(&self) -> Token {
 		match self {
-			Token::Root(ref v) => {
-				if v.len() != 1 {panic!()};
-				let v = v[0].as_number();
-
-				if let Token::Number(l, v) = v {
-					Token::Number(l, v)
-				} else { panic!(); }
-			},
-
 			Token::Negative(ref v) => {
 				if v.len() != 1 {panic!()};
 				let v = v[0].as_number();
@@ -179,7 +172,7 @@ impl Token {
 			},
 
 			Token::Factorial(ref _v) => { todo!() },
-			_ => panic!()
+			_ => self.as_number()
 		}
 	}
 }

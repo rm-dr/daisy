@@ -123,8 +123,8 @@ fn treeify_binary(
 			let mut left = g_inner.remove(i-1).unwrap();
 			let this = g_inner.remove(i-1).unwrap();
 			let mut right = g_inner.remove(i-1).unwrap();
-			if let Token::PreGroup(_, _) = right { right = inner_treeify(right)?; }
-			if let Token::PreGroup(_, _) = left { left = inner_treeify(left)?; }
+			if let Token::PreGroup(_, _) = right { right = p_treeify(right)?; }
+			if let Token::PreGroup(_, _) = left { left = p_treeify(left)?; }
 
 			let k = match this {
 				Token::PreOperator(_, k) => k,
@@ -218,7 +218,7 @@ fn treeify_unaryleft(
 		if right_val.is_none() || this_val > right_val.unwrap() {
 			let this = g_inner.remove(i).unwrap();
 			let mut right = g_inner.remove(i).unwrap();
-			if let Token::PreGroup(_, _) = right { right = inner_treeify(right)?; }
+			if let Token::PreGroup(_, _) = right { right = p_treeify(right)?; }
 
 			let k = match this {
 				Token::PreOperator(_, k) => k,
@@ -318,7 +318,7 @@ fn treeify_unaryright(
 		if left_val.is_none() || this_val > left_val.unwrap() {
 			let this = g_inner.remove(i).unwrap();
 			let mut left = g_inner.remove(i-1).unwrap();
-			if let Token::PreGroup(_, _) = left { left = inner_treeify(left)?; }
+			if let Token::PreGroup(_, _) = left { left = p_treeify(left)?; }
 
 			let k = match this {
 				Token::PreOperator(_, k) => k,
@@ -341,12 +341,12 @@ fn treeify_unaryright(
 	};
 }
 
-fn inner_treeify(
+pub fn p_treeify(
 	mut g: Token,
 ) -> Result<Token, (LineLocation, ParserError)> {
 
 	let g_inner: &mut VecDeque<Token> = match g {
-		Token::Root(ref mut x) => x,
+		Token::PreGroup(_, ref mut x) => x,
 		_ => panic!()
 	};
 
@@ -386,19 +386,10 @@ fn inner_treeify(
 			return Err((l, ParserError::Syntax));
 		},
 		Token::PreGroup(_,_) => {
-			g = inner_treeify(g)?;
+			g = p_treeify(g)?;
 		}
 		_ => {}
 	};
 
-	return Ok(g);
-}
-
-pub fn p_treeify(
-	mut g: Token,
-) -> Result<Token, (LineLocation, ParserError)> {
-	let mut v: VecDeque<Token> = VecDeque::new();
-	v.push_back(inner_treeify(g)?);
-	g = Token::Root(v);
 	return Ok(g);
 }

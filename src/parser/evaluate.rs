@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::parser::Token;
 use crate::parser::LineLocation;
 use crate::parser::ParserError;
@@ -15,7 +17,6 @@ fn get_at_coords<'a>(g: &'a mut Token, coords: &Vec<usize>) -> &'a mut Token {
 			Token::Negative(ref mut v) => v,
 			Token::Power(ref mut v) => v,
 			Token::Modulo(ref mut v) => v,
-			Token::Root(ref mut v) => v,
 			_ => panic!()
 		};
 
@@ -36,19 +37,19 @@ pub fn p_evaluate(
 
 		let mut h = &mut g;
 		for t in coords.iter() {
-			let inner = match h {
-				Token::Multiply(ref mut v) => v,
-				Token::Divide(ref mut v) => v,
-				Token::Add(ref mut v) => v,
-				Token::Factorial(ref mut v) => v,
-				Token::Negative(ref mut v) => v,
-				Token::Power(ref mut v) => v,
-				Token::Modulo(ref mut v) => v,
-				Token::Root(ref mut v) => v,
-				_ => panic!()
+			let inner: Option<&mut VecDeque<Token>> = match h {
+				Token::Multiply(ref mut v)
+				| Token::Divide(ref mut v)
+				| Token::Add(ref mut v)
+				| Token::Factorial(ref mut v)
+				| Token::Negative(ref mut v)
+				| Token::Power(ref mut v)
+				| Token::Modulo(ref mut v)
+				=> Some(v),
+				_ => None
 			};
 
-			if *t >= inner.len() {
+			if inner.is_none() || *t >= inner.as_ref().unwrap().len() {
 				coords.pop();
 				if coords.len() == 0 { break 'outer; }
 
@@ -62,7 +63,7 @@ pub fn p_evaluate(
 				continue 'outer;
 			}
 
-			h = &mut inner[*t];
+			h = &mut inner.unwrap()[*t];
 		}
 
 		match h {
@@ -90,8 +91,7 @@ pub fn p_evaluate(
 			Token::PreOperator(_,_) |
 			Token::PreGroup(_,_) |
 			Token::PreGroupStart(_) |
-			Token::PreGroupEnd(_) |
-			Token::Root(_)
+			Token::PreGroupEnd(_)
 			=> panic!()
 		};
 	}
