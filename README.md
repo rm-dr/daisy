@@ -4,6 +4,8 @@
  - CLI Options
  - Branding
  - Compile to WASM => webapp
+ - Replace &str with strings
+ - Named parameters for Tokens
 
 # Internals
  - Non-recursive treeify
