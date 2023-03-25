@@ -118,9 +118,8 @@ impl Token {
 				for i in v.iter() {
 					let j = i.as_number();
 					if let Token::Number(l, v) = j {
-						let LineLocation{pos, len} = l;
-						if new_pos == 0 {new_pos = pos};
-						new_len = new_len + len;
+						if new_pos == 0 {new_pos = l.pos};
+						new_len = new_len + l.len;
 						sum += v;
 					} else {
 						panic!();
@@ -140,9 +139,8 @@ impl Token {
 				for i in v.iter() {
 					let j = i.as_number();
 					if let Token::Number(l, v) = j {
-						let LineLocation{pos, len} = l;
-						if new_pos == 0 {new_pos = pos};
-						new_len = new_len + len;
+						if new_pos == 0 {new_pos = l.pos};
+						new_len = new_len + l.len;
 						prod *= v;
 					} else {
 						panic!();
@@ -162,10 +160,8 @@ impl Token {
 
 				if let Token::Number(la, va) = a {
 					if let Token::Number(lb, vb) = b {
-						let LineLocation{pos: posa, ..} = la;
-						let LineLocation{pos: posb, len: lenb} = lb;
 						Token::Number(
-							LineLocation { pos: posa, len: posb - posa + lenb },
+							LineLocation { pos: la.pos, len: lb.pos - la.pos + lb.len },
 							va/vb
 						)
 					} else { panic!(); }
@@ -179,10 +175,8 @@ impl Token {
 
 				if let Token::Number(la, va) = a {
 					if let Token::Number(lb, vb) = b {
-						let LineLocation{pos: posa, ..} = la;
-						let LineLocation{pos: posb, len: lenb} = lb;
 						Token::Number(
-							LineLocation { pos: posa, len: posb - posa + lenb },
+							LineLocation { pos: la.pos, len: lb.pos - la.pos + lb.len },
 							va%vb
 						)
 					} else { panic!(); }
@@ -196,10 +190,8 @@ impl Token {
 
 				if let Token::Number(la, va) = a {
 					if let Token::Number(lb, vb) = b {
-						let LineLocation{pos: posa, ..} = la;
-						let LineLocation{pos: posb, len: lenb} = lb;
 						Token::Number(
-							LineLocation { pos: posa, len: posb - posa + lenb },
+							LineLocation { pos: la.pos, len: lb.pos - la.pos + lb.len },
 							va.powf(vb)
 						)
 					} else { panic!(); }

@@ -90,12 +90,11 @@ fn main() -> Result<(), std::io::Error> {
 								} else { panic!(); }
 							},
 							Err((l, e)) => {
-								let LineLocation{pos, len} = l;
 								write!(
 									stdout, "{}{}{} {e:?}{}\r\n",
 									color::Fg(color::Red),
-									" ".repeat(pos + 4),
-									"^".repeat(len),
+									" ".repeat(l.pos + 4),
+									"^".repeat(l.len),
 									color::Fg(color::Reset),
 								)?;
 							}

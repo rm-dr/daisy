@@ -31,9 +31,8 @@ fn lookback(
 			(Token::Constant(_,_,_), Token::Constant(l,_,_))
 			=> {
 				g.push_back(a);
-				let LineLocation { pos: i, .. } = l;
 				g.push_back(Token::PreOperator(
-					LineLocation{pos: i-1, len: 0},
+					LineLocation{pos: l.pos-1, len: 0},
 					Operator::ImplicitMultiply
 				));
 				g.push_back(b);
@@ -42,10 +41,8 @@ fn lookback(
 			// The following are syntax errors
 			(Token::Number(la, _), Token::Number(lb,_))
 			=> {
-				let LineLocation { pos: posa, .. } = *la;
-				let LineLocation { pos: posb, len: lenb } = *lb;
 				return Err((
-					LineLocation{pos: posa, len: posb - posa + lenb},
+					LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
 					ParserError::Syntax
 				));
 			}
@@ -106,12 +103,9 @@ pub fn p_groupify(mut g: VecDeque<Token>) -> Result<Token, (LineLocation, Parser
 			},
 
 			Token::PreGroupEnd(l) => {
-				let LineLocation{pos: posa, ..} = *l_now;
-				let LineLocation{pos: posb, len: lenb} = l;
-
 				let l = LineLocation {
-					pos: posa,
-					len: lenb + posb - posa
+					pos: l_now.pos,
+					len: l.len + l.pos - l_now.pos
 				};
 
 				if i_level == 0 {

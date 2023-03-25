@@ -15,10 +15,9 @@ fn update_line_location(mut t: Token, stop_i: usize) -> Token {
 		Token::PreNumber(ref mut l, _) |
 		Token::PreWord(ref mut l, _)
 		=> {
-			let LineLocation{pos, .. } = l;
 			*l = LineLocation{
-				pos: *pos,
-				len: stop_i - *pos,
+				pos: l.pos,
+				len: stop_i - l.pos,
 			};
 		},
 		_ => panic!()

@@ -75,10 +75,9 @@ fn treeify_binary(
 			=> {
 				// Binary and right-unary operators cannot
 				// follow a binary operator.
-				let LineLocation { pos: posa, .. } = *this.get_line_location();
-				let LineLocation { pos: posb, len: lenb } = *l;
+				let tl = *this.get_line_location();
 				return Err((
-					LineLocation{pos: posa, len: posb - posa + lenb},
+					LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
 					ParserError::Syntax
 				));
 			},
@@ -172,10 +171,9 @@ fn treeify_unaryleft(
 			=> {
 				// Binary and right-unary operators cannot
 				// follow a binary operator.
-				let LineLocation { pos: posa, .. } = *this.get_line_location();
-				let LineLocation { pos: posb, len: lenb } = *l;
+				let tl = *this.get_line_location();
 				return Err((
-					LineLocation{pos: posa, len: posb - posa + lenb},
+					LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
 					ParserError::Syntax
 				));
 			},
@@ -261,10 +259,9 @@ fn treeify_unaryright(
 			match o {
 				// Left unary operators
 				Operator::Negative => {
-					let LineLocation { pos: posa, .. } = *this.get_line_location();
-					let LineLocation { pos: posb, len: lenb } = *l;
+					let tl = *this.get_line_location();
 					return Err((
-						LineLocation{pos: posa, len: posb - posa + lenb},
+						LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
 						ParserError::Syntax
 					));
 				},
@@ -279,10 +276,9 @@ fn treeify_unaryright(
 	}
 
 	if let Token::PreOperator(l, _) = left {
-		let LineLocation { pos: posa, .. } = *this.get_line_location();
-		let LineLocation { pos: posb, len: lenb } = *l;
+		let tl = *this.get_line_location();
 		return Err((
-			LineLocation{pos: posa, len: posb - posa + lenb},
+			LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
 			ParserError::Syntax
 		));
 
