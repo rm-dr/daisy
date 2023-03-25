@@ -6,18 +6,6 @@ use crate::parser::ParserError;
 use crate::parser::Operator;
 
 #[inline(always)]
-fn get_line_location(t: &Token) -> &LineLocation {
-	match t {
-		Token::PreNumber(l, _) |
-		Token::PreWord(l, _) |
-		Token::PreOperator(l, _) |
-		Token::PreGroup(l, _)
-		=> l,
-		_ => panic!()
-	}
-}
-
-#[inline(always)]
 fn select_op(k: Operator, mut new_token_args: VecDeque<Token>) -> Token {
 	match k {
 		Operator::Subtract => {
@@ -87,7 +75,7 @@ fn treeify_binary(
 			=> {
 				// Binary and right-unary operators cannot
 				// follow a binary operator.
-				let LineLocation { pos: posa, .. } = *get_line_location(&this);
+				let LineLocation { pos: posa, .. } = *this.get_line_location();
 				let LineLocation { pos: posb, len: lenb } = *l;
 				return Err((
 					LineLocation{pos: posa, len: posb - posa + lenb},
@@ -184,7 +172,7 @@ fn treeify_unaryleft(
 			=> {
 				// Binary and right-unary operators cannot
 				// follow a binary operator.
-				let LineLocation { pos: posa, .. } = *get_line_location(&this);
+				let LineLocation { pos: posa, .. } = *this.get_line_location();
 				let LineLocation { pos: posb, len: lenb } = *l;
 				return Err((
 					LineLocation{pos: posa, len: posb - posa + lenb},
@@ -273,7 +261,7 @@ fn treeify_unaryright(
 			match o {
 				// Left unary operators
 				Operator::Negative => {
-					let LineLocation { pos: posa, .. } = *get_line_location(&this);
+					let LineLocation { pos: posa, .. } = *this.get_line_location();
 					let LineLocation { pos: posb, len: lenb } = *l;
 					return Err((
 						LineLocation{pos: posa, len: posb - posa + lenb},
@@ -284,14 +272,14 @@ fn treeify_unaryright(
 			};
 		} else {
 			return Err((
-				*get_line_location(&this),
+				*this.get_line_location(),
 				ParserError::Syntax
 			));
 		}
 	}
 
 	if let Token::PreOperator(l, _) = left {
-		let LineLocation { pos: posa, .. } = *get_line_location(&this);
+		let LineLocation { pos: posa, .. } = *this.get_line_location();
 		let LineLocation { pos: posb, len: lenb } = *l;
 		return Err((
 			LineLocation{pos: posa, len: posb - posa + lenb},

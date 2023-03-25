@@ -9,17 +9,7 @@ fn get_at_coords<'a>(g: &'a mut Token, coords: &Vec<usize>) -> &'a mut Token {
 	let mut h = &mut *g;
 
 	for t in coords.iter() {
-		let inner = match h {
-			Token::Multiply(ref mut v) => v,
-			Token::Divide(ref mut v) => v,
-			Token::Add(ref mut v) => v,
-			Token::Factorial(ref mut v) => v,
-			Token::Negative(ref mut v) => v,
-			Token::Power(ref mut v) => v,
-			Token::Modulo(ref mut v) => v,
-			_ => panic!()
-		};
-
+		let inner = h.get_args().unwrap();
 		h = &mut inner[*t];
 	}
 
@@ -37,17 +27,7 @@ pub fn p_evaluate(
 
 		let mut h = &mut g;
 		for t in coords.iter() {
-			let inner: Option<&mut VecDeque<Token>> = match h {
-				Token::Multiply(ref mut v)
-				| Token::Divide(ref mut v)
-				| Token::Add(ref mut v)
-				| Token::Factorial(ref mut v)
-				| Token::Negative(ref mut v)
-				| Token::Power(ref mut v)
-				| Token::Modulo(ref mut v)
-				=> Some(v),
-				_ => None
-			};
+			let inner = h.get_args();
 
 			if inner.is_none() || *t >= inner.as_ref().unwrap().len() {
 				coords.pop();

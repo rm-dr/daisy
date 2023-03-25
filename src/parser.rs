@@ -40,7 +40,6 @@ pub enum Token {
 	Number(LineLocation, f64),
 	Constant(LineLocation, f64, String),
 
-	Root(VecDeque<Token>),
 	Multiply(VecDeque<Token>),
 	Divide(VecDeque<Token>),
 	Add(VecDeque<Token>),
@@ -51,6 +50,42 @@ pub enum Token {
 }
 
 impl Token {
+
+	#[inline(always)]
+	pub fn get_args(&mut self) -> Option<&mut VecDeque<Token>> {
+		match self {
+			Token::Multiply(ref mut v)
+			| Token::Divide(ref mut v)
+			| Token::Add(ref mut v)
+			| Token::Factorial(ref mut v)
+			| Token::Negative(ref mut v)
+			| Token::Power(ref mut v)
+			| Token::Modulo(ref mut v)
+			=> Some(v),
+			_ => None
+		}
+	}
+
+	#[inline(always)]
+	pub fn get_line_location(&self) -> &LineLocation {
+		match self {
+			Token::PreNumber(l, _) |
+			Token::PreWord(l, _) |
+			Token::PreOperator(l, _) |
+			Token::PreGroupStart(l) |
+			Token::PreGroupEnd(l) |
+			Token::PreGroup(l, _)
+			=> l,
+
+			// These have a line location, but we shouldn't ever need to get it.
+			Token::Number(_l, _) |
+			Token::Constant(_l, _, _)
+			=> panic!(),
+
+
+			_ => panic!()
+		}
+	}
 
 	#[inline(always)]
 	fn as_number(&self) -> Token {
