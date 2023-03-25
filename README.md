@@ -6,8 +6,6 @@
 
 # Internals
  - Non-recursive treeify
- - Tokens with impl: get line, get args, ::new
- - Fix names (Root isn't sqrt!)
  - Syntax errors are broken
 
 # Features
