@@ -6,20 +6,21 @@
 
 # Internals
  - Non-recursive treeify
- - Syntax errors are broken
+ - Print any expression
+ - Copy expression, print with result
 
 # Features
  - Function application
- - variable definitons
- - function definitions
- - rational datatype
- - units
+ - Variable definitions
+ - Function definitions
+ - Rational datatype
+ - Units
  - Dice
  - Derivatives
+ - Mini CAS
 
 # Prompt
- - Replace multi-char tokens (pi)
  - Arrows to move cursor
+ - Syntax errors are broken
  - Live syntax/output
  - Commands
- - Better error texts
