@@ -8,6 +8,7 @@
  - Non-recursive treeify
  - Tokens with impl: get line, get args, ::new
  - Fix names (Root isn't sqrt!)
+ - Syntax errors are broken
 
 # Features
  - Function application
@@ -16,9 +17,11 @@
  - rational datatype
  - units
  - Dice
+ - Derivatives
 
 # Prompt
  - Replace multi-char tokens (pi)
- - Arrows, history, live syntax check or output
+ - Arrows to move cursor
+ - Live syntax/output
  - Commands
  - Better error texts
