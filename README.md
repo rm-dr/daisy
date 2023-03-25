@@ -21,6 +21,7 @@
  - Dice
  - Derivatives
  - Mini CAS
+ - Complex numbers
 
 # Prompt
  - Arrows to move cursor
