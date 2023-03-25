@@ -1,5 +1,4 @@
 use crate::parser::Token;
-use crate::parser::Eval;
 use crate::parser::LineLocation;
 use crate::parser::ParserError;
 
@@ -30,7 +29,6 @@ fn get_at_coords<'a>(g: &'a mut Token, coords: &Vec<usize>) -> &'a mut Token {
 pub fn evaluate(
 	mut g: Token,
 ) -> Result<Token, (LineLocation, ParserError)> {
-
 	let mut coords: Vec<usize> = Vec::with_capacity(16);
 	coords.push(0);
 
@@ -80,12 +78,19 @@ pub fn evaluate(
 				continue 'outer;
 			},
 
+			Token::Constant(_,_,_) |
 			Token::Number(_,_) => {
 				let l = coords.pop().unwrap();
 				coords.push(l + 1);
 				continue 'outer;
 			}
-			_ => panic!()
+
+			Token::PreNumber(_,_) |
+			Token::PreWord(_,_) |
+			Token::PreOperator(_,_) |
+			Token::PreGroup(_,_) |
+			Token::Root(_)
+			=> panic!()
 		};
 	}
 

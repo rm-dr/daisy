@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use crate::parser::Token;
 use crate::parser::LineLocation;
 use crate::parser::ParserError;
-use crate::parser::Operators;
+use crate::parser::Operator;
 
 #[inline(always)]
 fn get_line_location(t: &Token) -> &LineLocation {
@@ -18,9 +18,9 @@ fn get_line_location(t: &Token) -> &LineLocation {
 }
 
 #[inline(always)]
-fn select_op(k: Operators, mut new_token_args: VecDeque<Token>) -> Token {
+fn select_op(k: Operator, mut new_token_args: VecDeque<Token>) -> Token {
 	match k {
-		Operators::Subtract => {
+		Operator::Subtract => {
 			let a = new_token_args.pop_front().unwrap();
 			let b = new_token_args.pop_front().unwrap();
 
@@ -30,15 +30,15 @@ fn select_op(k: Operators, mut new_token_args: VecDeque<Token>) -> Token {
 					Token::Negative(VecDeque::from(vec!(b)))
 			)))
 		},
-		Operators::Add => Token::Add(new_token_args),
-		Operators::Divide => Token::Divide(new_token_args),
-		Operators::Multiply => Token::Multiply(new_token_args),
-		Operators::ImplicitMultiply => Token::Multiply(new_token_args),
-		Operators::Modulo => Token::Modulo(new_token_args),
-		Operators::ModuloLong => Token::Modulo(new_token_args),
-		Operators::Power => Token::Power(new_token_args),
-		Operators::Negative => Token::Negative(new_token_args),
-		Operators::Factorial => Token::Factorial(new_token_args)
+		Operator::Add => Token::Add(new_token_args),
+		Operator::Divide => Token::Divide(new_token_args),
+		Operator::Multiply => Token::Multiply(new_token_args),
+		Operator::ImplicitMultiply => Token::Multiply(new_token_args),
+		Operator::Modulo => Token::Modulo(new_token_args),
+		Operator::ModuloLong => Token::Modulo(new_token_args),
+		Operator::Power => Token::Power(new_token_args),
+		Operator::Negative => Token::Negative(new_token_args),
+		Operator::Factorial => Token::Factorial(new_token_args)
 	}
 }
 
@@ -74,16 +74,16 @@ fn treeify_binary(
 	if let Token::PreOperator(l, o) = right {
 		match o {
 			// Binary operators
-			Operators::ModuloLong |
-			Operators::Subtract |
-			Operators::Add |
-			Operators::Divide |
-			Operators::Multiply |
-			Operators::ImplicitMultiply |
-			Operators::Modulo |
-			Operators::Power |
+			Operator::ModuloLong |
+			Operator::Subtract |
+			Operator::Add |
+			Operator::Divide |
+			Operator::Multiply |
+			Operator::ImplicitMultiply |
+			Operator::Modulo |
+			Operator::Power |
 			// Right unary operators
-			Operators::Factorial
+			Operator::Factorial
 			=> {
 				// Binary and right-unary operators cannot
 				// follow a binary operator.
@@ -96,7 +96,7 @@ fn treeify_binary(
 			},
 
 			// Left unary operators
-			Operators::Negative => {
+			Operator::Negative => {
 				i += 1;
 				return Ok(i);
 			}
@@ -171,16 +171,16 @@ fn treeify_unaryleft(
 	if let Token::PreOperator(l, o) = right {
 		match o {
 			// Binary operators
-			Operators::ModuloLong |
-			Operators::Subtract |
-			Operators::Add |
-			Operators::Divide |
-			Operators::Multiply |
-			Operators::ImplicitMultiply |
-			Operators::Modulo |
-			Operators::Power |
+			Operator::ModuloLong |
+			Operator::Subtract |
+			Operator::Add |
+			Operator::Divide |
+			Operator::Multiply |
+			Operator::ImplicitMultiply |
+			Operator::Modulo |
+			Operator::Power |
 			// Right unary operators
-			Operators::Factorial
+			Operator::Factorial
 			=> {
 				// Binary and right-unary operators cannot
 				// follow a binary operator.
@@ -193,7 +193,7 @@ fn treeify_unaryleft(
 			},
 
 			// Left unary operators
-			Operators::Negative => {
+			Operator::Negative => {
 				i += 1;
 				return Ok(i);
 			}
@@ -272,7 +272,7 @@ fn treeify_unaryright(
 		if let Token::PreOperator(l, o) = right.unwrap() {
 			match o {
 				// Left unary operators
-				Operators::Negative => {
+				Operator::Negative => {
 					let LineLocation { pos: posa, .. } = *get_line_location(&this);
 					let LineLocation { pos: posb, len: lenb } = *l;
 					return Err((
@@ -358,20 +358,20 @@ fn inner_treeify(
 		};
 
 		match this_op {
-			Operators::ModuloLong |
-			Operators::Subtract |
-			Operators::Add |
-			Operators::Divide |
-			Operators::Multiply |
-			Operators::ImplicitMultiply |
-			Operators::Modulo |
-			Operators::Power
+			Operator::ModuloLong |
+			Operator::Subtract |
+			Operator::Add |
+			Operator::Divide |
+			Operator::Multiply |
+			Operator::ImplicitMultiply |
+			Operator::Modulo |
+			Operator::Power
 			=> { i = treeify_binary(i, g_inner)?; },
 
-			Operators::Negative
+			Operator::Negative
 			=> { i = treeify_unaryleft(i, g_inner)?; },
 
-			Operators::Factorial
+			Operator::Factorial
 			=> { i = treeify_unaryright(i, g_inner)?; }
 
 		};
@@ -386,7 +386,7 @@ fn inner_treeify(
 			return Err((l, ParserError::Syntax));
 		},
 		Token::PreGroup(_,_) => {
-			g = treeify(g)?;
+			g = inner_treeify(g)?;
 		}
 		_ => {}
 	};

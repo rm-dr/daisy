@@ -13,7 +13,6 @@ use crate::promptbuffer::PromptBuffer;
 use crate::parser::Token;
 //use crate::parser::ParserError;
 use crate::parser::LineLocation;
-use crate::parser::Eval;
 
 
 fn draw_line(
@@ -122,7 +121,7 @@ fn main() -> Result<(), std::io::Error> {
 					_ => {}
 				};
 			};
-			
+
 			draw_line(
 				&mut stdout,
 				pb.get_contents(),

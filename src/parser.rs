@@ -14,10 +14,6 @@ use std::collections::VecDeque;
 /// Tokens starting with `Pre*` are intermediate tokens, and
 /// will never show up in a fully-parsed expression tree.
 
-pub trait Eval {
-	fn eval(&self) -> Token;
-}
-
 #[derive(Debug)]
 pub enum Token {
 
@@ -31,14 +27,16 @@ pub enum Token {
 
 	/// Used only until operators are parsed.
 	/// Each of these will become one of the operators below.
-	PreOperator(LineLocation, Operators),
+	PreOperator(LineLocation, Operator),
 
 	/// Used only until operators are parsed.
 	/// PreGroups aren't needed once we have a tree.
 	PreGroup(LineLocation, VecDeque<Token>),
 
-	Root(VecDeque<Token>),
 	Number(LineLocation, f64),
+	Constant(LineLocation, f64, String),
+
+	Root(VecDeque<Token>),
 	Multiply(VecDeque<Token>),
 	Divide(VecDeque<Token>),
 	Add(VecDeque<Token>),
@@ -48,21 +46,35 @@ pub enum Token {
 	Modulo(VecDeque<Token>),
 }
 
-impl Eval for Token {
-	fn eval(&self) -> Token {
+impl Token {
+	fn as_number(&self) -> Token {
+		match self {
+			Token::Number(l,v) => {
+				Token::Number(*l, *v)
+			},
+			Token::Constant(l,v,_) => {
+				Token::Number(*l, *v)
+			},
+			_ => panic!()
+		}
+	}
+
+	pub fn eval(&self) -> Token {
 		match self {
 			Token::Root(ref v) => {
 				if v.len() != 1 {panic!()};
+				let v = v[0].as_number();
 
-				if let Token::Number(l, v) = v[0] {
+				if let Token::Number(l, v) = v {
 					Token::Number(l, v)
 				} else { panic!(); }
 			},
 
 			Token::Negative(ref v) => {
 				if v.len() != 1 {panic!()};
+				let v = v[0].as_number();
 
-				if let Token::Number(l, v) = v[0]{
+				if let Token::Number(l, v) = v {
 					Token::Number(l, -v)
 				} else { panic!(); }
 			},
@@ -72,8 +84,9 @@ impl Eval for Token {
 				let mut new_pos: usize = 0;
 				let mut new_len: usize = 0;
 				for i in v.iter() {
-					if let Token::Number(l, v) = i {
-						let LineLocation{pos, len} = *l;
+					let j = i.as_number();
+					if let Token::Number(l, v) = j {
+						let LineLocation{pos, len} = l;
 						if new_pos == 0 {new_pos = pos};
 						new_len = new_len + len;
 						sum += v;
@@ -93,8 +106,9 @@ impl Eval for Token {
 				let mut new_pos: usize = 0;
 				let mut new_len: usize = 0;
 				for i in v.iter() {
-					if let Token::Number(l, v) = i {
-						let LineLocation{pos, len} = *l;
+					let j = i.as_number();
+					if let Token::Number(l, v) = j {
+						let LineLocation{pos, len} = l;
 						if new_pos == 0 {new_pos = pos};
 						new_len = new_len + len;
 						prod *= v;
@@ -111,12 +125,12 @@ impl Eval for Token {
 
 			Token::Divide(ref v) => {
 				if v.len() != 2 {panic!()};
-				let a = &v[0];
-				let b = &v[1];
+				let a = v[0].as_number();
+				let b = v[1].as_number();
 
 				if let Token::Number(la, va) = a {
 					if let Token::Number(lb, vb) = b {
-						let LineLocation{pos: posa, ..} = *la;
+						let LineLocation{pos: posa, ..} = la;
 						let LineLocation{pos: posb, len: lenb} = lb;
 						Token::Number(
 							LineLocation { pos: posa, len: posb - posa + lenb },
@@ -128,12 +142,12 @@ impl Eval for Token {
 
 			Token::Modulo(ref v) => {
 				if v.len() != 2 {panic!()};
-				let a = &v[0];
-				let b = &v[1];
+				let a = v[0].as_number();
+				let b = v[1].as_number();
 
 				if let Token::Number(la, va) = a {
 					if let Token::Number(lb, vb) = b {
-						let LineLocation{pos: posa, ..} = *la;
+						let LineLocation{pos: posa, ..} = la;
 						let LineLocation{pos: posb, len: lenb} = lb;
 						Token::Number(
 							LineLocation { pos: posa, len: posb - posa + lenb },
@@ -145,16 +159,16 @@ impl Eval for Token {
 
 			Token::Power(ref v) => {
 				if v.len() != 2 {panic!()};
-				let a = &v[0];
-				let b = &v[1];
+				let a = v[0].as_number();
+				let b = v[1].as_number();
 
 				if let Token::Number(la, va) = a {
 					if let Token::Number(lb, vb) = b {
-						let LineLocation{pos: posa, ..} = *la;
+						let LineLocation{pos: posa, ..} = la;
 						let LineLocation{pos: posb, len: lenb} = lb;
 						Token::Number(
 							LineLocation { pos: posa, len: posb - posa + lenb },
-							va.powf(*vb)
+							va.powf(vb)
 						)
 					} else { panic!(); }
 				} else { panic!(); }
@@ -171,7 +185,7 @@ impl Eval for Token {
 /// The Null operator MUST be equal to zero.
 #[derive(Debug)]
 #[derive(Copy, Clone)]
-pub enum Operators {
+pub enum Operator {
 	ModuloLong = 0, // Mod invoked with "mod"
 	Subtract,
 	Add,

@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use crate::parser::Token;
 use crate::parser::LineLocation;
 use crate::parser::ParserError;
-use crate::parser::Operators;
+use crate::parser::Operator;
 
 /// Updates the length of a Token's LineLocation.
 /// Run whenever a token is finished.
@@ -46,13 +46,18 @@ fn lookback(
 			// Insert ImplicitMultiply
 			(Token::PreGroup(_,_), Token::PreGroup(l ,_)) |
 			(Token::PreGroup(_,_), Token::Number(l,_)) |
-			(Token::Number(_,_), Token::PreGroup(l,_))
+			(Token::Number(_,_), Token::PreGroup(l,_)) |
+			(Token::Constant(_,_,_), Token::Number(l,_)) |
+			(Token::Number(_,_), Token::Constant(l,_,_)) |
+			(Token::Constant(_,_,_), Token::PreGroup(l,_)) |
+			(Token::PreGroup(_,_), Token::Constant(l,_,_)) |
+			(Token::Constant(_,_,_), Token::Constant(l,_,_))
 			=> {
 				g.push_back(a);
 				let LineLocation { pos: i, .. } = l;
 				g.push_back(Token::PreOperator(
 					LineLocation{pos: i-1, len: 0},
-					Operators::ImplicitMultiply
+					Operator::ImplicitMultiply
 				));
 				g.push_back(b);
 			},
@@ -69,11 +74,8 @@ fn lookback(
 			}
 
 			// The following are fine
-			(Token::PreOperator(_,_), Token::PreOperator(_,_)) |
-			(Token::PreOperator(_,_), Token::Number(_,_)) |
-			(Token::Number(_,_), Token::PreOperator(_,_)) |
-			(Token::PreOperator(_,_), Token::PreGroup(_,_)) |
-			(Token::PreGroup(_,_), Token::PreOperator(_,_))
+			(Token::PreOperator(_,_), _) |
+			(_, Token::PreOperator(_,_))
 			=> { g.push_back(a); g.push_back(b); },
 
 			// If we get this far, we found a Token
@@ -108,7 +110,9 @@ fn push_token(
 			},
 			Token::PreWord(l, s) => {
 				if s == "mod" {
-					Token::PreOperator(l, Operators::ModuloLong)
+					Token::PreOperator(l, Operator::ModuloLong)
+				} else if s == "pi" {
+					Token::Constant(l, 3.141592653, String::from("π"))
 				} else {
 					return Err((l, ParserError::Syntax));
 				}
@@ -145,7 +149,7 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 				push_token(g_now, i, t)?;
 				t = Some(Token::PreOperator(
 					LineLocation{pos: i, len: 1},
-					Operators::Factorial
+					Operator::Factorial
 				));
 			},
 
@@ -161,7 +165,7 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 					Some(Token::PreWord(_, _)) => {
 						t = Some(Token::PreOperator(
 							LineLocation{pos: i, len: 1},
-							Operators::Subtract
+							Operator::Subtract
 						));
 					},
 
@@ -169,7 +173,7 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 					_ => {
 						t = Some(Token::PreOperator(
 							LineLocation{pos: i, len: 1},
-							Operators::Negative
+							Operator::Negative
 						));
 					}
 				};
@@ -219,11 +223,11 @@ pub fn tokenize(input: &String) -> Result<Token, (LineLocation, ParserError)> {
 				t = Some(Token::PreOperator(
 					LineLocation{pos: i, len: 1},
 					match c {
-						'^' => Operators::Power,
-						'%' => Operators::Modulo,
-						'*'|'×' => Operators::Multiply,
-						'/'|'÷' => Operators::Divide,
-						'+' => Operators::Add,
+						'^' => Operator::Power,
+						'%' => Operator::Modulo,
+						'*'|'×' => Operator::Multiply,
+						'/'|'÷' => Operator::Divide,
+						'+' => Operator::Add,
 						_ => panic!()
 					}
 				));
