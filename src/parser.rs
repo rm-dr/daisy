@@ -256,7 +256,6 @@ impl Operator {
 	pub fn is_left_associative(&self) -> bool {
 		match self {
 			Operator::Negative
-			| Operator::Power
 			=> false,
 			_ => true
 		}
