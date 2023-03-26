@@ -19,12 +19,12 @@ use crate::parser::Token;
   ######  @@@@@@
  #     ##@@     @
  ##     #@     @@
-   #@@@@@@@@@@@#
+   @@@@@@@@@@@@@
  @@     @#     ##
  @     @@##     #
   @@@@@@  ######
 
-  Mariposa 0.0.1
+   Daisy 0.0.1
 */
 #[inline(always)]
 fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
@@ -34,12 +34,11 @@ fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io
 	{a} ###### {b} @@@@@@\r\n \
 	{a}#     ##{b}@@     @\r\n \
 	{a}##     #{b}@     @@\r\n \
-	{a}  #{b}@@@@@@@@@@@{a}#\r\n \
+	{a}  {b}@@@@@@@@@@@@@{a}\r\n \
 	{b}@@     @{a}#     ##\r\n \
 	{b}@     @@{a}##     #\r\n \
 	{b} @@@@@@ {a} ###### {r}\r\n \
-	\n \
-	{t}Mariposa{r} {v}0.0.1{r}\r\n\n",
+	\n  {t}Daisy{r}  {v}v0.0.0{r}\r\n\n",
 		a = color::Fg(color::Magenta),
 		b = color::Fg(color::White),
 		t = format!("{}{}", color::Fg(color::White), style::Bold),

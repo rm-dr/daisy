@@ -1,34 +1,45 @@
-## For 1.0 release
+![](./misc/banner.png)
+
+A high-precision partially-symbolic calculator with support for units, derivatives, and more.
+
+# Warning
+This is nowhere near complete. Stay tuned.
+
+
+# TODO
+
+
+## Before For 1.0 release
  - Tests
  - Branding
- - Replace &str with strings
- - Named parameters for Tokens
+ - Replace strings with &str?
  - Function application
  - Commands
  - Arrows to move cursor
-
-
-## Etc
-
-# General
  - Documentation
+ - Versioning
+
+
+## General
  - CLI Options
  - Compile to WASM => webapp
 
-# Internals
+## Internals
  - Non-recursive treeify
  - Print any expression
  - Copy expression, print with result
 
-# Features
+## Features
  - Variable definitions
  - Function definitions
  - Rational datatype
  - Units
  - Dice
  - Derivatives
- - Mini CAS
+ - MiniCAS
  - Complex numbers
+ - Config file
+ - History to file
 
-# Prompt
+## Prompt
  - Live syntax/output
