@@ -33,7 +33,6 @@ pub fn p_tokenize(input: &String) -> VecDeque<Token> {
 
 
 	for (i, c) in input.chars().enumerate() {
-
 		match c {
 			// The minus sign can be both a Negative and an Operator.
 			// Needs special treatment.
@@ -82,8 +81,8 @@ pub fn p_tokenize(input: &String) -> VecDeque<Token> {
 
 			// Operator
 			// Always one character
-			'*'|'/'|'+'|
-			'^'|'!'|'%'
+			'*'|'×'|'/'|'÷'|
+			'+'|'^'|'!'|'%'
 			=> {
 				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
 				t = Some(Token::PreOperator(
@@ -136,7 +135,7 @@ pub fn p_tokenize(input: &String) -> VecDeque<Token> {
 		};
 	}
 
-	if t.is_some() { g.push_back(update_line_location(t.unwrap(), input.len())); }
+	if t.is_some() { g.push_back(update_line_location(t.unwrap(), input.chars().count())); }
 
 	return g;
 }

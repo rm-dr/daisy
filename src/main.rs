@@ -129,10 +129,11 @@ fn main() -> Result<(), std::io::Error> {
 							},
 							Err((l, e)) => {
 								write!(
-									stdout, "{}{}{} {e:?}{}\r\n",
+									stdout, "{}{}{} {}{}\r\n",
 									color::Fg(color::Red),
 									" ".repeat(l.pos + 4),
 									"^".repeat(l.len),
+									e.to_message(),
 									color::Fg(color::Reset),
 								)?;
 							}

@@ -34,7 +34,7 @@ pub fn p_find_subs(
 			},
 
 			Token::PreWord(_, s) => {
-				match &s[..] {
+				let target = match &s[..] {
 					// Greek letters
 					"alpha"   => {Some("α")},
 					"beta"    => {Some("β")},
@@ -62,7 +62,15 @@ pub fn p_find_subs(
 					"omega"   => {Some("ω")}
 
 					_ => {None}
+				};
+
+				// Update preword contents too.
+				// This makes sure future prints of this token
+				// contain substituted text too.
+				if target.is_some() {*
+					s = String::from(target.unwrap());
 				}
+				target
 			},
 
 			_ => {None}

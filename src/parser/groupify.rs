@@ -73,7 +73,7 @@ pub fn p_groupify(mut g: VecDeque<Token>) -> Result<Token, (LineLocation, Parser
 		let t = g.pop_front().unwrap();
 		let (l_now, v_now) = levels.last_mut().unwrap();
 
-		match &t {
+		match t {
 			Token::PreOperator(_, _) => {
 				v_now.push_back(t);
 				lookback(v_now)?;
@@ -82,23 +82,25 @@ pub fn p_groupify(mut g: VecDeque<Token>) -> Result<Token, (LineLocation, Parser
 			Token::PreNumber(l, s) => {
 				let n = match s.parse() {
 					Ok(n) => n,
-					Err(_) => return Err((*l, ParserError::BadNumber))
+					Err(_) => return Err((l, ParserError::BadNumber))
 				};
-				v_now.push_back(Token::Number(*l, n));
+				v_now.push_back(Token::Number(l, n));
 				lookback(v_now)?;
 			},
 
 			Token::PreWord(l, s) => {
+				// This method must support both plain text and
+				// unicode versions of each word.
 				v_now.push_back(match &s[..] {
-					"mod" => { Token::PreOperator(*l, Operator::ModuloLong) },
-					"pi" => { Token::Constant(*l, 3.141592653, String::from("π")) },
-					_ => { return Err((*l, ParserError::Syntax)); }
+					"mod" => { Token::PreOperator(l, Operator::ModuloLong) },
+					"π"|"pi" => { Token::Constant(l, 3.141592653, String::from("π")) },
+					_ => { return Err((l, ParserError::Undefined(s))); }
 				});
 				lookback(v_now)?;
 			},
 
 			Token::PreGroupStart(l) => {
-				levels.push((*l, VecDeque::with_capacity(8)));
+				levels.push((l, VecDeque::with_capacity(8)));
 				i_level += 1;
 			},
 
@@ -129,10 +131,28 @@ pub fn p_groupify(mut g: VecDeque<Token>) -> Result<Token, (LineLocation, Parser
 		}
 	}
 
+	/*
+	// Error on missing parenthesis
 	if levels.len() != 1 {
 		let (l, _) = levels.pop().unwrap();
 		return Err((l, ParserError::MissingCloseParen))
 	}
+	*/
+
+	// Auto-close parenthesis
+	while levels.len() != 1 {
+		let (l, v) = levels.pop().unwrap();
+		let (_, v_now) = levels.last_mut().unwrap();
+
+		// Catch empty groups
+		if v.len() == 0 {
+			return Err((l, ParserError::EmptyGroup))
+		}
+
+		v_now.push_back(Token::PreGroup(l, v));
+		lookback(v_now)?;
+	}
+
 
 	let (_, v) = levels.pop().unwrap();
 	return Ok(Token::PreGroup(LineLocation{pos:0, len:0}, v));

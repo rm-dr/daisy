@@ -255,11 +255,37 @@ pub struct LineLocation {
 /// If we cannot parse a string, one of these is returned.
 #[derive(Debug)]
 pub enum ParserError {
-	MissingCloseParen,
+	//MissingCloseParen,
 	ExtraCloseParen,
 	EmptyGroup,
 	Syntax,
-	BadNumber 
+	Undefined(String),
+	BadNumber
+}
+
+impl ParserError {
+	pub fn to_message(&self) -> String {
+		match self {
+			//ParserError::MissingCloseParen => {
+			//	String::from("This group is never closed")
+			//},
+			ParserError::ExtraCloseParen => {
+				String::from("Extra close parenthesis")
+			},
+			ParserError::EmptyGroup => {
+				String::from("Groups can't be empty")
+			},
+			ParserError::Syntax => {
+				String::from("Syntax")
+			},
+			ParserError::Undefined(s) => {
+				format!("\"{s}\" isn't defined")
+			},
+			ParserError::BadNumber => {
+				String::from("Invalid number")
+			}
+		}
+	}
 }
 
 
