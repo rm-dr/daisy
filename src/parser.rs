@@ -52,7 +52,6 @@ pub enum Token {
 }
 
 impl Token {
-
 	#[inline(always)]
 	pub fn get_args(&mut self) -> Option<&mut VecDeque<Token>> {
 		match self {
@@ -239,7 +238,78 @@ pub enum Operator {
 	Power,
 
 	Negative,
-	Factorial
+	Factorial,
+}
+
+impl Operator {
+	#[inline(always)]
+	pub fn is_binary(&self) -> bool {
+		match self {
+			Operator::Negative
+			| Operator::Factorial
+			=> false,
+			_ => true
+		}
+	}
+
+	#[inline(always)]
+	pub fn is_left_associative(&self) -> bool {
+		match self {
+			Operator::Negative
+			| Operator::Power
+			=> false,
+			_ => true
+		}
+	}
+
+	#[inline(always)]
+	pub fn into_token(&self, mut args: VecDeque<Token>) -> Token {
+		match self {
+			Operator::Add => Token::Add(args),
+
+			Operator::Multiply
+			| Operator::ImplicitMultiply
+			=> Token::Multiply(args),
+			
+			Operator::Subtract => {
+				if args.len() != 2 { panic!() }
+				let a = args.pop_front().unwrap();
+				let b = args.pop_front().unwrap();
+	
+				Token::Add(
+				VecDeque::from(vec!(
+						a,
+						Token::Negative(VecDeque::from(vec!(b)))
+				)))
+			},
+
+			Operator::Divide => {
+				if args.len() != 2 { panic!() }
+				Token::Divide(args)
+			},
+	
+			Operator::ModuloLong |
+			Operator::Modulo => {
+				if args.len() != 2 { panic!() }
+				Token::Modulo(args)
+			},
+	
+			Operator::Power => {
+				if args.len() != 2 { panic!() }
+				Token::Power(args)
+			},
+
+			Operator::Negative => {
+				if args.len() != 1 { panic!() }
+				Token::Negative(args)
+			},
+
+			Operator::Factorial => {
+				if args.len() != 1 { panic!() }
+				Token::Factorial(args)
+			}
+		}
+	}
 }
 
 /// Specifies the location of a token in an input string.
