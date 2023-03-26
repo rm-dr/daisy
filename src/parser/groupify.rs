@@ -93,7 +93,11 @@ pub fn p_groupify(mut g: VecDeque<Token>) -> Result<Token, (LineLocation, Parser
 				// unicode versions of each word.
 				v_now.push_back(match &s[..] {
 					"mod" => { Token::PreOperator(l, Operator::ModuloLong) },
-					"π"|"pi" => { Token::Constant(l, 3.141592653, String::from("π")) },
+
+					// Mathematical constants
+					"π"|"pi" => { Token::Constant(l, 3.141592653, String::from("pi")) },
+					"e" => { Token::Constant(l, 2.71828, String::from("e")) },
+					"phi"|"φ" => { Token::Constant(l, 1.61803, String::from("phi")) },
 					_ => { return Err((l, ParserError::Undefined(s))); }
 				});
 				lookback(v_now)?;

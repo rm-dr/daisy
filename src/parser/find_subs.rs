@@ -44,22 +44,22 @@ pub fn p_find_subs(
 					"zeta"    => {Some("ζ")},
 					"eta"     => {Some("η")},
 					"theta"   => {Some("θ")},
-					"iota"    => {Some("ι")},
-					"kappa"   => {Some("κ")},
+					//"iota"    => {Some("ι")},
+					//"kappa"   => {Some("κ")},
 					"lambda"  => {Some("λ")},
 					"mu"      => {Some("μ")},
-					"nu"      => {Some("ν")},
+					//"nu"      => {Some("ν")},
 					"xi"      => {Some("ξ")},
-					"omicron" => {Some("ο")},
+					//"omicron" => {Some("ο")},
 					"pi"      => {Some("π")},
 					"rho"     => {Some("ρ")},
 					"sigma"   => {Some("σ")},
 					"tau"     => {Some("τ")},
-					"upsilon" => {Some("υ")},
+					//"upsilon" => {Some("υ")},
 					"phi"     => {Some("φ")},
 					"chi"     => {Some("χ")},
 					"psi"     => {Some("ψ")},
-					"omega"   => {Some("ω")}
+					"omega"   => {Some("ω")},
 
 					_ => {None}
 				};
