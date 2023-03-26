@@ -83,8 +83,25 @@ impl Token {
 			Token::Number(_l, _) |
 			Token::Constant(_l, _, _)
 			=> panic!(),
+			_ => panic!()
+		}
+	}
 
+	#[inline(always)]
+	pub fn get_mut_line_location(&mut self) -> &mut LineLocation {
+		match self {
+			Token::PreNumber(l, _) |
+			Token::PreWord(l, _) |
+			Token::PreOperator(l, _) |
+			Token::PreGroupStart(l) |
+			Token::PreGroupEnd(l) |
+			Token::PreGroup(l, _)
+			=> l,
 
+			// These have a line location, but we shouldn't ever need to get it.
+			Token::Number(_l, _) |
+			Token::Constant(_l, _, _)
+			=> panic!(),
 			_ => panic!()
 		}
 	}
@@ -261,6 +278,7 @@ pub enum ParserError {
 pub fn evaluate(s: &String) -> Result<Token, (LineLocation, ParserError)> {
 
 	let tokens = p_tokenize(s);
+	let (_, tokens) = p_find_subs(tokens);
 	let mut g = p_groupify(tokens)?;
 	g = p_treeify(g)?;
 	g = p_evaluate(g)?;
@@ -274,7 +292,7 @@ pub fn substitute(s: &String) -> String{
 	let mut new_s = s.clone();
 
 	let tokens = p_tokenize(s);
-	let subs = p_find_subs(tokens);
+	let (subs, _) = p_find_subs(tokens);
 
 	for r in subs.iter() {
 		new_s.replace_range(
