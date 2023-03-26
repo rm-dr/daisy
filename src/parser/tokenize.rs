@@ -38,12 +38,12 @@ pub fn p_tokenize(input: &String) -> VecDeque<Token> {
 			// Needs special treatment.
 			'-' => {
 				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
-				match g.back() {
+				match g.back().as_ref().unwrap() {
 					// If previous token was any of the following,
 					// this is the "minus" operator
-					Some(Token::Number(_, _)) |
-					Some(Token::PreGroup(_, _)) |
-					Some(Token::PreWord(_, _)) => {
+					Token::PreNumber(_, _) |
+					Token::PreGroup(_, _) |
+					Token::PreWord(_, _) => {
 						t = Some(Token::PreOperator(
 							LineLocation{pos: i, len: 1},
 							Operator::Subtract
@@ -118,8 +118,6 @@ pub fn p_tokenize(input: &String) -> VecDeque<Token> {
 			}
 
 			// Word
-			//'A'..='Z' |
-			//'a'..='z' 
 			_ => {
 				match &mut t {
 					Some(Token::PreWord(_, val)) => {
