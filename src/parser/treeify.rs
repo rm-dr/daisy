@@ -6,7 +6,7 @@ use crate::parser::ParserError;
 use crate::parser::Operator;
 
 fn treeify_binary(
-	mut i: usize,
+	i: usize,
 	g_inner: &mut VecDeque<Token>,
 	left_associative: bool
 ) -> Result<(), (LineLocation, ParserError)> {
