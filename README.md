@@ -1,11 +1,19 @@
-# General
- - Documentation
+## For 1.0 release
  - Tests
- - CLI Options
  - Branding
- - Compile to WASM => webapp
  - Replace &str with strings
  - Named parameters for Tokens
+ - Function application
+ - Commands
+ - Arrows to move cursor
+
+
+## Etc
+
+# General
+ - Documentation
+ - CLI Options
+ - Compile to WASM => webapp
 
 # Internals
  - Non-recursive treeify
@@ -13,7 +21,6 @@
  - Copy expression, print with result
 
 # Features
- - Function application
  - Variable definitions
  - Function definitions
  - Rational datatype
@@ -24,7 +31,4 @@
  - Complex numbers
 
 # Prompt
- - Arrows to move cursor
- - Syntax errors are broken
  - Live syntax/output
- - Commands
