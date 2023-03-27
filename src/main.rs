@@ -283,6 +283,8 @@ mod tests {
 		bad_expr("3 + ");
 		bad_expr("3 + @");
 		bad_expr("3 - ");
+		bad_expr("()");
+		bad_expr("3+2)");
 	}
 
 	#[test]
@@ -291,6 +293,7 @@ mod tests {
 		good_expr(125f64, "5 ^ 3");
 		good_expr(125f64, "( 5 ) ^ ( 3 )");
 		good_expr(125f64, "( ( 5 ) ^ ( 3 ) )");
+		good_expr(125f64, "( ( 5 ^ ( 3");
 		good_expr(125f64, "( 5 ^ 3 )");
 		//good_expr(125f64, "5^(+3)");
 		//good_expr(125f64, "+5^3");
