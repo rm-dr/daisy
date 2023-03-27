@@ -41,13 +41,19 @@ fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io
 	{b}@@     @{a}#     ##\r\n \
 	{b}@     @@{a}##     #\r\n \
 	{b} @@@@@@ {a} ###### {r}\r\n \
-	\n  {t}Daisy{r}  {v}v0.0.0{r}\r\n\n",
+	\n  {t}Daisy{r}  {v}v{ver}{r}\r\n\n",
+		r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+
+		// Icon colors
 		a = color::Fg(color::Magenta),
 		b = color::Fg(color::White),
-		t = format!("{}{}", color::Fg(color::White), style::Bold),
-		v = format!("{}{}", color::Fg(color::White), style::Italic),
 
-		r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+		// Title format
+		t = format!("{}{}", color::Fg(color::White), style::Bold),
+
+		// Version
+		v = format!("{}{}", color::Fg(color::White), style::Italic),
+		ver = env!("CARGO_PKG_VERSION"),
 	)?;
 
 	return Ok(());
