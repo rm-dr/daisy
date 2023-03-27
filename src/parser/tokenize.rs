@@ -42,7 +42,7 @@ pub fn p_tokenize(input: &String) -> VecDeque<Token> {
 					// If previous token was any of the following,
 					// this is the "minus" operator
 					Some(Token::PreNumber(_, _)) |
-					Some(Token::PreGroup(_, _)) |
+					Some(Token::PreGroupEnd(_)) |
 					Some(Token::PreWord(_, _)) => {
 						t = Some(Token::PreOperator(
 							LineLocation{pos: i, len: 1},
