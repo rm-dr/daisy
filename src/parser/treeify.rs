@@ -1,7 +1,6 @@
 use std::collections::VecDeque;
 
 use crate::tokens::Token;
-use crate::tokens::Operator;
 use crate::tokens::LineLocation;
 
 use crate::parser::ParserError;
@@ -165,17 +164,9 @@ fn treeify_unary(
 
 	if prev.is_some() {
 		if let Token::PreOperator(l, o) = prev.unwrap() {
-			match o {
-				// Left unary operators
-				Operator::Negative => {
-					let tl = *this.get_line_location();
-					return Err((
-						LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
-						ParserError::Syntax
-					));
-				},
-				_ => {},
-			};
+			if o.is_left_associative() && left_associative {
+				return Err((*l, ParserError::Syntax));
+			}
 		} else {
 			return Err((
 				*this.get_line_location(),
