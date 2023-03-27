@@ -1,9 +1,10 @@
 use std::collections::VecDeque;
 
-use crate::parser::Token;
-use crate::parser::LineLocation;
+use crate::tokens::Token;
+use crate::tokens::Operator;
+use crate::tokens::LineLocation;
+
 use crate::parser::ParserError;
-use crate::parser::Operator;
 
 /// Looks backwards at the elements of g.
 /// - Inserts ImplicitMultiply

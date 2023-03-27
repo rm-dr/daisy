@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 
-use crate::parser::Token;
-use crate::parser::LineLocation;
-use crate::parser::Operator;
+use crate::tokens::Token;
+use crate::tokens::Operator;
+use crate::tokens::LineLocation;
 
 /// Updates the length of a Token's LineLocation.
 /// Run whenever a token is finished.

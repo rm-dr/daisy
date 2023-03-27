@@ -6,11 +6,14 @@ use termion::raw::IntoRawMode;
 use termion::raw::RawTerminal;
 use termion::{color, style};
 
+pub mod tokens;
 mod parser;
 mod promptbuffer;
+mod evaluate;
+
+use crate::tokens::Token;
 use crate::promptbuffer::PromptBuffer;
 
-use crate::parser::Token;
 //use crate::parser::ParserError;
 //use crate::parser::LineLocation;
 
@@ -79,6 +82,17 @@ fn draw_line(
 	return Ok(());
 }
 
+/*
+
+#[cfg(debug_assertions)]
+RawTerminal::suspend_raw_mode(&stdout)?;
+#[cfg(debug_assertions)]
+write!(stdout, "\n")?;
+
+#[cfg(debug_assertions)]
+RawTerminal::activate_raw_mode(&stdout)?;
+*/
+
 fn main() -> Result<(), std::io::Error> {
 	let mut stdout = stdout().into_raw_mode().unwrap();
 
@@ -106,16 +120,25 @@ fn main() -> Result<(), std::io::Error> {
 				match q {
 					'\n' => {
 						let s = pb.enter();
-						if s == "" { write!(stdout, "\r\n")?; break; }
+						write!(stdout, "\r\n")?;
+						if s == "" { break; }
 
+						#[cfg(debug_assertions)]
 						RawTerminal::suspend_raw_mode(&stdout)?;
-						write!(stdout, "\n")?;
-						let g = parser::evaluate(&s);
+						let g = parser::parse(&s);
+						#[cfg(debug_assertions)]
 						RawTerminal::activate_raw_mode(&stdout)?;
 
 						match g {
 							Ok(g) => {
+								#[cfg(debug_assertions)]
+								RawTerminal::suspend_raw_mode(&stdout)?;
+								let g = evaluate::evaluate(g).unwrap();
 								let n = g.eval();
+								#[cfg(debug_assertions)]
+								RawTerminal::activate_raw_mode(&stdout)?;
+
+
 								if let Token::Number(_, v) = n {
 									write!(
 										stdout, "\r\n  {}{}={} {v}{}\r\n\n",
@@ -126,6 +149,8 @@ fn main() -> Result<(), std::io::Error> {
 									)?;
 								} else { panic!(); }
 							},
+
+							// Show parse error
 							Err((l, e)) => {
 								write!(
 									stdout, "{}{}{} {}{}\r\n",

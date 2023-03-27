@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 
-use crate::parser::Operator;
-use crate::parser::Token;
-use crate::parser::LineLocation;
+use crate::tokens::Token;
+use crate::tokens::Operator;
+use crate::tokens::LineLocation;
 
 
 pub fn p_find_subs(
@@ -60,6 +60,7 @@ pub fn p_find_subs(
 					"chi"     => {Some("χ")},
 					"psi"     => {Some("ψ")},
 					"omega"   => {Some("ω")},
+					"sqrt"    => {Some("√")},
 
 					_ => {None}
 				};
