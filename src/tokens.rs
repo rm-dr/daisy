@@ -231,9 +231,11 @@ pub enum Operator {
 	Multiply,
 	ImplicitMultiply,
 	Modulo, // Mod invoked with %
+	Negative,
+
+
 	Power,
 
-	Negative,
 	Factorial,
 }
 
