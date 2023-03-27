@@ -10,18 +10,18 @@ This is nowhere near complete. Stay tuned.
 
 
 ## Before For 1.0 release
- - Tests
- - Branding
  - Replace strings with &str?
  - Function application
  - Commands
  - Arrows to move cursor
  - Documentation
- - Versioning
+ - Branding
+ - ** as exponentiation
+ - Improve tests
 
 
 ## General
- - CLI Options
+ - CLI Options: version, help, evaluate
  - Compile to WASM => webapp
 
 ## Internals
