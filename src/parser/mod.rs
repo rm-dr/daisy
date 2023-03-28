@@ -12,8 +12,16 @@ use crate::parser::groupify::groupify;
 use crate::parser::treeify::treeify;
 use crate::parser::find_subs::find_subs;
 
-use crate::tokens::LineLocation;
 use crate::tokens::Token;
+
+/// Specifies the location of a token in an input string.
+/// Used to locate ParserErrors.
+#[derive(Debug)]
+#[derive(Copy, Clone)]
+pub struct LineLocation {
+	pub pos: usize,
+	pub len: usize
+}
 
 #[derive(Debug)]
 enum PreToken {
@@ -67,14 +75,14 @@ impl PreToken {
 					Ok(n) => n,
 					Err(_) => return Err((l, ParserError::BadNumber))
 				};
-				return Ok(Token::Number(l, n));
+				return Ok(Token::Number(n));
 			},
 			PreToken::PreWord(l, s) => {
 				return Ok(match &s[..] {
 					// Mathematical constants
-					"π"|"pi" => { Token::Constant(l, 3.141592653, String::from("pi")) },
-					"e" => { Token::Constant(l, 2.71828, String::from("e")) },
-					"phi"|"φ" => { Token::Constant(l, 1.61803, String::from("phi")) },
+					"π"|"pi" => { Token::Constant(3.141592653, String::from("pi")) },
+					"e" => { Token::Constant(2.71828, String::from("e")) },
+					"phi"|"φ" => { Token::Constant(1.61803, String::from("phi")) },
 					_ => { return Err((l, ParserError::Undefined(s))); }
 				});
 			}

@@ -43,14 +43,14 @@ pub fn evaluate(
 		}
 
 		match h {
-			Token::Operator(_,_,_)
+			Token::Operator(_,_)
 			=> {
 				coords.push(0);
 				continue 'outer;
 			},
 
-			Token::Constant(_,_,_) |
-			Token::Number(_,_) => {
+			Token::Constant(_,_) |
+			Token::Number(_) => {
 				let l = coords.pop().unwrap();
 				coords.push(l + 1);
 				continue 'outer;

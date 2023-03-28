@@ -1,16 +1,28 @@
 use std::collections::VecDeque;
 
-use crate::tokens::LineLocation;
-use crate::tokens::Operator;
 use crate::parser::PreToken;
-
+use crate::parser::LineLocation;
 use crate::parser::ParserError;
+
+use crate::tokens::Operator;
 
 // Inserts implicit operators
 fn lookback(
 	g: &mut VecDeque<PreToken>
 ) -> Result<(), (LineLocation, ParserError)> {
-	if g.len() >= 2 {
+	if g.len() == 1 {
+		let a: PreToken = g.pop_back().unwrap();
+		match &a {
+			PreToken::PreOperator(l,o)
+			=> {
+				if o == "-" {
+					g.push_back(PreToken::PreOperator(*l, String::from("neg")));
+				} else { g.push_back(a); }
+			},
+			_ => { g.push_back(a); }
+		};
+
+	} else {
 		let b: PreToken = g.pop_back().unwrap();
 		let a: PreToken = g.pop_back().unwrap();
 
@@ -42,10 +54,58 @@ fn lookback(
 				));
 			}
 
-			// The following are fine
-			(PreToken::PreOperator(_,_), _) |
-			(_, PreToken::PreOperator(_,_))
-			=> { g.push_back(a); g.push_back(b); },
+			(PreToken::PreOperator(_, sa), PreToken::PreOperator(l,sb))
+			=> {
+				if sb == "-" && {
+					let o = Operator::from_string(sa);
+
+					o.is_some() &&
+					(
+						o.unwrap().is_binary() ||
+						!o.unwrap().is_left_associative()
+					)
+				} {
+					g.push_back(a);
+					g.push_back(PreToken::PreOperator(*l, String::from("neg")));
+				} else { g.push_back(a); g.push_back(b); }
+			}
+
+			// Insert implicit multiplications for unary operators
+			(PreToken::PreNumber(_,_), PreToken::PreOperator(l,s))
+			| (PreToken::PreGroup(_,_), PreToken::PreOperator(l,s))
+			| (PreToken::PreWord(_,_), PreToken::PreOperator(l,s))
+			=> {
+				let o = Operator::from_string(s);
+				g.push_back(a);
+				if o.is_some() {
+					let o = o.unwrap();
+					if (!o.is_binary()) && (!o.is_left_associative()) {
+						g.push_back(PreToken::PreOperator(
+							LineLocation{pos: l.pos-1, len: 0},
+							String::from("i*")
+						));
+					}
+				}
+				g.push_back(b);
+			},
+
+			(PreToken::PreOperator(_,s), PreToken::PreNumber(l,_))
+			| (PreToken::PreOperator(_,s), PreToken::PreGroup(l,_))
+			| (PreToken::PreOperator(_,s), PreToken::PreWord(l,_))
+			=> {
+				let o = Operator::from_string(s);
+				g.push_back(a);
+				if o.is_some() {
+					let o = o.unwrap();
+					if (!o.is_binary()) && o.is_left_associative() {
+						g.push_back(PreToken::PreOperator(
+							LineLocation{pos: l.pos-1, len: 0},
+							String::from("i*")
+						));
+					}
+				}
+				g.push_back(b);
+			},
 
 			// This shouldn't ever happen.
 			(PreToken::PreGroupStart(_), _)
@@ -101,16 +161,6 @@ pub(in crate::parser) fn groupify(
 				v_now.push_back(PreToken::PreGroup(l, v));
 				lookback(v_now)?;
 			},
-
-			PreToken::PreWord(ref l, ref s) => {
-				let o = Operator::from_string(&s[..]);
-				if o.is_some() {
-					v_now.push_back(PreToken::PreOperator(*l, s.clone()));
-				} else {
-					v_now.push_back(t);
-				}
-				lookback(v_now)?;
-			}
 
 			_ => {
 				v_now.push_back(t);

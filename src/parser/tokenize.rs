@@ -1,28 +1,44 @@
 use std::collections::VecDeque;
 
 use crate::parser::PreToken;
-use crate::tokens::LineLocation;
+use crate::parser::LineLocation;
 
-/// Updates the length of a Token's LineLocation.
-/// Run whenever a token is finished.
+use crate::tokens::Operator;
+
+// Called whenever a token is finished.
 #[inline(always)]
-fn update_line_location(mut t: PreToken, stop_i: usize) -> PreToken {
+fn push_token(g: &mut VecDeque<PreToken>, t: Option<PreToken>, stop_i: usize) {
+	
+	if t.is_none() { return }
+	let mut t = t.unwrap();
+
 	match t {
-		PreToken::PreGroupStart(ref mut l) |
-		PreToken::PreGroupEnd(ref mut l) |
-		PreToken::PreOperator(ref mut l, _) |
-		PreToken::PreNumber(ref mut l, _) |
-		PreToken::PreWord(ref mut l, _)
+		PreToken::PreGroupStart(ref mut l) 
+		| PreToken::PreGroupEnd(ref mut l)
+		| PreToken::PreOperator(ref mut l, _)
+		| PreToken::PreNumber(ref mut l, _)
+		| PreToken::PreWord(ref mut l, _)
 		=> {
 			*l = LineLocation{
 				pos: l.pos,
 				len: stop_i - l.pos,
 			};
 		},
-		_ => panic!()
+
+		PreToken::PreGroup(_,_)
+		| PreToken::Container(_)
+		=> panic!()
 	};
 
-	return t;
+
+	if let PreToken::PreWord(l, s) = &t {
+		let o = Operator::from_string(s);
+		if o.is_some() {
+			t = PreToken::PreOperator(*l, s.clone());
+		}
+	}
+
+	g.push_back(t);
 }
 
 /// Turns a string into Tokens. First stage of parsing.
@@ -36,27 +52,11 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 			// The minus sign can be both a Negative and an Operator.
 			// Needs special treatment.
 			'-' => {
-				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
-				match g.back().as_ref() {
-					// If previous token was any of the following,
-					// this is the "minus" operator
-					Some(PreToken::PreNumber(_, _)) |
-					Some(PreToken::PreGroupEnd(_)) |
-					Some(PreToken::PreWord(_, _)) => {
-						t = Some(PreToken::PreOperator(
-							LineLocation{pos: i, len: 1},
-							String::from("-")
-						));
-					},
-
-					// Otherwise, this is a negative sign.
-					_ => {
-						t = Some(PreToken::PreOperator(
-							LineLocation{pos: i, len: 1},
-							String::from("neg")
-						));
-					}
-				};
+				push_token(&mut g, t, i);
+				t = Some(PreToken::PreOperator(
+					LineLocation{pos: i, len: 1},
+					String::from("-")
+				));
 			},
 
 			// Number
@@ -72,7 +72,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 					// If we're not building a number, finalize
 					// previous token and start one.
 					_ => {
-						if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
+						push_token(&mut g, t, i);
 						t = Some(PreToken::PreNumber(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
@@ -85,7 +85,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 				match &mut t {
 					Some(PreToken::PreOperator(_, val)) => { val.push(c); },
 					_ => {
-						if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
+						push_token(&mut g, t, i);
 						t = Some(PreToken::PreOperator(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
@@ -93,20 +93,18 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 			
 			// Group
 			'(' => {
-				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
+				push_token(&mut g, t, i);
 				t = Some(PreToken::PreGroupStart(LineLocation{pos: i, len: 0}));
 			},
 			')' => {
-				if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
+				push_token(&mut g, t, i);
 				t = Some(PreToken::PreGroupEnd(LineLocation{pos: i, len: 0}));
 			},
 
 			// Space. Basic seperator.
 			' ' => {
-				if t.is_some() {
-					g.push_back(update_line_location(t.unwrap(), i));
-					t = None;
-				}
+				push_token(&mut g, t, i);
+				t = None;
 			}
 
 			// Word
@@ -115,7 +113,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 					Some(PreToken::PreWord(_, val)) => { val.push(c); },
 
 					_ => {
-						if t.is_some() { g.push_back(update_line_location(t.unwrap(), i)); }
+						push_token(&mut g, t, i);
 						t = Some(PreToken::PreWord(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
@@ -123,7 +121,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 		};
 	}
 
-	if t.is_some() { g.push_back(update_line_location(t.unwrap(), input.chars().count())); }
+	push_token(&mut g, t, input.chars().count());
 
 	return g;
 }
