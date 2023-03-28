@@ -148,7 +148,10 @@ pub fn parse(
 }
 
 
-pub fn substitute(s: &String) -> String{
+pub fn substitute(
+	s: &String, // The string to subsitute
+	c: usize    // Location of the cursor right now
+) -> String{
 	if s == "" { return s.clone() }
 	let mut new_s = s.clone();
 
@@ -156,6 +159,11 @@ pub fn substitute(s: &String) -> String{
 	let (subs, _) = find_subs(tokens);
 
 	for r in subs.iter() {
+		if { // Don't subsitute if our cursor is inside the substitution
+			c >= r.0.pos &&
+			c < r.0.pos+r.0.len
+		} { continue; }
+
 		new_s.replace_range(
 			r.0.pos..r.0.pos+r.0.len,
 			&r.1[..]

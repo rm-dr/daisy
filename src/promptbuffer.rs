@@ -1,4 +1,10 @@
 use std::collections::VecDeque;
+use std::io::Write;
+use termion::raw::RawTerminal;
+use termion::color;
+use termion::style;
+
+use crate::parser::substitute;
 
 
 #[derive(Debug)]
@@ -14,7 +20,8 @@ pub struct PromptBuffer {
 
 	buffer: String,
 	buffer_changed: bool,
-	//cursor: usize // Counts from back of buffer
+	cursor: usize,
+	last_print_len: usize
 }
 
 impl PromptBuffer {
@@ -24,11 +31,48 @@ impl PromptBuffer {
 			hist_maxlen: maxlen,
 			hist_cursor: 0,
 			buffer: String::with_capacity(64),
-			buffer_changed: false
-			//cursor: 0,
+			buffer_changed: false,
+			cursor: 0,
+			last_print_len: 0,
 		};
 	}
 
+
+	pub fn write_prompt(&mut self, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
+		// Draw prettyprinted expression
+		let s = substitute(&self.get_contents(), self.get_cursor_idx());
+		write!(
+			stdout, "\r{}{}==>{}{} {}",
+			style::Bold,
+			color::Fg(color::Blue),
+			color::Fg(color::Reset),
+			style::Reset,
+			s
+		)?;
+	
+		// If this string is shorter, clear the remaining old one.
+		if s.chars().count() < self.last_print_len {
+			write!(
+				stdout, "{}{}",
+				" ".repeat(self.last_print_len - s.chars().count()),
+				termion::cursor::Left((self.last_print_len - s.chars().count()) as u16)
+			)?;
+		}
+	
+		// Move cursor to correct position
+		if self.cursor != 0 {
+			write!(
+				stdout, "{}",
+				termion::cursor::Left(self.cursor as u16)
+			)?;
+			stdout.flush()?;
+		}
+		self.last_print_len = s.chars().count();
+
+		stdout.flush()?;
+
+		return Ok(());
+	}
 
 	// Prompt methods
 	pub fn get_contents(&self) -> &String {&self.buffer}
@@ -49,19 +93,60 @@ impl PromptBuffer {
 
 	// Buffer manipulation
 	pub fn add_char(&mut self, c: char) {
-		self.buffer.push(c);
 		self.buffer_changed = true;
-	}
-	pub fn backspace(&mut self) {
-		if self.buffer.len() != 0 {
-			self.buffer_changed = true;
-			self.buffer.pop();
+
+		if self.cursor == 0 {
+			self.buffer.push(c);
+		} else {
+			let l = self.buffer.chars().count();
+			let i = l - self.cursor;
+			self.buffer.insert(i, c);
 		}
 	}
-	pub fn delete(&mut self) {
-		self.backspace();
+	pub fn backspace(&mut self) {
+		if self.buffer.len() == 0 { return }
+		self.buffer_changed = true;
+		let l = self.buffer.chars().count();
+
+		if self.cursor == 0 {
+			self.buffer.pop();
+		} else if self.cursor != l {
+			let i = l - self.cursor;
+			self.buffer.remove(i-1);
+
+			if self.cursor >= l {
+				self.cursor = l-1;
+			}
+		}
 	}
 
+	pub fn delete(&mut self) {
+		if self.cursor != 0 {
+			self.cursor -= 1;
+			self.backspace();
+		}
+	}
+
+
+	// Cursor manipulation
+	pub fn cursor_left(&mut self) {
+		let l = self.buffer.chars().count();
+		if self.cursor < l {
+			self.cursor += 1;
+		}
+	}
+
+	pub fn cursor_right(&mut self) {
+		if self.cursor > 0 {
+			self.cursor -= 1;
+		}
+	}
+
+	pub fn get_cursor(&self) -> usize { self.cursor }
+	pub fn get_cursor_idx(&self) -> usize {
+		let l = self.buffer.chars().count();
+		if l == 0 {0} else {l - self.cursor}
+	}
 
 	// History manipulation
 	pub fn hist_up(&mut self) {

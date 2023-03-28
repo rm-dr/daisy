@@ -60,44 +60,6 @@ fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io
 }
 
 
-fn draw_line(
-	stdout: &mut RawTerminal<std::io::Stdout>,
-	s: &String,
-	clear_len: usize
-) -> Result<(), std::io::Error> {
-	write!(
-		stdout, "\r{}{}==>{}{} {}",
-		style::Bold,
-		color::Fg(color::Blue),
-		color::Fg(color::Reset),
-		style::Reset,
-		s
-	)?;
-
-	// If this string is shorter, clear the remaining old one.
-	if clear_len != 0 {
-		write!(
-			stdout, "{}{}",
-			" ".repeat(clear_len as usize),
-			termion::cursor::Left(clear_len as u16)
-		)?;
-	}
-
-	stdout.flush()?;
-
-	return Ok(());
-}
-
-/*
-
-#[cfg(debug_assertions)]
-RawTerminal::suspend_raw_mode(&stdout)?;
-#[cfg(debug_assertions)]
-write!(stdout, "\n")?;
-
-#[cfg(debug_assertions)]
-RawTerminal::activate_raw_mode(&stdout)?;
-*/
 
 fn main() -> Result<(), std::io::Error> {
 	let mut stdout = stdout().into_raw_mode().unwrap();
@@ -108,17 +70,10 @@ fn main() -> Result<(), std::io::Error> {
 	//write!(stdout, "{:?}", size).unwrap();
 
 	let mut pb: PromptBuffer = PromptBuffer::new(64);
-	let mut last_len: usize = 0;
 
 	'outer: loop {
 
-		let s = parser::substitute(&pb.get_contents());
-		draw_line(
-			&mut stdout, &s,
-			if s.chars().count() >= last_len
-			{ 0 } else {last_len - s.chars().count()}
-		)?;
-		last_len = s.chars().count();
+		pb.write_prompt(&mut stdout)?;
 
 		let stdin = stdin();
 		for c in stdin.keys() {
@@ -175,8 +130,8 @@ fn main() -> Result<(), std::io::Error> {
 				match c.unwrap() {
 					Key::Backspace => { pb.backspace(); },
 					Key::Delete => { pb.delete(); },
-					Key::Left => {},
-					Key::Right => {},
+					Key::Left => { pb.cursor_left(); },
+					Key::Right => { pb.cursor_right(); },
 					Key::Up => { pb.hist_up(); },
 					Key::Down => { pb.hist_down(); },
 					
@@ -186,13 +141,7 @@ fn main() -> Result<(), std::io::Error> {
 				};
 			};
 
-			let s = parser::substitute(&pb.get_contents());
-			draw_line(
-				&mut stdout, &s,
-				if s.chars().count() >= last_len
-				{ 0 } else {last_len - s.chars().count()}
-			)?;
-			last_len = s.chars().count();
+			pb.write_prompt(&mut stdout)?;
 		}
 	}
 
