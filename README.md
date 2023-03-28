@@ -16,8 +16,8 @@ This is nowhere near complete. Stay tuned.
  - Replace strings with &str?
  - Function application
  - Commands
- - Arrows to move cursor
- - Documentation
+ - Documentation (usage)
+ - Documentation (comments)
  - Branding
  - Improve tests
 
