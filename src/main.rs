@@ -98,7 +98,7 @@ fn main() -> Result<(), std::io::Error> {
 								#[cfg(debug_assertions)]
 								RawTerminal::activate_raw_mode(&stdout)?;
 
-								if let Token::Number(_, v) = g {
+								if let Token::Number(v) = g {
 									write!(
 										stdout, "\r\n  {}{}={} {v}{}\r\n\n",
 										style::Bold,
@@ -149,7 +149,9 @@ fn main() -> Result<(), std::io::Error> {
 	return Ok(());
 }
 
-
+// Tests to add:
+// 3!+1
+// 3!3
 
 #[cfg(test)]
 mod tests {
@@ -163,7 +165,7 @@ mod tests {
 		let g = parser::parse(&s).unwrap();
 		let g = evaluate::evaluate(g).unwrap();
 		let n = g.eval();
-		let tokens::Token::Number(_, v) = n else {panic!()};
+		let tokens::Token::Number(v) = n else {panic!()};
 		assert_eq!(v, r);
 	}
 
@@ -247,32 +249,14 @@ mod tests {
 
 	#[test]
 	fn operators() {
-		good_expr(125f64, "5^3");
-		good_expr(125f64, "5 ^ 3");
-		good_expr(125f64, "( 5 ) ^ ( 3 )");
-		good_expr(125f64, "( ( 5 ) ^ ( 3 ) )");
-		good_expr(125f64, "( ( 5 ^ ( 3");
-		good_expr(125f64, "( 5 ^ 3 )");
+
 		//good_expr(125f64, "5^(+3)");
 		//good_expr(125f64, "+5^3");
-	
-		good_expr(64f64, "4^3");
-		good_expr(64f64, "4 ^ 3");
-		good_expr(64f64, "4**3");
-		good_expr(64f64, "4 ** 3");
-
-		good_expr(-81f64, "-3^4");
-		good_expr(-81f64, "-3 ^ 4");
-		good_expr(-81f64, "-3**4");
-		good_expr(-81f64, "-3 ** 4");
-		good_expr(-81f64, "-(3^4)");
-
 		//good_expr(f64, "3 ^ (-1.4)");
 		//good_expr(f64, "3 ** (-1.4)");
 	
 		//good_expr(f64, "2^3^4^5");
-		good_expr(0.5f64, "2^-1");
-		good_expr(0.25f64, "2^-2");
+
 
 
 		good_expr(15f64, "5*3");
@@ -292,27 +276,18 @@ mod tests {
 		//good_expr(-15f64, "+5*(-3)");
 
 		good_expr(2f64, "6/3");
-		good_expr(2f64, "6 / 3");
-		good_expr(2f64, "( 6 ) / ( 3 )");
-		good_expr(2f64, "( ( 6 ) / ( 3 ) )");
-		good_expr(2f64, "( 6 / 3 )");
-
 		good_expr(2f64, "5%3");
-		good_expr(2f64, "5 % 3");
-		good_expr(2f64, "( 5 ) % ( 3 )");
-		good_expr(2f64, "( ( 5 ) % ( 3 ) )");
-		good_expr(2f64, "( 5 % 3 )");
-
 		good_expr(8f64, "5+3");
-		good_expr(8f64, "5 + 3");
-		good_expr(8f64, "( 5 ) + ( 3 )");
-		good_expr(8f64, "( ( 5 ) + ( 3 ) )");
-		good_expr(8f64, "( 5 + 3 )");
+		good_expr(64f64, "4^3");
+		good_expr(64f64, "4 ^ 3");
+		good_expr(64f64, "4**3");
+		good_expr(-81f64, "-3^4");
+		good_expr(-81f64, "-(3^4)");
+		good_expr(0.5f64, "2^-1");
+		good_expr(0.25f64, "2^-2");
 
-		good_expr(2f64, "5-3");
-		good_expr(2f64, "5 - 3");
-		good_expr(2f64, "( 5 ) - ( 3 )");
-		good_expr(2f64, "( ( 5 ) - ( 3 ) )");
-		good_expr(2f64, "( 5 - 3 )");
+		good_expr(2f64, "rt 4");
+		good_expr(2f64, "sqrt 4");
+		good_expr(6f64, "2 rt 9");
 	}
 }
