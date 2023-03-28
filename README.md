@@ -19,7 +19,6 @@ This is nowhere near complete. Stay tuned.
  - Arrows to move cursor
  - Documentation
  - Branding
- - ** as exponentiation
  - Improve tests
 
 

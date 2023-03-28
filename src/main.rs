@@ -309,13 +309,13 @@ mod tests {
 	
 		good_expr(64f64, "4^3");
 		good_expr(64f64, "4 ^ 3");
-		//good_expr(64f64, "4**3");
-		//good_expr(64f64, "4 ** 3");
+		good_expr(64f64, "4**3");
+		good_expr(64f64, "4 ** 3");
 
 		good_expr(-81f64, "-3^4");
 		good_expr(-81f64, "-3 ^ 4");
-		//good_expr(-81f64, "-3**4");
-		//good_expr(-81f64, "-3 ** 4");
+		good_expr(-81f64, "-3**4");
+		good_expr(-81f64, "-3 ** 4");
 		good_expr(-81f64, "-(3^4)");
 
 		//good_expr(f64, "3 ^ (-1.4)");

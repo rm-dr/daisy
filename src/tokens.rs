@@ -234,16 +234,16 @@ impl Operator {
 	#[inline(always)]
 	pub fn from_string(s: &str) -> Option<Operator> {
 		match s {
-			"+"     => {Some( Operator::Add )},
-			"-"     => {Some( Operator::Subtract )},
-			"neg"   => {Some( Operator::Negative )},
-			"*"|"×" => {Some( Operator::Multiply )},
-			"/"|"÷" => {Some( Operator::Divide )},
-			"i*"    => {Some( Operator::ImplicitMultiply )},
-			"%"     => {Some( Operator::Modulo )},
-			"mod"   => {Some( Operator::ModuloLong )},
-			"^"     => {Some( Operator::Power )},
-			"!"     => {Some( Operator::Factorial )},
+			"+"      => {Some( Operator::Add )},
+			"-"      => {Some( Operator::Subtract )},
+			"neg"    => {Some( Operator::Negative )},
+			"*"|"×"  => {Some( Operator::Multiply )},
+			"/"|"÷"  => {Some( Operator::Divide )},
+			"i*"     => {Some( Operator::ImplicitMultiply )},
+			"%"      => {Some( Operator::Modulo )},
+			"mod"    => {Some( Operator::ModuloLong )},
+			"^"|"**" => {Some( Operator::Power )},
+			"!"      => {Some( Operator::Factorial )},
 			_ => None
 		}
 	}
