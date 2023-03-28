@@ -28,6 +28,8 @@ pub(in crate::parser) fn find_subs(
 				let target = match &s[..] {
 					"*" => {Some("×")},
 					"/" => {Some("÷")},
+					"sqrt"    => {Some("√")},
+					"rt"      => {Some("√")},
 					_ => {None}
 				};
 
@@ -64,11 +66,6 @@ pub(in crate::parser) fn find_subs(
 					"chi"     => {Some("χ")},
 					"psi"     => {Some("ψ")},
 					"omega"   => {Some("ω")},
-
-					// Operators
-					"sqrt"    => {Some("√")},
-					"rt"      => {Some("√")},
-
 					_ => {None}
 				};
 
