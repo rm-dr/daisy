@@ -16,49 +16,22 @@ pub struct LineLocation {
 /// will never show up in a fully-parsed expression tree.
 #[derive(Debug)]
 pub enum Token {
-
-	/// Used only while tokenizing.
-	/// Will be replaced with a Number once we finish.
-	PreNumber(LineLocation, String),
-
-	/// Used only while tokenizing.
-	/// Will be replaced with one of the Tokens below once we finish.
-	PreWord(LineLocation, String),
-
-	/// Used only until operators are parsed.
-	/// Each of these will become one of the operators below.
-	PreOperator(LineLocation, Operator),
-
-	PreGroupStart(LineLocation),
-	PreGroupEnd(LineLocation),
-	/// Used only until operators are parsed.
-	/// PreGroups aren't needed once we have a tree.
-	PreGroup(LineLocation, VecDeque<Token>),
-
 	Number(LineLocation, f64),
 	Constant(LineLocation, f64, String),
 
-	Multiply(VecDeque<Token>),
-	Divide(VecDeque<Token>),
-	Add(VecDeque<Token>),
-	Factorial(VecDeque<Token>),
-	Negative(VecDeque<Token>),
-	Power(VecDeque<Token>),
-	Modulo(VecDeque<Token>),
+	Operator(
+		LineLocation,
+		Operator,
+		VecDeque<Token>
+	),
 }
 
 impl Token {
 	#[inline(always)]
 	pub fn get_args(&mut self) -> Option<&mut VecDeque<Token>> {
 		match self {
-			Token::Multiply(ref mut v)
-			| Token::Divide(ref mut v)
-			| Token::Add(ref mut v)
-			| Token::Factorial(ref mut v)
-			| Token::Negative(ref mut v)
-			| Token::Power(ref mut v)
-			| Token::Modulo(ref mut v)
-			=> Some(v),
+			Token::Operator(_, _, ref mut a)
+			=> Some(a),
 			_ => None
 		}
 	}
@@ -66,38 +39,10 @@ impl Token {
 	#[inline(always)]
 	pub fn get_line_location(&self) -> &LineLocation {
 		match self {
-			Token::PreNumber(l, _) |
-			Token::PreWord(l, _) |
-			Token::PreOperator(l, _) |
-			Token::PreGroupStart(l) |
-			Token::PreGroupEnd(l) |
-			Token::PreGroup(l, _)
+			Token::Number(l, _)
+			| Token::Operator(l, _, _)
+			| Token::Constant(l, _, _)
 			=> l,
-
-			// These have a line location, but we shouldn't ever need to get it.
-			Token::Number(_l, _) |
-			Token::Constant(_l, _, _)
-			=> panic!(),
-			_ => panic!()
-		}
-	}
-
-	#[inline(always)]
-	pub fn get_mut_line_location(&mut self) -> &mut LineLocation {
-		match self {
-			Token::PreNumber(l, _) |
-			Token::PreWord(l, _) |
-			Token::PreOperator(l, _) |
-			Token::PreGroupStart(l) |
-			Token::PreGroupEnd(l) |
-			Token::PreGroup(l, _)
-			=> l,
-
-			// These have a line location, but we shouldn't ever need to get it.
-			Token::Number(_l, _) |
-			Token::Constant(_l, _, _)
-			=> panic!(),
-			_ => panic!()
 		}
 	}
 
@@ -115,8 +60,15 @@ impl Token {
 	}
 
 	pub fn eval(&self) -> Token {
-		match self {
-			Token::Negative(ref v) => {
+		let (o, v) = match self {
+			Token::Operator(_, o, v) => (o, v),
+			Token::Number(l, v) => { return Token::Number(*l, *v); },
+			_ => panic!()
+		};
+
+
+		match o {
+			Operator::Negative => {
 				if v.len() != 1 {panic!()};
 				let v = v[0].as_number();
 
@@ -125,7 +77,7 @@ impl Token {
 				} else { panic!(); }
 			},
 
-			Token::Add(ref v) => {
+			Operator::Add => {
 				let mut sum: f64 = 0f64;
 				let mut new_pos: usize = 0;
 				let mut new_len: usize = 0;
@@ -146,7 +98,8 @@ impl Token {
 				)
 			},
 
-			Token::Multiply(ref v) => {
+			Operator::ImplicitMultiply |
+			Operator::Multiply => {
 				let mut prod: f64 = 1f64;
 				let mut new_pos: usize = 0;
 				let mut new_len: usize = 0;
@@ -167,7 +120,7 @@ impl Token {
 				)
 			},
 
-			Token::Divide(ref v) => {
+			Operator::Divide => {
 				if v.len() != 2 {panic!()};
 				let a = v[0].as_number();
 				let b = v[1].as_number();
@@ -182,7 +135,8 @@ impl Token {
 				} else { panic!(); }
 			},
 
-			Token::Modulo(ref v) => {
+			Operator::ModuloLong |
+			Operator::Modulo => {
 				if v.len() != 2 {panic!()};
 				let a = v[0].as_number();
 				let b = v[1].as_number();
@@ -197,7 +151,7 @@ impl Token {
 				} else { panic!(); }
 			},
 
-			Token::Power(ref v) => {
+			Operator::Power => {
 				if v.len() != 2 {panic!()};
 				let a = v[0].as_number();
 				let b = v[1].as_number();
@@ -212,15 +166,13 @@ impl Token {
 				} else { panic!(); }
 			},
 
-			Token::Factorial(ref _v) => { todo!() },
-			_ => self.as_number()
+			Operator::Factorial => { todo!() },
+			Operator::Subtract => { panic!() }
 		}
 	}
 }
 
-
 /// Operator types, in order of increasing priority.
-/// The Null operator MUST be equal to zero.
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 pub enum Operator {
@@ -241,6 +193,62 @@ pub enum Operator {
 
 impl Operator {
 	#[inline(always)]
+	pub fn into_token(self, l: LineLocation, mut args: VecDeque<Token>) -> Token {
+		match self {
+			Operator::Subtract => {
+				if args.len() != 2 { panic!() }
+				let a = args.pop_front().unwrap();
+				let b = args.pop_front().unwrap();
+				let b = Token::Operator(l, Operator::Negative, VecDeque::from(vec!(b)));
+
+				Token::Operator(
+					l, Operator::Add,
+					VecDeque::from(vec!(a,b))
+				)
+			},
+
+			Operator::Factorial
+			| Operator::Negative
+			=> {
+				if args.len() != 1 { panic!() }
+				Token::Operator(l, self, args)
+			},
+
+			Operator::Modulo
+			| Operator::ModuloLong
+			| Operator::Divide
+			| Operator::Power
+			=> {
+				if args.len() != 2 { panic!() }
+				Token::Operator(l, self, args)
+			},
+			
+			Operator::Add
+			| Operator::Multiply
+			| Operator::ImplicitMultiply
+			=> Token::Operator(l, self, args)
+		}
+	}
+
+
+	#[inline(always)]
+	pub fn from_string(s: &str) -> Option<Operator> {
+		match s {
+			"+"     => {Some( Operator::Add )},
+			"-"     => {Some( Operator::Subtract )},
+			"neg"   => {Some( Operator::Negative )},
+			"*"|"×" => {Some( Operator::Multiply )},
+			"/"|"÷" => {Some( Operator::Divide )},
+			"i*"    => {Some( Operator::ImplicitMultiply )},
+			"%"     => {Some( Operator::Modulo )},
+			"mod"   => {Some( Operator::ModuloLong )},
+			"^"     => {Some( Operator::Power )},
+			"!"     => {Some( Operator::Factorial )},
+			_ => None
+		}
+	}
+
+	#[inline(always)]
 	pub fn is_binary(&self) -> bool {
 		match self {
 			Operator::Negative
@@ -256,55 +264,6 @@ impl Operator {
 			Operator::Negative
 			=> false,
 			_ => true
-		}
-	}
-
-	#[inline(always)]
-	pub fn into_token(&self, mut args: VecDeque<Token>) -> Token {
-		match self {
-			Operator::Add => Token::Add(args),
-
-			Operator::Multiply
-			| Operator::ImplicitMultiply
-			=> Token::Multiply(args),
-			
-			Operator::Subtract => {
-				if args.len() != 2 { panic!() }
-				let a = args.pop_front().unwrap();
-				let b = args.pop_front().unwrap();
-	
-				Token::Add(
-				VecDeque::from(vec!(
-						a,
-						Token::Negative(VecDeque::from(vec!(b)))
-				)))
-			},
-
-			Operator::Divide => {
-				if args.len() != 2 { panic!() }
-				Token::Divide(args)
-			},
-	
-			Operator::ModuloLong |
-			Operator::Modulo => {
-				if args.len() != 2 { panic!() }
-				Token::Modulo(args)
-			},
-	
-			Operator::Power => {
-				if args.len() != 2 { panic!() }
-				Token::Power(args)
-			},
-
-			Operator::Negative => {
-				if args.len() != 1 { panic!() }
-				Token::Negative(args)
-			},
-
-			Operator::Factorial => {
-				if args.len() != 1 { panic!() }
-				Token::Factorial(args)
-			}
 		}
 	}
 }

@@ -1,46 +1,40 @@
 use std::collections::VecDeque;
 
-use crate::tokens::Token;
-use crate::tokens::Operator;
 use crate::tokens::LineLocation;
+use crate::tokens::Operator;
+use crate::parser::PreToken;
 
 use crate::parser::ParserError;
 
-/// Looks backwards at the elements of g.
-/// - Inserts ImplicitMultiply
-/// - Removes multiple PreNegatives
-/// - Applies PreNegative to Numbers
-/// - Parses factorials
-/// - Checks syntax
-#[inline(always)]
+// Inserts implicit operators
 fn lookback(
-	g: &mut VecDeque<Token>
+	g: &mut VecDeque<PreToken>
 ) -> Result<(), (LineLocation, ParserError)> {
 	if g.len() >= 2 {
-		let b: Token = g.pop_back().unwrap();
-		let a: Token = g.pop_back().unwrap();
+		let b: PreToken = g.pop_back().unwrap();
+		let a: PreToken = g.pop_back().unwrap();
 
 		match (&a, &b) {
 			// Insert ImplicitMultiply
-			(Token::PreGroup(_,_), Token::PreGroup(l ,_)) |
-			(Token::PreGroup(_,_), Token::Number(l,_)) |
-			(Token::Number(_,_), Token::PreGroup(l,_)) |
-			(Token::Constant(_,_,_), Token::Number(l,_)) |
-			(Token::Number(_,_), Token::Constant(l,_,_)) |
-			(Token::Constant(_,_,_), Token::PreGroup(l,_)) |
-			(Token::PreGroup(_,_), Token::Constant(l,_,_)) |
-			(Token::Constant(_,_,_), Token::Constant(l,_,_))
+			(PreToken::PreGroup(_,_), PreToken::PreGroup(l ,_))
+			| (PreToken::PreGroup(_,_), PreToken::PreNumber(l,_))
+			| (PreToken::PreNumber(_,_), PreToken::PreGroup(l,_))
+			| (PreToken::PreGroup(_,_), PreToken::PreWord(l,_))
+			| (PreToken::PreWord(_,_), PreToken::PreGroup(l,_))
+			| (PreToken::PreNumber(_,_), PreToken::PreWord(l,_))
+			| (PreToken::PreWord(_,_), PreToken::PreNumber(l,_))
+			| (PreToken::PreWord(_,_), PreToken::PreWord(l,_))
 			=> {
 				g.push_back(a);
-				g.push_back(Token::PreOperator(
+				g.push_back(PreToken::PreOperator(
 					LineLocation{pos: l.pos-1, len: 0},
-					Operator::ImplicitMultiply
+					String::from("i*")
 				));
 				g.push_back(b);
 			},
 
 			// The following are syntax errors
-			(Token::Number(la, _), Token::Number(lb,_))
+			(PreToken::PreNumber(la,_), PreToken::PreNumber(lb,_))
 			=> {
 				return Err((
 					LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
@@ -49,22 +43,32 @@ fn lookback(
 			}
 
 			// The following are fine
-			(Token::PreOperator(_,_), _) |
-			(_, Token::PreOperator(_,_))
+			(PreToken::PreOperator(_,_), _) |
+			(_, PreToken::PreOperator(_,_))
 			=> { g.push_back(a); g.push_back(b); },
 
-			// If we get this far, we found a Token
-			// that shouldn't be here.
-			_ => panic!()
+			// This shouldn't ever happen.
+			(PreToken::PreGroupStart(_), _)
+			| (_, PreToken::PreGroupStart(_))
+			| (PreToken::PreGroupEnd(_), _)
+			| (_, PreToken::PreGroupEnd(_))
+			| (PreToken::Container(_), _)
+			| (_, PreToken::Container(_))
+			=> panic!()
 		}
 	};
 	return Ok(());
 }
 
 
-pub fn p_groupify(mut g: VecDeque<Token>) -> Result<Token, (LineLocation, ParserError)> {
+pub(in crate::parser) fn groupify(
+	mut g: VecDeque<PreToken>
+) -> Result<
+	PreToken,
+	(LineLocation, ParserError)
+> {
 	// Vector of grouping levels
-	let mut levels: Vec<(LineLocation, VecDeque<Token>)> = Vec::with_capacity(8);
+	let mut levels: Vec<(LineLocation, VecDeque<PreToken>)> = Vec::with_capacity(8);
 	levels.push((LineLocation{pos: 0, len: 0}, VecDeque::with_capacity(8)));
 
 	// Makes sure parenthesis are matched
@@ -75,65 +79,45 @@ pub fn p_groupify(mut g: VecDeque<Token>) -> Result<Token, (LineLocation, Parser
 		let (l_now, v_now) = levels.last_mut().unwrap();
 
 		match t {
-			Token::PreOperator(_, _) => {
-				v_now.push_back(t);
-				lookback(v_now)?;
-			},
-
-			Token::PreNumber(l, s) => {
-				let n = match s.parse() {
-					Ok(n) => n,
-					Err(_) => return Err((l, ParserError::BadNumber))
-				};
-				v_now.push_back(Token::Number(l, n));
-				lookback(v_now)?;
-			},
-
-			Token::PreWord(l, s) => {
-				// This method must support both plain text and
-				// unicode versions of each word.
-				v_now.push_back(match &s[..] {
-					"mod" => { Token::PreOperator(l, Operator::ModuloLong) },
-
-					// Mathematical constants
-					"π"|"pi" => { Token::Constant(l, 3.141592653, String::from("pi")) },
-					"e" => { Token::Constant(l, 2.71828, String::from("e")) },
-					"phi"|"φ" => { Token::Constant(l, 1.61803, String::from("phi")) },
-					_ => { return Err((l, ParserError::Undefined(s))); }
-				});
-				lookback(v_now)?;
-			},
-
-			Token::PreGroupStart(l) => {
+			PreToken::PreGroupStart(l) => {
 				levels.push((l, VecDeque::with_capacity(8)));
 				i_level += 1;
 			},
 
-			Token::PreGroupEnd(l) => {
+			PreToken::PreGroupEnd(l) => {
 				let l = LineLocation {
 					pos: l_now.pos,
 					len: l.len + l.pos - l_now.pos
 				};
 
-				if i_level == 0 {
-					return Err((l, ParserError::ExtraCloseParen))
-				}
-				i_level -= 1;
+				if i_level == 0 { return Err((l, ParserError::ExtraCloseParen)) }
+				if v_now.len() == 0 { return Err((l, ParserError::EmptyGroup)) }
 
-				// Catch empty groups
-				if v_now.len() == 0 {
-					return Err((l, ParserError::EmptyGroup))
-				}
+				i_level -= 1;
 
 				let (_, v) = levels.pop().unwrap();
 				let (_, v_now) = levels.last_mut().unwrap();
 
-				v_now.push_back(Token::PreGroup(l, v));
+				v_now.push_back(PreToken::PreGroup(l, v));
 				lookback(v_now)?;
 			},
 
-			_ => panic!()
+			PreToken::PreWord(ref l, ref s) => {
+				let o = Operator::from_string(&s[..]);
+				if o.is_some() {
+					v_now.push_back(PreToken::PreOperator(*l, s.clone()));
+				} else {
+					v_now.push_back(t);
+				}
+				lookback(v_now)?;
+			}
+
+			_ => {
+				v_now.push_back(t);
+				lookback(v_now)?;
+			}
 		}
+
 	}
 
 	/*
@@ -149,16 +133,13 @@ pub fn p_groupify(mut g: VecDeque<Token>) -> Result<Token, (LineLocation, Parser
 		let (l, v) = levels.pop().unwrap();
 		let (_, v_now) = levels.last_mut().unwrap();
 
-		// Catch empty groups
-		if v.len() == 0 {
-			return Err((l, ParserError::EmptyGroup))
-		}
+		if v.len() == 0 { return Err((l, ParserError::EmptyGroup)) }
 
-		v_now.push_back(Token::PreGroup(l, v));
+		v_now.push_back(PreToken::PreGroup(l, v));
 		lookback(v_now)?;
 	}
 
 
 	let (_, v) = levels.pop().unwrap();
-	return Ok(Token::PreGroup(LineLocation{pos:0, len:0}, v));
+	return Ok(PreToken::PreGroup(LineLocation{pos:0, len:0}, v));
 }

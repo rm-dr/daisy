@@ -1,22 +1,21 @@
 use std::collections::VecDeque;
 
-use crate::tokens::Token;
-use crate::tokens::Operator;
+use crate::parser::PreToken;
 use crate::tokens::LineLocation;
 
 
-pub fn p_find_subs(
-	mut g: VecDeque<Token>,
+pub(in crate::parser) fn find_subs(
+	mut g: VecDeque<PreToken>,
 ) -> (
 	Vec<(LineLocation, String)>,
-	VecDeque<Token>
+	VecDeque<PreToken>
 ) {
 
 	// Array of replacements
 	let mut r: Vec<(LineLocation, String)> = Vec::with_capacity(8);
 
 	// New token array, with updated locations
-	let mut n: VecDeque<Token> = VecDeque::with_capacity(g.len());
+	let mut n: VecDeque<PreToken> = VecDeque::with_capacity(g.len());
 
 	let mut offset: usize = 0;
 
@@ -25,15 +24,20 @@ pub fn p_find_subs(
 		let mut t = g.pop_back().unwrap();
 
 		let target: Option<&str> = match &mut t {
-			Token::PreOperator(_, o) => {
-				match o {
-					Operator::Multiply => {Some("×")},
-					Operator::Divide => {Some("÷")},
+			PreToken::PreOperator(_, s) => {
+				let target = match &s[..] {
+					"*" => {Some("×")},
+					"/" => {Some("÷")},
 					_ => {None}
-				}
+				};
+
+				// Update token contents too.
+				// This makes sure that errors also contain the updated text.
+				if target.is_some() { *s = String::from(target.unwrap()); }
+				target
 			},
 
-			Token::PreWord(_, s) => {
+			PreToken::PreWord(_, s) => {
 				let target = match &s[..] {
 					// Greek letters
 					"alpha"   => {Some("α")},
@@ -65,12 +69,7 @@ pub fn p_find_subs(
 					_ => {None}
 				};
 
-				// Update preword contents too.
-				// This makes sure future prints of this token
-				// contain substituted text too.
-				if target.is_some() {*
-					s = String::from(target.unwrap());
-				}
+				if target.is_some() { *s = String::from(target.unwrap()); }
 				target
 			},
 

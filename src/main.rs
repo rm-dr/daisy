@@ -140,12 +140,10 @@ fn main() -> Result<(), std::io::Error> {
 								#[cfg(debug_assertions)]
 								RawTerminal::suspend_raw_mode(&stdout)?;
 								let g = evaluate::evaluate(g).unwrap();
-								let n = g.eval();
 								#[cfg(debug_assertions)]
 								RawTerminal::activate_raw_mode(&stdout)?;
 
-
-								if let Token::Number(_, v) = n {
+								if let Token::Number(_, v) = g {
 									write!(
 										stdout, "\r\n  {}{}={} {v}{}\r\n\n",
 										style::Bold,
@@ -201,9 +199,6 @@ fn main() -> Result<(), std::io::Error> {
 	write!(stdout, "\r\n")?;
 	return Ok(());
 }
-
-
-
 
 
 
@@ -294,6 +289,14 @@ mod tests {
 	}
 
 	#[test]
+	fn implicit_multiply() {
+		good_expr(15f64, "5(3)");
+		good_expr(15f64, "(5)3");
+		good_expr(15f64, "(5)(3)");
+		bad_expr("5 2");
+	}
+
+	#[test]
 	fn operators() {
 		good_expr(125f64, "5^3");
 		good_expr(125f64, "5 ^ 3");
@@ -329,8 +332,6 @@ mod tests {
 		good_expr(15f64, "( 5 ) ( 3 )");
 		good_expr(15f64, "( ( 5 ) * ( 3 ) )");
 		good_expr(15f64, "( 5 * 3 )");
-		good_expr(15f64, "5(3)");
-		good_expr(15f64, "(5)3");
 		//good_expr(15f64, "5(+3)");
 		//good_expr(15f64, "+5*3");
 	

@@ -27,13 +27,13 @@ pub fn evaluate(
 
 			if inner.is_none() || *t >= inner.as_ref().unwrap().len() {
 				coords.pop();
-				if coords.len() == 0 { break 'outer; }
 
 
 				let p = get_at_coords(&mut g, &coords);
 				let e = p.eval();
 				*p = e;
 
+				if coords.len() == 0 { break 'outer; }
 				let l = coords.pop().unwrap();
 				coords.push(l + 1);
 				continue 'outer;
@@ -43,13 +43,7 @@ pub fn evaluate(
 		}
 
 		match h {
-			Token::Multiply(_) |
-			Token::Divide(_) |
-			Token::Add(_) |
-			Token::Factorial(_) |
-			Token::Negative(_) |
-			Token::Power(_) |
-			Token::Modulo(_)
+			Token::Operator(_,_,_)
 			=> {
 				coords.push(0);
 				continue 'outer;
@@ -61,17 +55,8 @@ pub fn evaluate(
 				coords.push(l + 1);
 				continue 'outer;
 			}
-
-			Token::PreNumber(_,_) |
-			Token::PreWord(_,_) |
-			Token::PreOperator(_,_) |
-			Token::PreGroup(_,_) |
-			Token::PreGroupStart(_) |
-			Token::PreGroupEnd(_)
-			=> panic!()
 		};
 	}
-
 
 	return Ok(g);
 }
