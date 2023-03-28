@@ -39,8 +39,11 @@ impl PromptBuffer {
 
 
 	pub fn write_prompt(&mut self, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
+		let i = self.buffer.chars().count();
+		let i = if i == 0 {0} else {i - self.cursor};
+
 		// Draw prettyprinted expression
-		let s = substitute(&self.get_contents(), self.get_cursor_idx());
+		let s = substitute(&self.get_contents(), i);
 		write!(
 			stdout, "\r{}{}==>{}{} {}",
 			style::Bold,
@@ -140,12 +143,6 @@ impl PromptBuffer {
 		if self.cursor > 0 {
 			self.cursor -= 1;
 		}
-	}
-
-	pub fn get_cursor(&self) -> usize { self.cursor }
-	pub fn get_cursor_idx(&self) -> usize {
-		let l = self.buffer.chars().count();
-		if l == 0 {0} else {l - self.cursor}
 	}
 
 	// History manipulation

@@ -10,7 +10,6 @@ This is nowhere near complete. Stay tuned.
 
 
 ## Before For 1.0 release
- - Cleanup parser
  - Non-recursive treeify
 
  - Replace strings with &str?

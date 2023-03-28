@@ -14,8 +14,6 @@ use crate::parser::find_subs::find_subs;
 
 use crate::tokens::LineLocation;
 use crate::tokens::Token;
-use crate::tokens::Operator;
-
 
 #[derive(Debug)]
 enum PreToken {
