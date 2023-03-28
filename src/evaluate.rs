@@ -30,7 +30,7 @@ pub fn evaluate(
 
 
 				let p = get_at_coords(&mut g, &coords);
-				let e = p.eval();
+				let e = p.eval()?;
 				*p = e;
 
 				if coords.len() == 0 { break 'outer; }

@@ -25,12 +25,12 @@ impl Token {
 	}
 
 	#[inline(always)]
-	pub fn eval(&self) -> Token {
-		match self {
+	pub fn eval(&self) -> Result<Token, ()> {
+		Ok(match self {
 			Token::Number(v) => { Token::Number(*v) },
 			Token::Constant(v,_) => { Token::Number(*v) },
-			Token::Operator(o,v) => { o.apply(v) }
-		}
+			Token::Operator(o,v) => { o.apply(v)? }
+		})
 	}
 
 	// Temporary solution
@@ -162,7 +162,7 @@ impl Operator {
 }
 
 impl Operator{
-	pub fn apply(&self, args: &VecDeque<Token>) -> Token {
+	pub fn apply(&self, args: &VecDeque<Token>) -> Result<Token, ()> {
 		match self {
 			Operator::ImplicitMultiply |
 			Operator::Sqrt |
@@ -175,7 +175,7 @@ impl Operator{
 				let args = args[0].as_number();
 
 				if let Token::Number(v) = args {
-					Token::Number(-v)
+					return Ok(Token::Number(-v));
 				} else { panic!(); }
 			},
 
@@ -184,7 +184,8 @@ impl Operator{
 				let args = args[0].as_number();
 
 				if let Token::Number(v) = args {
-					Token::Number(1f64/v)
+					if v == 0f64 { return Err(()); }
+					return Ok(Token::Number(1f64/v));
 				} else { panic!(); }
 			},
 
@@ -198,7 +199,7 @@ impl Operator{
 						panic!();
 					}
 				}
-				Token::Number(sum)
+				return Ok(Token::Number(sum));
 			},
 			
 			Operator::Multiply => {
@@ -211,7 +212,7 @@ impl Operator{
 						panic!();
 					}
 				}
-				Token::Number(prod)
+				return Ok(Token::Number(prod));
 			},
 
 			Operator::Modulo => {
@@ -221,7 +222,11 @@ impl Operator{
 
 				if let Token::Number(va) = a {
 					if let Token::Number(vb) = b {
-						Token::Number(va%vb)
+						if vb <= 1f64 { return Err(()); } 
+						if va.fract() != 0f64 { return Err(()); }
+						if vb.fract() != 0f64 { return Err(()); }
+
+						return Ok(Token::Number(va%vb));
 					} else { panic!(); }
 				} else { panic!(); }
 			},
@@ -233,13 +238,32 @@ impl Operator{
 
 				if let Token::Number(va) = a {
 					if let Token::Number(vb) = b {
-						Token::Number(va.powf(vb))
+						let p = va.powf(vb);
+						if p.is_nan() {return Err(());}
+						return Ok(Token::Number(p));
 					} else { panic!(); }
 				} else { panic!(); }
 			},
 
-			Operator::Factorial => { todo!() },
-		}
+			Operator::Factorial => {
+				if args.len() != 1 {panic!()};
+				let args = args[0].as_number();
+
+				if let Token::Number(v) = args {
+					if v.fract() != 0f64 { return Err(()); }
+					if v >= 100f64 { return Err(()); }
+
+					let mut prod = 1f64;
+					let mut u = v;
+					while u > 0f64 {
+						prod *= u;
+						u -= 1f64;
+					}
+
+					return Ok(Token::Number(prod));
+				} else { panic!(); }
+			},
+		};
 	}
 
 }

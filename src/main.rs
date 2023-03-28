@@ -94,19 +94,32 @@ fn main() -> Result<(), std::io::Error> {
 							Ok(g) => {
 								#[cfg(debug_assertions)]
 								RawTerminal::suspend_raw_mode(&stdout)?;
-								let g = evaluate::evaluate(g).unwrap();
+								let g = evaluate::evaluate(g);
 								#[cfg(debug_assertions)]
 								RawTerminal::activate_raw_mode(&stdout)?;
 
-								if let Token::Number(v) = g {
-									write!(
-										stdout, "\r\n  {}{}={} {v}{}\r\n\n",
-										style::Bold,
-										color::Fg(color::Green),
-										style::Reset,
-										color::Fg(color::Reset)
-									)?;
-								} else { panic!(); }
+								match g {
+									Ok(Token::Number(v)) => {
+										write!(
+											stdout, "\r\n  {}{}={} {v}{}\r\n\n",
+											style::Bold,
+											color::Fg(color::Green),
+											style::Reset,
+											color::Fg(color::Reset)
+										)?;
+									},
+
+									Err(_) => {
+										write!(
+											stdout, "\r\n  {}{}Mathematical Error: {}Failed to evaluate expression.is{}\r\n\n",
+											style::Bold,
+											color::Fg(color::Red),
+											style::Reset,
+											color::Fg(color::Reset),
+										)?;
+									}
+									_ => panic!()
+								}
 							},
 
 							// Show parse error
@@ -164,7 +177,7 @@ mod tests {
 		let s = String::from(s);
 		let g = parser::parse(&s).unwrap();
 		let g = evaluate::evaluate(g).unwrap();
-		let n = g.eval();
+		let n = g.eval().unwrap();
 		let tokens::Token::Number(v) = n else {panic!()};
 		assert_eq!(v, r);
 	}
