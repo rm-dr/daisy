@@ -14,7 +14,6 @@ This is nowhere near complete. Stay tuned.
 
  - Replace strings with &str?
  - Function application
- - Errors on bad values (mod negative, rt -1)
  - Commands
  - Documentation (usage)
  - Documentation (comments)
@@ -41,6 +40,7 @@ This is nowhere near complete. Stay tuned.
  - Complex numbers
  - Config file
  - History to file
+ - Reference previous results
 
 ## Prompt
  - Live syntax/output
