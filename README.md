@@ -8,11 +8,9 @@ This is nowhere near complete. Stay tuned.
 
 # TODO
 
-
 ## Before For 1.0 release
  - Non-recursive treeify
 
- - Replace strings with &str?
  - Function application
  - Commands
  - Documentation (usage)
@@ -26,8 +24,7 @@ This is nowhere near complete. Stay tuned.
  - Compile to WASM => webapp
 
 ## Internals
- - Print any expression
- - Copy expression, print with result
+ - Copy expression
 
 ## Features
  - Variable definitions
@@ -35,6 +32,7 @@ This is nowhere near complete. Stay tuned.
  - Rational datatype
  - Units
  - Dice
+ - Mean, Median: arrays and multi-arg functions
  - Derivatives
  - MiniCAS
  - Complex numbers
