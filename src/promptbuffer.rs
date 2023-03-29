@@ -84,6 +84,7 @@ impl PromptBuffer {
 		let s = String::from(self.buffer.trim());
 		self.buffer.clear();
 		self.hist_cursor = 0;
+		self.cursor = 0;
 		self.buffer_changed = false;
 
 		if s != "" { self.hist.push_back(s.clone()); }
