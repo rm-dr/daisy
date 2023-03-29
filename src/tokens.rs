@@ -16,7 +16,22 @@ pub enum Token {
 }
 
 impl Token {
+
+	pub fn print(&self) -> String {
+		match self {
+			Token::Number(v) => v.to_string(),
+			Token::Constant(_,s) => s.clone(),
+			Token::Operator(o,a) => o.print(a)
+		}
+	}
+
 	#[inline(always)]
+	pub fn get_args(&self) -> Option<&VecDeque<Token>> {
+		match self {
+			Token::Operator(_, ref a) => Some(a),
+			_ => None
+		}
+	}
 
 	#[inline(always)]
 	pub fn get_args_mut(&mut self) -> Option<&mut VecDeque<Token>> {
@@ -57,18 +72,137 @@ pub enum Operator {
 	Add,
 	Divide,
 	Multiply,
-	ImplicitMultiply,
 	Modulo, // Mod invoked with %
 	Negative,
-	Power,
+
 	Sqrt,
+	ImplicitMultiply,
+
+	Power,
 	Factorial,
+
+	Function(String),
 
 	// Not accessible from prompt
 	Flip,
 }
 
 impl Operator {
+
+	#[inline(always)]
+	fn add_parens_to_arg(&self, arg: &Token) -> String {
+		let mut astr: String = arg.print();
+		if let Token::Operator(o,_) = arg {
+			if o.as_int() < self.as_int() {
+				astr = format!("({})", astr);
+			}
+		}
+		return astr;
+	}
+
+	pub fn print(&self, args: &VecDeque<Token>) -> String {
+		match self {
+			Operator::ImplicitMultiply |
+			Operator::Sqrt |
+			Operator::Divide |
+			Operator::Flip |
+			Operator::Subtract => { panic!() }
+
+			Operator::Negative => {
+				return format!("-{}", self.add_parens_to_arg(&args[0]));
+			},
+
+			Operator::ModuloLong => {
+				return format!(
+					"{} mod {}",
+					self.add_parens_to_arg(&args[0]),
+					self.add_parens_to_arg(&args[1])
+				);
+			},
+
+			Operator::Modulo => {
+				return format!(
+					"{} % {}",
+					self.add_parens_to_arg(&args[0]),
+					self.add_parens_to_arg(&args[1])
+				);
+			},
+
+			Operator::Power => {
+				return format!(
+					"{}^{}",
+					self.add_parens_to_arg(&args[0]),
+					self.add_parens_to_arg(&args[1])
+				);
+			},
+
+			Operator::Factorial => {
+				return format!("{}!", self.add_parens_to_arg(&args[0]));
+			},
+
+
+
+			Operator::Add => {
+				let a = &args[0];
+				let mut b = &args[1];
+				let mut sub = false;
+
+				if let Token::Operator(o,ar) = b {
+					if let Operator::Negative = o {
+						sub = true;
+						b = &ar[0];
+					}
+				}
+				let (b, sub) = (b, sub);
+
+				if sub {
+					return format!("{} - {}", self.add_parens_to_arg(a), self.add_parens_to_arg(b));
+				} else {
+					return format!("{} + {}", self.add_parens_to_arg(a), self.add_parens_to_arg(b));
+				}
+			},
+			
+			Operator::Multiply => {
+				let a = &args[0];
+				let mut b = &args[1];
+				let mut div = false;
+
+				if let Token::Operator(o,ar) = b {
+					if let Operator::Flip = o {
+						div = true;
+						b = &ar[0];
+					}
+				}
+				let (b, div) = (b, div);
+
+
+				let mut astr: String = a.print();
+				if let Token::Operator(o,_) = a {
+					if o.as_int() < self.as_int() {
+						astr = format!("({})", astr);
+					}
+				}
+
+				let mut bstr: String = b.print();
+				if let Token::Operator(o,_) = b {
+					if o.as_int() < self.as_int() {
+						bstr = format!("({})", astr);
+					}
+				}
+
+				if div {
+					return format!("{} ÷ {}", astr, bstr);
+				} else {
+					return format!("{} × {}", astr, bstr);
+				}
+			},
+
+			Operator::Function(s) => {
+				return format!("{}({})", s, args[0].print());
+			}
+		};
+	}
+
 	#[inline(always)]
 	pub fn from_string(s: &str) -> Option<Operator> {
 		match s {
@@ -83,6 +217,7 @@ impl Operator {
 			"^"|"**" => {Some( Operator::Power )},
 			"!"      => {Some( Operator::Factorial )},
 			"sqrt"|"rt"|"√" => {Some( Operator::Sqrt )},
+			"sin"    => {Some( Operator::Function(String::from("sin")) )}
 			_ => None
 		}
 	}
@@ -93,6 +228,7 @@ impl Operator {
 			Operator::Negative
 			| Operator::Factorial
 			| Operator::Sqrt
+			| Operator::Function(_)
 			=> false,
 			_ => true
 		}
@@ -103,6 +239,7 @@ impl Operator {
 		match self {
 			Operator::Negative
 			| Operator::Sqrt
+			| Operator::Function(_)
 			=> false,
 			_ => true
 		}
@@ -154,16 +291,15 @@ impl Operator {
 			Operator::ImplicitMultiply
 			=> { Token::Operator(Operator::Multiply, args) },
 
-			Operator::ModuloLong
-			=> { Token::Operator(Operator::Modulo, args) },
-
-			Operator::Factorial
+			Operator::Function(_)
+			| Operator::Factorial
 			| Operator::Negative
 			| Operator::Flip
 			| Operator::Add
 			| Operator::Multiply
 			| Operator::Modulo
 			| Operator::Power
+			| Operator::ModuloLong
 			=> { Token::Operator(self, args) },
 		}
 	}
@@ -174,7 +310,6 @@ impl Operator{
 		match self {
 			Operator::ImplicitMultiply |
 			Operator::Sqrt |
-			Operator::ModuloLong |
 			Operator::Divide |
 			Operator::Subtract => { panic!() }
 
@@ -222,8 +357,9 @@ impl Operator{
 				}
 				return Ok(Token::Number(prod));
 			},
-
-			Operator::Modulo => {
+		
+			Operator::ModuloLong
+			| Operator::Modulo => {
 				if args.len() != 2 {panic!()};
 				let a = args[0].as_number();
 				let b = args[1].as_number();
@@ -271,6 +407,19 @@ impl Operator{
 					return Ok(Token::Number(prod));
 				} else { panic!(); }
 			},
+
+			Operator::Function(s) => {
+				match &s[..] {
+					"sin" => {
+						if args.len() != 1 {panic!()};
+						let a = args[0].as_number();
+						let Token::Number(v) = a else {panic!()};
+						return Ok(Token::Number(v.sin()));
+					}
+
+					_ => panic!()
+				}
+			}
 		};
 	}
 

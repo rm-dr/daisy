@@ -80,13 +80,13 @@ fn main() -> Result<(), std::io::Error> {
 			if let Key::Char(q) = c.as_ref().unwrap() {
 				match q {
 					'\n' => {
-						let s = pb.enter();
+						let in_str = pb.enter();
 						write!(stdout, "\r\n")?;
-						if s == "" { break; }
+						if in_str == "" { break; }
 
 						#[cfg(debug_assertions)]
 						RawTerminal::suspend_raw_mode(&stdout)?;
-						let g = parser::parse(&s);
+						let g = parser::parse(&in_str);
 						#[cfg(debug_assertions)]
 						RawTerminal::activate_raw_mode(&stdout)?;
 
@@ -94,14 +94,22 @@ fn main() -> Result<(), std::io::Error> {
 							Ok(g) => {
 								#[cfg(debug_assertions)]
 								RawTerminal::suspend_raw_mode(&stdout)?;
+								let out_str = g.print();
 								let g = evaluate::evaluate(g);
 								#[cfg(debug_assertions)]
 								RawTerminal::activate_raw_mode(&stdout)?;
 
+								write!(
+									stdout, " {}{}=>{}{} {}\r\n",
+									style::Bold, color::Fg(color::Magenta),
+									style::Reset, color::Fg(color::Reset),
+									out_str
+								)?;
+
 								match g {
 									Ok(Token::Number(v)) => {
 										write!(
-											stdout, "\r\n  {}{}={} {v}{}\r\n\n",
+											stdout, "\n  {}{}={} {v}{}\r\n\n",
 											style::Bold,
 											color::Fg(color::Green),
 											style::Reset,
@@ -111,7 +119,7 @@ fn main() -> Result<(), std::io::Error> {
 
 									Err(_) => {
 										write!(
-											stdout, "\r\n  {}{}Mathematical Error: {}Failed to evaluate expression.is{}\r\n\n",
+											stdout, "\n  {}{}Mathematical Error: {}Failed to evaluate expression.{}\r\n\n",
 											style::Bold,
 											color::Fg(color::Red),
 											style::Reset,
