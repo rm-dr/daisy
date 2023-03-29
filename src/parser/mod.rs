@@ -80,9 +80,9 @@ impl PreToken {
 			PreToken::PreWord(l, s) => {
 				return Ok(match &s[..] {
 					// Mathematical constants
-					"π"|"pi" => { Token::Constant(3.141592653, String::from("pi")) },
+					"π"|"pi" => { Token::Constant(3.141592653, String::from("π")) },
 					"e" => { Token::Constant(2.71828, String::from("e")) },
-					"phi"|"φ" => { Token::Constant(1.61803, String::from("phi")) },
+					"phi"|"φ" => { Token::Constant(1.61803, String::from("φ")) },
 					_ => { return Err((l, ParserError::Undefined(s))); }
 				});
 			}
@@ -148,9 +148,9 @@ pub fn parse(
 	let tokens = tokenize(s);
 	let (_, tokens) = find_subs(tokens);
 	let g = groupify(tokens)?;
-	let t = treeify(g)?;
+	let g = treeify(g)?;
 
-	return Ok(t);
+	return Ok(g);
 }
 
 

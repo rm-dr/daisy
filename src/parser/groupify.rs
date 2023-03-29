@@ -61,8 +61,8 @@ fn lookback(
 
 					o.is_some() &&
 					(
-						o.unwrap().is_binary() ||
-						!o.unwrap().is_left_associative()
+						o.as_ref().unwrap().is_binary() ||
+						!o.as_ref().unwrap().is_left_associative()
 					)
 				} {
 					g.push_back(a);

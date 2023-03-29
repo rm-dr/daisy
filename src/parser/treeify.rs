@@ -1,4 +1,3 @@
-
 use std::collections::VecDeque;
 
 use crate::parser::PreToken;
@@ -97,7 +96,7 @@ fn treeify_binary(
 		let PreToken::PreOperator(l, s) = this else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
-		o.unwrap() as isize
+		o.unwrap().as_int()
 	};
 
 	// Precedence of the operators contesting our arguments
@@ -105,14 +104,14 @@ fn treeify_binary(
 		let PreToken::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
-		Some(o.unwrap() as isize)
+		Some(o.unwrap().as_int())
 	} else { None };
 
 	let right_val = if i < g_inner.len()-2 {
 		let PreToken::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
-		Some(o.unwrap() as isize)
+		Some(o.unwrap().as_int())
 	} else { None };
 
 	if {
@@ -213,7 +212,7 @@ fn treeify_unary(
 			let PreToken::PreOperator(l, s) = this else {panic!()};
 			let o = Operator::from_string(s);
 			if o.is_none() { return Err((*l, ParserError::Syntax)); }
-			o.unwrap() as isize
+			o.unwrap().as_int()
 		};
 
 		// Precedence of the operator contesting its argument
@@ -222,14 +221,14 @@ fn treeify_unary(
 				let PreToken::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
 				let o = Operator::from_string(s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
-				Some(o.unwrap() as isize)
+				Some(o.unwrap().as_int())
 			} else { None }
 		} else {
 			if i < g_inner.len()-2 {
 				let PreToken::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
 				let o = Operator::from_string(s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
-				Some(o.unwrap() as isize)
+				Some(o.unwrap().as_int())
 			} else { None }
 		};
 

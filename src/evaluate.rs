@@ -5,7 +5,7 @@ fn get_at_coords<'a>(g: &'a mut Token, coords: &Vec<usize>) -> &'a mut Token {
 	let mut h = &mut *g;
 
 	for t in coords.iter() {
-		let inner = h.get_args().unwrap();
+		let inner = h.get_args_mut().unwrap();
 		h = &mut inner[*t];
 	}
 
@@ -23,7 +23,7 @@ pub fn evaluate(
 
 		let mut h = &mut g;
 		for t in coords.iter() {
-			let inner = h.get_args();
+			let inner = h.get_args_mut();
 
 			if inner.is_none() || *t >= inner.as_ref().unwrap().len() {
 				coords.pop();

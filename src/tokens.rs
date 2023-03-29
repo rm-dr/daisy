@@ -17,7 +17,9 @@ pub enum Token {
 
 impl Token {
 	#[inline(always)]
-	pub fn get_args(&mut self) -> Option<&mut VecDeque<Token>> {
+
+	#[inline(always)]
+	pub fn get_args_mut(&mut self) -> Option<&mut VecDeque<Token>> {
 		match self {
 			Token::Operator(_, ref mut a) => Some(a),
 			_ => None
@@ -47,7 +49,8 @@ impl Token {
 
 /// Operator types, in order of increasing priority.
 #[derive(Debug)]
-#[derive(Copy, Clone)]
+#[derive(Clone)]
+#[repr(usize)]
 pub enum Operator {
 	ModuloLong = 0, // Mod invoked with "mod"
 	Subtract,
@@ -103,6 +106,11 @@ impl Operator {
 			=> false,
 			_ => true
 		}
+	}
+
+	#[inline(always)]
+	pub fn as_int(&self) -> usize {
+		unsafe { *<*const _>::from(self).cast::<usize>() }
 	}
 
 
