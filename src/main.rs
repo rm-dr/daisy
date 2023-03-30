@@ -107,12 +107,13 @@ fn main() -> Result<(), std::io::Error> {
 								)?;
 
 								match g {
-									Ok(Token::Number(v)) => {
+									Ok(q) => {
 										write!(
-											stdout, "\n  {}{}={} {v}{}\r\n\n",
+											stdout, "\n  {}{}={} {}{}\r\n\n",
 											style::Bold,
 											color::Fg(color::Green),
 											style::Reset,
+											q.print(),
 											color::Fg(color::Reset)
 										)?;
 									},
@@ -126,7 +127,6 @@ fn main() -> Result<(), std::io::Error> {
 											color::Fg(color::Reset),
 										)?;
 									}
-									_ => panic!()
 								}
 							},
 
