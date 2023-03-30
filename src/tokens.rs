@@ -81,11 +81,157 @@ pub enum Operator {
 	Power,
 	Factorial,
 
-	Function(String),
+	Function(Function),
 
 	// Not accessible from prompt
 	Flip,
 }
+#[derive(Debug)]
+#[derive(Copy, Clone)]
+pub enum Function {
+	Abs,
+	Floor,
+	Ceil,
+	Round,
+	
+	// TODO: Add arbitrary log
+	NaturalLog,
+	TenLog,
+
+	Sin,
+	Cos,
+	Tan,
+	Asin,
+	Acos,
+	Atan,
+	Csc,
+	Sec,
+	Cot,
+
+	Sinh,
+	Cosh,
+	Tanh,
+	Asinh,
+	Acosh,
+	Atanh,
+	Csch,
+	Sech,
+	Coth,
+}
+
+impl Function {
+	pub fn to_string(&self) -> String {
+		match self {
+			Function::Abs => { String::from("abs") },
+			Function::Floor => { String::from("floor") },
+			Function::Ceil => { String::from("ceil") },
+			Function::Round => { String::from("round") },
+			Function::NaturalLog => { String::from("ln") },
+			Function::TenLog => { String::from("log") },
+			Function::Sin => { String::from("sin") },
+			Function::Cos => { String::from("cos") },
+			Function::Tan => { String::from("tan") },
+			Function::Asin => { String::from("asin") },
+			Function::Acos => { String::from("acos") },
+			Function::Atan => { String::from("atan") },
+			Function::Csc => { String::from("csc") },
+			Function::Sec => { String::from("sec") },
+			Function::Cot => { String::from("cot") },
+			Function::Sinh => { String::from("sinh") },
+			Function::Cosh => { String::from("cosh") },
+			Function::Tanh => { String::from("tanh") },
+			Function::Asinh => { String::from("asinh") },
+			Function::Acosh => { String::from("acosh") },
+			Function::Atanh => { String::from("atanh") },
+			Function::Csch => { String::from("csch") },
+			Function::Sech => { String::from("sech") },
+			Function::Coth => { String::from("coth") },
+		}
+	}
+
+	pub fn apply(&self, args: &VecDeque<Token>) -> Result<Token, ()> {
+		if args.len() != 1 {panic!()};
+		let a = args[0].as_number();
+		let Token::Number(v) = a else {panic!()};
+
+		match self {
+			Function::Abs => { return Ok(Token::Number(v.abs())); },
+			Function::Floor => { return Ok(Token::Number(v.floor())); },
+			Function::Ceil => { return Ok(Token::Number(v.ceil())); },
+			Function::Round => { return Ok(Token::Number(v.round())); },
+
+			Function::NaturalLog => { return Ok(Token::Number(v.log(2.71828))); },
+			Function::TenLog => { return Ok(Token::Number(v.log(10f64))); },
+
+			Function::Sin => { return Ok(Token::Number(v.sin())); },
+			Function::Cos => { return Ok(Token::Number(v.cos())); },
+			Function::Tan => { return Ok(Token::Number(v.tan())); },
+			Function::Asin => { return Ok(Token::Number(v.asin())); },
+			Function::Acos => { return Ok(Token::Number(v.acos())); },
+			Function::Atan => { return Ok(Token::Number(v.atan())); },
+
+			Function::Csc => {
+				return Ok(
+					Token::Operator(
+						Operator::Flip,
+						VecDeque::from(vec!(Token::Number(v.sin())))
+					).eval()?
+				);
+			},
+			Function::Sec => {
+				return Ok(
+					Token::Operator(
+						Operator::Flip,
+						VecDeque::from(vec!(Token::Number(v.cos())))
+					).eval()?
+				);
+			},
+			Function::Cot => {
+				return Ok(
+					Token::Operator(
+						Operator::Flip,
+						VecDeque::from(vec!(Token::Number(v.tan())))
+					).eval()?
+				);
+			},
+
+
+			Function::Sinh => { return Ok(Token::Number(v.sinh())); },
+			Function::Cosh => { return Ok(Token::Number(v.cosh())); },
+			Function::Tanh => { return Ok(Token::Number(v.tanh())); },
+			Function::Asinh => { return Ok(Token::Number(v.asinh())); },
+			Function::Acosh => { return Ok(Token::Number(v.acosh())); },
+			Function::Atanh => { return Ok(Token::Number(v.atanh())); },
+
+			Function::Csch => {
+				return Ok(
+					Token::Operator(
+						Operator::Flip,
+						VecDeque::from(vec!(Token::Number(v.sinh())))
+					).eval()?
+				);
+			},
+			Function::Sech => {
+				return Ok(
+					Token::Operator(
+						Operator::Flip,
+						VecDeque::from(vec!(Token::Number(v.cosh())))
+					).eval()?
+				);
+			},
+			Function::Coth => {
+				return Ok(
+					Token::Operator(
+						Operator::Flip,
+						VecDeque::from(vec!(Token::Number(v.tanh())))
+					).eval()?
+				);
+			},
+
+		}
+	}
+}
+
 
 impl Operator {
 
@@ -105,8 +251,11 @@ impl Operator {
 			Operator::ImplicitMultiply |
 			Operator::Sqrt |
 			Operator::Divide |
-			Operator::Flip |
 			Operator::Subtract => { panic!() }
+
+			Operator::Flip => {
+				return format!("1/{}", Operator::Divide.add_parens_to_arg(&args[0]));
+			},
 
 			Operator::Negative => {
 				return format!("-{}", self.add_parens_to_arg(&args[0]));
@@ -198,7 +347,7 @@ impl Operator {
 			},
 
 			Operator::Function(s) => {
-				return format!("{}({})", s, args[0].print());
+				return format!("{}({})", s.to_string(), args[0].print());
 			}
 		};
 	}
@@ -217,7 +366,31 @@ impl Operator {
 			"^"|"**" => {Some( Operator::Power )},
 			"!"      => {Some( Operator::Factorial )},
 			"sqrt"|"rt"|"√" => {Some( Operator::Sqrt )},
-			"sin"    => {Some( Operator::Function(String::from("sin")) )}
+
+			"abs"    => {Some( Operator::Function(Function::Abs) )},
+			"floor"    => {Some( Operator::Function(Function::Floor) )},
+			"ceil"    => {Some( Operator::Function(Function::Ceil) )},
+			"round"    => {Some( Operator::Function(Function::Round) )},
+			"ln"    => {Some( Operator::Function(Function::NaturalLog) )},
+			"log"    => {Some( Operator::Function(Function::TenLog) )},
+			"sin"    => {Some( Operator::Function(Function::Sin) )},
+			"cos"    => {Some( Operator::Function(Function::Cos) )},
+			"tan"    => {Some( Operator::Function(Function::Tan) )},
+			"asin"    => {Some( Operator::Function(Function::Asin) )},
+			"acos"    => {Some( Operator::Function(Function::Acos) )},
+			"atan"    => {Some( Operator::Function(Function::Atan) )},
+			"csc"    => {Some( Operator::Function(Function::Csc) )},
+			"sec"    => {Some( Operator::Function(Function::Sec) )},
+			"cot"    => {Some( Operator::Function(Function::Cot) )},
+			"sinh"    => {Some( Operator::Function(Function::Sinh) )},
+			"cosh"    => {Some( Operator::Function(Function::Cosh) )},
+			"tanh"    => {Some( Operator::Function(Function::Tanh) )},
+			"asinh"    => {Some( Operator::Function(Function::Asinh) )},
+			"acosh"    => {Some( Operator::Function(Function::Acosh) )},
+			"atanh"    => {Some( Operator::Function(Function::Atanh) )},
+			"csch"    => {Some( Operator::Function(Function::Csch) )},
+			"sech"    => {Some( Operator::Function(Function::Sech) )},
+			"coth"    => {Some( Operator::Function(Function::Coth) )},
 			_ => None
 		}
 	}
@@ -408,17 +581,8 @@ impl Operator{
 				} else { panic!(); }
 			},
 
-			Operator::Function(s) => {
-				match &s[..] {
-					"sin" => {
-						if args.len() != 1 {panic!()};
-						let a = args[0].as_number();
-						let Token::Number(v) = a else {panic!()};
-						return Ok(Token::Number(v.sin()));
-					}
-
-					_ => panic!()
-				}
+			Operator::Function(f) => {
+				return f.apply(args);
 			}
 		};
 	}
