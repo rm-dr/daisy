@@ -22,6 +22,8 @@ This is nowhere near complete. Stay tuned.
 ## General
  - CLI Options: version, help, evaluate
  - Compile to WASM => webapp
+ - Trig tests
+ - Expression-printing tests
 
 ## Internals
  - Copy expression
@@ -32,13 +34,14 @@ This is nowhere near complete. Stay tuned.
  - Rational datatype
  - Units
  - Dice
- - Mean, Median: arrays and multi-arg functions
+ - Mean, Median, Min, Max: arrays and multi-arg functions
  - Derivatives
  - MiniCAS
  - Complex numbers
  - Config file
  - History to file
  - Reference previous results
+ - acot/acoth functions
 
 ## Prompt
  - Live syntax/output
