@@ -49,16 +49,6 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 
 	for (i, c) in input.chars().enumerate() {
 		match c {
-			// The minus sign can be both a Negative and an Operator.
-			// Needs special treatment.
-			'-' => {
-				push_token(&mut g, t, i);
-				t = Some(PreToken::PreOperator(
-					LineLocation{pos: i, len: 1},
-					String::from("-")
-				));
-			},
-
 			// Number
 			// Commas act just like dots.
 			',' | '.' | '0'..='9' => {
@@ -76,6 +66,16 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 						t = Some(PreToken::PreNumber(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
+			},
+
+			// The minus sign can be both a Negative and an Operator.
+			// Needs special treatment, always starts a new token.
+			'-' => {
+				push_token(&mut g, t, i);
+				t = Some(PreToken::PreOperator(
+					LineLocation{pos: i, len: 1},
+					String::from("-")
+				));
 			},
 
 			// Operator
