@@ -101,7 +101,7 @@ impl Quantity {
 		}
 	}
 
-	pub fn float_from_string(s: &str) -> Quantity {
+	pub fn new_float_from_string(s: &str) -> Quantity {
 		let v = Float::parse(s);
 		return Quantity::Float {
 			v: Float::with_val(FLOAT_PRECISION, v.unwrap())
@@ -112,6 +112,12 @@ impl Quantity {
 	pub fn new_rational(top: i64, bottom: i64) -> Quantity {
 		return Quantity::Rational {
 			v: RationalQ::new(top, bottom)
+		}
+	}
+
+	pub fn new_rational_from_string(s: &str) -> Quantity {
+		return Quantity::Rational {
+			v: RationalQ::from_string(s)
 		}
 	}
 
@@ -126,6 +132,24 @@ impl Quantity {
 		} else {
 			return None;
 		}
+	}
+
+	pub fn new_rational_from_float_string(s: &str) -> Option<Quantity> {
+
+		let mut q = s.split(".");
+		let a = q.next().unwrap();
+		let b = q.next();
+		let b = if b.is_some() {b.unwrap()} else {""};
+
+		// Error conditions
+		if {
+			q.next().is_some() || // We should have at most one `.`
+			a.len() == 0 // We need something in the numerator
+		} { return None; }
+
+		return Some(Quantity::new_rational_from_string(
+			&format!("{a}{b}/1{}", "0".repeat(b.len()))
+		));
 	}
 
 	pub fn to_float(&self) -> Float {

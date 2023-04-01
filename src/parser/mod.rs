@@ -73,19 +73,21 @@ impl PreToken {
 	pub fn to_token(self) -> Result<Token, (LineLocation, ParserError)>{
 		match self {
 			PreToken::PreNumber(l, s) => {
-				let n: f64 = match s.parse() {
-					Ok(n) => n,
-					Err(_) => return Err((l, ParserError::BadNumber))
-				};
-				return Ok(Token::Number(Quantity::new_rational_from_f64(n).unwrap()));
+
+				let r = Quantity::new_rational_from_float_string(&s);
+				if r.is_none() {
+					return Err((l, ParserError::BadNumber))
+				}
+				return Ok(Token::Number(r.unwrap()));
 			},
+
 			PreToken::PreWord(l, s) => {
 				return Ok(match &s[..] {
 					// Mathematical constants
 					// 100 digits of each.
-					"π"|"pi" => { Token::Constant(Quantity::float_from_string("3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067"), String::from("π")) },
-					"e" => { Token::Constant(Quantity::float_from_string("2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713 8217852516642"), String::from("e")) },
-					"phi"|"φ" => { Token::Constant(Quantity::float_from_string("1.618033988749894848204586834365638117720309179805762862135448622705260462818902449707207204189391137"), String::from("φ")) },
+					"π"|"pi" => { Token::Constant(Quantity::new_float_from_string("3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067"), String::from("π")) },
+					"e" => { Token::Constant(Quantity::new_float_from_string("2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713 8217852516642"), String::from("e")) },
+					"phi"|"φ" => { Token::Constant(Quantity::new_float_from_string("1.618033988749894848204586834365638117720309179805762862135448622705260462818902449707207204189391137"), String::from("φ")) },
 
 					_ => { return Err((l, ParserError::Undefined(s))); }
 				});

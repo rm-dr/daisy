@@ -63,6 +63,11 @@ impl RationalQ {
 		return Some(RationalQ{ val: v.unwrap() });
 	}
 
+	pub fn from_string(s: &str) -> RationalQ {
+		let v = Rational::from_str_radix(s, 10);
+		return RationalQ{ val: v.unwrap() };
+	}
+
 	pub fn to_float(&self) -> Float {
 		Float::with_val(FLOAT_PRECISION, self.val.numer()) /
 		Float::with_val(FLOAT_PRECISION, self.val.denom())
