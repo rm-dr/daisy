@@ -9,7 +9,6 @@ This is nowhere near complete. Stay tuned.
 # TODO
 
 ## Before For 1.0 release
- - Parse numbers directly into rational (no float conversion)
  - e notation
  - + as a unary operator
  - Compare operators => *, / should have the same priority!
@@ -18,14 +17,16 @@ This is nowhere near complete. Stay tuned.
  - Documentation (usage)
  - Documentation (comments)
  - Branding
- - Improve tests
 
 
 ## General
  - CLI Options: version, help, evaluate
  - Compile to WASM => webapp
  - Trig tests
- - Expression-printing tests
+ - Fix tests
+   - Direct expression printing
+   - Better comparison
+
 
 ## Internals
  - Copy expression
