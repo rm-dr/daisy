@@ -10,113 +10,135 @@ use crate::tokens::Operator;
 fn lookback(
 	g: &mut VecDeque<PreToken>
 ) -> Result<(), (LineLocation, ParserError)> {
-	if g.len() == 1 {
-		let a: PreToken = g.pop_back().unwrap();
-		match &a {
-			PreToken::PreOperator(l,o)
-			=> {
-				if o == "-" {
-					g.push_back(PreToken::PreOperator(*l, String::from("neg")));
-				} else { g.push_back(a); }
-			},
-			_ => { g.push_back(a); }
+
+	for i in 0..g.len() {
+
+		println!("{i} {:?}", g);
+		
+		if i < 1 {
+			let a: PreToken = g.remove(i).unwrap();
+
+			match &a {
+				PreToken::PreOperator(l,o)
+				=> {
+					if o == "-" {
+						g.insert(i, PreToken::PreOperator(*l, String::from("neg")));
+					} else { g.insert(i, a); }
+				},
+				_ => { g.insert(i, a); }
+			};
+	
+		} else {
+			let a: PreToken = g.remove(i-1).unwrap();
+			let b: PreToken = g.remove(i-1).unwrap();
+	
+			match (&a, &b) {
+				// Insert ImplicitMultiply
+				(PreToken::PreGroup(_,_), PreToken::PreGroup(l ,_))
+				| (PreToken::PreGroup(_,_), PreToken::PreNumber(l,_))
+				| (PreToken::PreNumber(_,_), PreToken::PreGroup(l,_))
+				| (PreToken::PreGroup(_,_), PreToken::PreWord(l,_))
+				| (PreToken::PreWord(_,_), PreToken::PreGroup(l,_))
+				| (PreToken::PreNumber(_,_), PreToken::PreWord(l,_))
+				| (PreToken::PreWord(_,_), PreToken::PreNumber(l,_))
+				| (PreToken::PreWord(_,_), PreToken::PreWord(l,_))
+				=> {
+					let loc = LineLocation{pos: l.pos-1, len: 0};
+
+					g.insert(i-1, b);
+					g.insert(i-1, PreToken::PreOperator(
+						loc,
+						String::from("i*")
+					));
+					g.insert(i-1, a);
+				},
+	
+				// The following are syntax errors
+				(PreToken::PreNumber(la,_), PreToken::PreNumber(lb,_))
+				=> {
+					return Err((
+						LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
+						ParserError::Syntax
+					));
+				}
+	
+				(PreToken::PreOperator(_, sa), PreToken::PreOperator(l,sb))
+				=> {
+					if sb == "-" && {
+						let o = Operator::from_string(sa);
+	
+						o.is_some() &&
+						(
+							o.as_ref().unwrap().is_binary() ||
+							!o.as_ref().unwrap().is_left_associative()
+						)
+					} {
+						g.insert(i-1, PreToken::PreOperator(*l, String::from("neg")));
+						g.insert(i-1, a);
+					} else { g.insert(i-1, b); g.insert(i-1, a); }
+				}
+	
+				// Insert implicit multiplications for right-unary operators
+				(PreToken::PreNumber(_,_), PreToken::PreOperator(l,s))
+				| (PreToken::PreGroup(_,_), PreToken::PreOperator(l,s))
+				| (PreToken::PreWord(_,_), PreToken::PreOperator(l,s))
+				=> {
+					let o = Operator::from_string(s);
+					let loc = LineLocation{pos: l.pos-1, len: 0};
+
+					g.insert(i-1, b);
+					if o.is_some() {
+						let o = o.unwrap();
+						if (!o.is_binary()) && (!o.is_left_associative()) {
+							g.insert(i-1, PreToken::PreOperator(
+								loc,
+								String::from("i*")
+							));
+						} else if (!o.is_binary()) && o.is_left_associative() {
+							g.insert(i-1, PreToken::PreOperator(
+								loc,
+								String::from("i*")
+							));
+						}
+					}
+					g.insert(i-1, a);
+				},
+	
+				// Insert implicit multiplications for left-unary operators.
+				(PreToken::PreOperator(_,s), PreToken::PreNumber(l,_))
+				| (PreToken::PreOperator(_,s), PreToken::PreGroup(l,_))
+				| (PreToken::PreOperator(_,s), PreToken::PreWord(l,_))
+				=> {
+					let o = Operator::from_string(s);
+					let loc = LineLocation{pos: l.pos-1, len: 0};
+
+					g.insert(i-1, b);
+					if o.is_some() {
+						let o = o.unwrap();
+						if (!o.is_binary()) && o.is_left_associative() {
+							g.insert(i-1, PreToken::PreOperator(
+								loc,
+								String::from("i*")
+							));
+						}
+					}
+					g.insert(i-1, a);
+				},
+	
+				// This shouldn't ever happen.
+				(PreToken::PreGroupStart(_), _)
+				| (_, PreToken::PreGroupStart(_))
+				| (PreToken::PreGroupEnd(_), _)
+				| (_, PreToken::PreGroupEnd(_))
+				| (PreToken::Container(_), _)
+				| (_, PreToken::Container(_))
+				=> panic!()
+			}
 		};
+	}
 
-	} else {
-		let b: PreToken = g.pop_back().unwrap();
-		let a: PreToken = g.pop_back().unwrap();
-
-		match (&a, &b) {
-			// Insert ImplicitMultiply
-			(PreToken::PreGroup(_,_), PreToken::PreGroup(l ,_))
-			| (PreToken::PreGroup(_,_), PreToken::PreNumber(l,_))
-			| (PreToken::PreNumber(_,_), PreToken::PreGroup(l,_))
-			| (PreToken::PreGroup(_,_), PreToken::PreWord(l,_))
-			| (PreToken::PreWord(_,_), PreToken::PreGroup(l,_))
-			| (PreToken::PreNumber(_,_), PreToken::PreWord(l,_))
-			| (PreToken::PreWord(_,_), PreToken::PreNumber(l,_))
-			| (PreToken::PreWord(_,_), PreToken::PreWord(l,_))
-			=> {
-				g.push_back(a);
-				g.push_back(PreToken::PreOperator(
-					LineLocation{pos: l.pos-1, len: 0},
-					String::from("i*")
-				));
-				g.push_back(b);
-			},
-
-			// The following are syntax errors
-			(PreToken::PreNumber(la,_), PreToken::PreNumber(lb,_))
-			=> {
-				return Err((
-					LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
-					ParserError::Syntax
-				));
-			}
-
-			(PreToken::PreOperator(_, sa), PreToken::PreOperator(l,sb))
-			=> {
-				if sb == "-" && {
-					let o = Operator::from_string(sa);
-
-					o.is_some() &&
-					(
-						o.as_ref().unwrap().is_binary() ||
-						!o.as_ref().unwrap().is_left_associative()
-					)
-				} {
-					g.push_back(a);
-					g.push_back(PreToken::PreOperator(*l, String::from("neg")));
-				} else { g.push_back(a); g.push_back(b); }
-			}
-
-			// Insert implicit multiplications for unary operators
-			(PreToken::PreNumber(_,_), PreToken::PreOperator(l,s))
-			| (PreToken::PreGroup(_,_), PreToken::PreOperator(l,s))
-			| (PreToken::PreWord(_,_), PreToken::PreOperator(l,s))
-			=> {
-				let o = Operator::from_string(s);
-				g.push_back(a);
-				if o.is_some() {
-					let o = o.unwrap();
-					if (!o.is_binary()) && (!o.is_left_associative()) {
-						g.push_back(PreToken::PreOperator(
-							LineLocation{pos: l.pos-1, len: 0},
-							String::from("i*")
-						));
-					}
-				}
-				g.push_back(b);
-			},
-
-			(PreToken::PreOperator(_,s), PreToken::PreNumber(l,_))
-			| (PreToken::PreOperator(_,s), PreToken::PreGroup(l,_))
-			| (PreToken::PreOperator(_,s), PreToken::PreWord(l,_))
-			=> {
-				let o = Operator::from_string(s);
-				g.push_back(a);
-				if o.is_some() {
-					let o = o.unwrap();
-					if (!o.is_binary()) && o.is_left_associative() {
-						g.push_back(PreToken::PreOperator(
-							LineLocation{pos: l.pos-1, len: 0},
-							String::from("i*")
-						));
-					}
-				}
-				g.push_back(b);
-			},
-
-			// This shouldn't ever happen.
-			(PreToken::PreGroupStart(_), _)
-			| (_, PreToken::PreGroupStart(_))
-			| (PreToken::PreGroupEnd(_), _)
-			| (_, PreToken::PreGroupEnd(_))
-			| (PreToken::Container(_), _)
-			| (_, PreToken::Container(_))
-			=> panic!()
-		}
-	};
+	println!("{:?}", g);
+	
 	return Ok(());
 }
 
@@ -155,16 +177,15 @@ pub(in crate::parser) fn groupify(
 
 				i_level -= 1;
 
-				let (_, v) = levels.pop().unwrap();
+				let (_, mut v) = levels.pop().unwrap();
 				let (_, v_now) = levels.last_mut().unwrap();
+				lookback(&mut v)?;
 
 				v_now.push_back(PreToken::PreGroup(l, v));
-				lookback(v_now)?;
 			},
 
 			_ => {
 				v_now.push_back(t);
-				lookback(v_now)?;
 			}
 		}
 
@@ -180,16 +201,18 @@ pub(in crate::parser) fn groupify(
 
 	// Auto-close parenthesis
 	while levels.len() != 1 {
-		let (l, v) = levels.pop().unwrap();
+		let (l, mut v) = levels.pop().unwrap();
 		let (_, v_now) = levels.last_mut().unwrap();
 
 		if v.len() == 0 { return Err((l, ParserError::EmptyGroup)) }
+		lookback(&mut v)?;
 
 		v_now.push_back(PreToken::PreGroup(l, v));
-		lookback(v_now)?;
 	}
 
 
-	let (_, v) = levels.pop().unwrap();
+	let (_, mut v) = levels.pop().unwrap();
+	lookback(&mut v)?;
+
 	return Ok(PreToken::PreGroup(LineLocation{pos:0, len:0}, v));
 }
