@@ -1,13 +1,17 @@
 use std::collections::VecDeque;
 
+use crate::quantity::Quantity;
+
 /// Tokens represent logical objects in an expession.
 /// 
 /// Tokens starting with `Pre*` are intermediate tokens, and
 /// will never show up in a fully-parsed expression tree.
 #[derive(Debug)]
+#[derive(Clone)]
 pub enum Token {
-	Number(f64),
-	Constant(f64, String),
+	Number(Quantity),
+
+	Constant(Quantity, String),
 
 	Operator(
 		Operator,
@@ -44,9 +48,9 @@ impl Token {
 	#[inline(always)]
 	pub fn eval(&self) -> Result<Token, ()> {
 		Ok(match self {
-			Token::Number(v) => { Token::Number(*v) },
-			Token::Constant(v,_) => { Token::Number(*v) },
-			Token::Operator(o,v) => { o.apply(v)? }
+			Token::Number(_) => { self.clone() },
+			Token::Constant(v,_) => { Token::Number(v.clone()) },
+			Token::Operator(o,v) => { o.apply(&v)? }
 		})
 	}
 
@@ -54,8 +58,8 @@ impl Token {
 	#[inline(always)]
 	pub fn as_number(&self) -> Token {
 		match self {
-			Token::Number(v) => { Token::Number(*v) },
-			Token::Constant(v,_) => { Token::Number(*v) },
+			Token::Number(v) => { Token::Number(v.clone()) },
+			Token::Constant(v,_) => { Token::Number(v.clone()) },
 			_ => panic!()
 		}
 	}
@@ -152,29 +156,29 @@ impl Function {
 	pub fn apply(&self, args: &VecDeque<Token>) -> Result<Token, ()> {
 		if args.len() != 1 {panic!()};
 		let a = args[0].as_number();
-		let Token::Number(v) = a else {panic!()};
+		let Token::Number(q) = a else {panic!()};
 
 		match self {
-			Function::Abs => { return Ok(Token::Number(v.abs())); },
-			Function::Floor => { return Ok(Token::Number(v.floor())); },
-			Function::Ceil => { return Ok(Token::Number(v.ceil())); },
-			Function::Round => { return Ok(Token::Number(v.round())); },
+			Function::Abs => { return Ok(Token::Number(q.abs())); },
+			Function::Floor => { return Ok(Token::Number(q.floor())); },
+			Function::Ceil => { return Ok(Token::Number(q.ceil())); },
+			Function::Round => { return Ok(Token::Number(q.round())); },
 
-			Function::NaturalLog => { return Ok(Token::Number(v.log(2.71828))); },
-			Function::TenLog => { return Ok(Token::Number(v.log(10f64))); },
+			Function::NaturalLog => { return Ok(Token::Number(q.ln())); },
+			Function::TenLog => { return Ok(Token::Number(q.log10())); },
 
-			Function::Sin => { return Ok(Token::Number(v.sin())); },
-			Function::Cos => { return Ok(Token::Number(v.cos())); },
-			Function::Tan => { return Ok(Token::Number(v.tan())); },
-			Function::Asin => { return Ok(Token::Number(v.asin())); },
-			Function::Acos => { return Ok(Token::Number(v.acos())); },
-			Function::Atan => { return Ok(Token::Number(v.atan())); },
+			Function::Sin => { return Ok(Token::Number(q.sin())); },
+			Function::Cos => { return Ok(Token::Number(q.cos())); },
+			Function::Tan => { return Ok(Token::Number(q.tan())); },
+			Function::Asin => { return Ok(Token::Number(q.asin())); },
+			Function::Acos => { return Ok(Token::Number(q.acos())); },
+			Function::Atan => { return Ok(Token::Number(q.atan())); },
 
 			Function::Csc => {
 				return Ok(
 					Token::Operator(
 						Operator::Flip,
-						VecDeque::from(vec!(Token::Number(v.sin())))
+						VecDeque::from(vec!(Token::Number(q.sin())))
 					).eval()?
 				);
 			},
@@ -182,7 +186,7 @@ impl Function {
 				return Ok(
 					Token::Operator(
 						Operator::Flip,
-						VecDeque::from(vec!(Token::Number(v.cos())))
+						VecDeque::from(vec!(Token::Number(q.cos())))
 					).eval()?
 				);
 			},
@@ -190,24 +194,24 @@ impl Function {
 				return Ok(
 					Token::Operator(
 						Operator::Flip,
-						VecDeque::from(vec!(Token::Number(v.tan())))
+						VecDeque::from(vec!(Token::Number(q.tan())))
 					).eval()?
 				);
 			},
 
 
-			Function::Sinh => { return Ok(Token::Number(v.sinh())); },
-			Function::Cosh => { return Ok(Token::Number(v.cosh())); },
-			Function::Tanh => { return Ok(Token::Number(v.tanh())); },
-			Function::Asinh => { return Ok(Token::Number(v.asinh())); },
-			Function::Acosh => { return Ok(Token::Number(v.acosh())); },
-			Function::Atanh => { return Ok(Token::Number(v.atanh())); },
+			Function::Sinh => { return Ok(Token::Number(q.sinh())); },
+			Function::Cosh => { return Ok(Token::Number(q.cosh())); },
+			Function::Tanh => { return Ok(Token::Number(q.tanh())); },
+			Function::Asinh => { return Ok(Token::Number(q.asinh())); },
+			Function::Acosh => { return Ok(Token::Number(q.acosh())); },
+			Function::Atanh => { return Ok(Token::Number(q.atanh())); },
 
 			Function::Csch => {
 				return Ok(
 					Token::Operator(
 						Operator::Flip,
-						VecDeque::from(vec!(Token::Number(v.sinh())))
+						VecDeque::from(vec!(Token::Number(q.sinh())))
 					).eval()?
 				);
 			},
@@ -215,7 +219,7 @@ impl Function {
 				return Ok(
 					Token::Operator(
 						Operator::Flip,
-						VecDeque::from(vec!(Token::Number(v.cosh())))
+						VecDeque::from(vec!(Token::Number(q.cosh())))
 					).eval()?
 				);
 			},
@@ -223,7 +227,7 @@ impl Function {
 				return Ok(
 					Token::Operator(
 						Operator::Flip,
-						VecDeque::from(vec!(Token::Number(v.tanh())))
+						VecDeque::from(vec!(Token::Number(q.tanh())))
 					).eval()?
 				);
 			},
@@ -457,7 +461,7 @@ impl Operator {
 
 				Token::Operator(
 					Operator::Power,
-					VecDeque::from(vec!(a, Token::Number(0.5)))
+					VecDeque::from(vec!(a, Token::Number(Quantity::new_rational(1,2))))
 				)
 			},
 
@@ -500,13 +504,13 @@ impl Operator{
 				let args = args[0].as_number();
 
 				if let Token::Number(v) = args {
-					if v == 0f64 { return Err(()); }
-					return Ok(Token::Number(1f64/v));
+					if v.is_zero() { return Err(()); }
+					return Ok(Token::Number(Quantity::new_rational(1,1)/v));
 				} else { panic!(); }
 			},
 
 			Operator::Add => {
-				let mut sum: f64 = 0f64;
+				let mut sum = Quantity::new_rational(0,1);
 				for i in args.iter() {
 					let j = i.as_number();
 					if let Token::Number(v) = j {
@@ -519,7 +523,7 @@ impl Operator{
 			},
 			
 			Operator::Multiply => {
-				let mut prod: f64 = 1f64;
+				let mut prod = Quantity::new_rational(1,1);
 				for i in args.iter() {
 					let j = i.as_number();
 					if let Token::Number(v) = j {
@@ -539,9 +543,9 @@ impl Operator{
 
 				if let Token::Number(va) = a {
 					if let Token::Number(vb) = b {
-						if vb <= 1f64 { return Err(()); } 
-						if va.fract() != 0f64 { return Err(()); }
-						if vb.fract() != 0f64 { return Err(()); }
+						if vb <= Quantity::new_rational(1,1) { return Err(()); } 
+						if va.fract() != Quantity::new_rational(0,1) { return Err(()); }
+						if vb.fract() != Quantity::new_rational(0,1) { return Err(()); }
 
 						return Ok(Token::Number(va%vb));
 					} else { panic!(); }
@@ -555,7 +559,7 @@ impl Operator{
 
 				if let Token::Number(va) = a {
 					if let Token::Number(vb) = b {
-						let p = va.powf(vb);
+						let p = va.pow(vb);
 						if p.is_nan() {return Err(());}
 						return Ok(Token::Number(p));
 					} else { panic!(); }
@@ -567,14 +571,14 @@ impl Operator{
 				let args = args[0].as_number();
 
 				if let Token::Number(v) = args {
-					if v.fract() != 0f64 { return Err(()); }
-					if v >= 100f64 { return Err(()); }
+					if !v.fract().is_zero() { return Err(()); }
+					if v >= Quantity::new_rational(100, 1) { return Err(()); }
 
-					let mut prod = 1f64;
-					let mut u = v;
-					while u > 0f64 {
-						prod *= u;
-						u -= 1f64;
+					let mut prod = Quantity::new_rational(1, 1);
+					let mut u = v.clone();
+					while u > Quantity::new_rational(0, 1) {
+						prod *= u.clone();
+						u = u - Quantity::new_rational(1, 1);
 					}
 
 					return Ok(Token::Number(prod));

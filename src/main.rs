@@ -8,12 +8,15 @@ use termion::{color, style};
 
 pub mod tokens;
 pub mod parser;
-mod promptbuffer;
 pub mod evaluate;
+pub mod quantity;
 
-use crate::tokens::Token;
+mod promptbuffer;
+
+
 use crate::promptbuffer::PromptBuffer;
 
+//use crate::tokens::Token;
 //use crate::parser::ParserError;
 //use crate::parser::LineLocation;
 
@@ -180,6 +183,7 @@ mod tests {
 	use crate::parser;
 	use crate::evaluate;
 	use crate::tokens;
+	use crate::quantity::Quantity;
 
 	fn good_expr(r: f64, s: &str) {
 		let s = String::from(s);
@@ -187,6 +191,8 @@ mod tests {
 		let g = evaluate::evaluate(g).unwrap();
 		let n = g.eval().unwrap();
 		let tokens::Token::Number(v) = n else {panic!()};
+
+		let r = Quantity::new_rational_from_f64(r).unwrap();
 		assert_eq!(v, r);
 	}
 
