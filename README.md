@@ -9,8 +9,10 @@ This is nowhere near complete. Stay tuned.
 # TODO
 
 ## Before For 1.0 release
- - Non-recursive treeify
-
+ - Parse numbers directly into rational (no float conversion)
+ - e notation
+ - + as a unary operator
+ - Compare operators => *, / should have the same priority!
  - Function application
  - Commands
  - Documentation (usage)
@@ -27,6 +29,7 @@ This is nowhere near complete. Stay tuned.
 
 ## Internals
  - Copy expression
+ - Non-recursive treeify
 
 ## Features
  - Variable definitions
