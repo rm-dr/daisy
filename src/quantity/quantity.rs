@@ -61,18 +61,18 @@ impl ToString for Quantity{
 		} else {
 			if exp <= 0 { // Decimal, needs `0.` and leading zeros
 				format!(
-					"0.{}{string}",
+					"{sign}0.{}{string}",
 					"0".repeat(exp_u)
 				)
 			} else if exp_u < string.len() { // Decimal, needs only `.`
 				format!(
-					"{}.{}",
+					"{sign}{}.{}",
 					&string[0..exp_u],
 					&string[exp_u..]
 				)
 			} else { // Integer, needs trailing zeros
 				format!(
-					"{string}{}",
+					"{sign}{string}{}",
 					"0".repeat(exp_u - string.len())
 				)
 			}
