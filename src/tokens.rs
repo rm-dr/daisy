@@ -572,7 +572,7 @@ impl Operator{
 
 				if let Token::Number(v) = args {
 					if !v.fract().is_zero() { return Err(()); }
-					if v >= Quantity::new_rational(100, 1) { return Err(()); }
+					if v > Quantity::new_rational(50_000, 1) { return Err(()); }
 
 					let mut prod = Quantity::new_rational(1, 1);
 					let mut u = v.clone();

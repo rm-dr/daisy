@@ -116,10 +116,10 @@ impl Quantity {
 		}
 	}
 
-	pub fn new_rational_from_string(s: &str) -> Quantity {
-		return Quantity::Rational {
-			v: RationalQ::from_string(s)
-		}
+	pub fn new_rational_from_string(s: &str) -> Option<Quantity> {
+		let r = RationalQ::from_string(s);
+		if r.is_none() { return None; }
+		return Some(Quantity::Rational { v: r.unwrap() });
 	}
 
 	pub fn new_rational_from_f64(f: f64) -> 

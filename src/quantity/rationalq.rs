@@ -63,9 +63,13 @@ impl RationalQ {
 		return Some(RationalQ{ val: v.unwrap() });
 	}
 
-	pub fn from_string(s: &str) -> RationalQ {
+	pub fn from_string(s: &str) -> Option<RationalQ> {
 		let v = Rational::from_str_radix(s, 10);
-		return RationalQ{ val: v.unwrap() };
+		let v = match v {
+			Ok(x) => x,
+			Err(_) => return None
+		};
+		return Some(RationalQ{ val: v });
 	}
 
 	pub fn to_float(&self) -> Float {
