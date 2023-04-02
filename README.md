@@ -9,7 +9,6 @@ This is nowhere near complete. Stay tuned.
 # TODO
 
 ## Before For 1.0 release
- - e notation
  - + as a unary operator
  - Compare operators => *, / should have the same priority!
  - Function application
