@@ -31,6 +31,24 @@ fn push_token(g: &mut VecDeque<PreToken>, t: Option<PreToken>, stop_i: usize) {
 	};
 
 
+	// `2e` isn't exponential notation, it's 2*e.
+	// If a number ends in `e`, disconnect the `e` and make it a word.
+	if let PreToken::PreNumber(l, s) = &t {
+		let last = &s[s.len()-1..];
+		if last == "e" {
+			g.push_back(PreToken::PreNumber(
+				LineLocation { pos: l.pos, len: l.len-1 },
+				String::from(&s[0..s.len()-1])
+			));
+			g.push_back(PreToken::PreWord(
+				LineLocation { pos: l.pos + l.len - 1, len: 1 },
+				String::from("e")
+			));
+
+			return;
+		}
+	}
+
 	if let PreToken::PreWord(l, s) = &t {
 		let o = Operator::from_string(s);
 		if o.is_some() {
@@ -68,14 +86,50 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 				};
 			},
 
-			// The minus sign can be both a Negative and an Operator.
-			// Needs special treatment, always starts a new token.
+			// 'e' needs special treatment.
+			// Can be both a word or a number.
+			'e' => {
+				match &mut t {
+					Some(PreToken::PreWord(_, val)) => { val.push(c); },
+					Some(PreToken::PreNumber(_, val)) => { val.push(c); },
+
+					_ => {
+						push_token(&mut g, t, i);
+						t = Some(PreToken::PreWord(LineLocation{pos: i, len: 0}, String::from(c)));
+					}
+				};
+			}
+
+			// The minus sign also needs special treatment.
+			// It can be the `neg` operator, the `minus` operator,
+			// or it can specify a negative exponent.
 			'-' => {
-				push_token(&mut g, t, i);
-				t = Some(PreToken::PreOperator(
-					LineLocation{pos: i, len: 1},
-					String::from("-")
-				));
+				match &mut t {
+					Some(PreToken::PreNumber(_, val)) => {
+						if &val[val.len()-1..] == "e" {
+							// If the current number ends in an `e`,
+							// this negative specifies a negative exponent
+							// like 2e-2 = 0.02.
+							val.push(c);
+						} else {
+							// Otherwise, end the number.
+							// We probably have a subtraction.
+							push_token(&mut g, t, i);
+							t = Some(PreToken::PreOperator(
+								LineLocation{pos: i, len: 1},
+								String::from("-")
+							));
+						}
+					},
+
+					_ => {
+						push_token(&mut g, t, i);
+						t = Some(PreToken::PreOperator(
+							LineLocation{pos: i, len: 1},
+							String::from("-")
+						));
+					}
+				};
 			},
 
 			// Operator

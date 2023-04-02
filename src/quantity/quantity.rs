@@ -137,20 +137,48 @@ impl Quantity {
 
 	pub fn new_rational_from_float_string(s: &str) -> Option<Quantity> {
 
-		let mut q = s.split(".");
-		let a = q.next().unwrap();
-		let b = q.next();
+		// Scientific notation
+		let mut sci = s.split("e");
+		let num = sci.next().unwrap();
+		let exp = sci.next();
+
+		let exp = if exp.is_some() {
+			let r = exp.unwrap().parse::<isize>();
+			match r {
+				Ok(x) => x,
+				Err(_) => return None
+			}
+		} else {0isize};
+
+		// Split integer and decimal parts
+		let mut dec = num.split(".");
+		let a = dec.next().unwrap();
+		let b = dec.next();
 		let b = if b.is_some() {b.unwrap()} else {""};
 
 		// Error conditions
 		if {
-			q.next().is_some() || // We should have at most one `.`
+			dec.next().is_some() || // We should have at most one `.`
+			sci.next().is_some() || // We should have at most one `e`
 			a.len() == 0 // We need something in the numerator
 		} { return None; }
 
-		return Some(Quantity::new_rational_from_string(
-			&format!("{a}{b}/1{}", "0".repeat(b.len()))
-		));
+		let s: String;
+		if exp < 0 {
+			let exp: usize = (-exp).try_into().unwrap();
+			s = format!("{a}{b}/1{}", "0".repeat(b.len() + exp));
+		} else if exp > 0 {
+			let exp: usize = exp.try_into().unwrap();
+			s = format!(
+				"{a}{b}{}/1{}",
+				"0".repeat(exp),
+				"0".repeat(b.len())
+			);
+		} else { // exp == 0
+			s = format!("{a}{b}/1{}", "0".repeat(b.len()));
+		};
+
+		return Quantity::new_rational_from_string(&s);
 	}
 
 	pub fn to_float(&self) -> Float {

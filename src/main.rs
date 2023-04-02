@@ -176,6 +176,13 @@ fn main() -> Result<(), std::io::Error> {
 // Tests to add:
 // 3!+1
 // 3!3
+// 1e2
+// 1e-2
+// 1e0
+// 1e1.2
+// 1e(2)
+// e2e
+// 2 2e2
 
 #[cfg(test)]
 mod tests {
