@@ -300,18 +300,26 @@ impl Operator {
 				let mut b = &args[1];
 				let mut sub = false;
 
+				let tmp;
+
 				if let Token::Operator(o,ar) = b {
 					if let Operator::Negative = o {
 						sub = true;
 						b = &ar[0];
 					}
+				} else if let Token::Number(q) = b {
+					if q.is_negative() {
+						sub = true;
+						tmp = Token::Number(-q.clone());
+						b = &tmp;
+					}
 				}
 				let (b, sub) = (b, sub);
 
 				if sub {
-					return format!("{} - {}", self.add_parens_to_arg(a), self.add_parens_to_arg(b));
+					return format!("{} - {}", self.add_parens_to_arg(a), self.add_parens_to_arg(&b));
 				} else {
-					return format!("{} + {}", self.add_parens_to_arg(a), self.add_parens_to_arg(b));
+					return format!("{} + {}", self.add_parens_to_arg(a), self.add_parens_to_arg(&b));
 				}
 			},
 			
@@ -435,11 +443,17 @@ impl Operator {
 				if args.len() != 2 { panic!() }
 				let a = args.pop_front().unwrap();
 				let b = args.pop_front().unwrap();
-				let b = Token::Operator(Operator::Negative, VecDeque::from(vec!(b)));
+
+				let b_new;
+				if let Token::Number(q) = b {
+					b_new = Token::Number(-q);
+				} else {
+					b_new = Token::Operator(Operator::Negative, VecDeque::from(vec!(b)));
+				}
 
 				Token::Operator(
 					Operator::Add,
-					VecDeque::from(vec!(a,b))
+					VecDeque::from(vec!(a,b_new))
 				)
 			},
 

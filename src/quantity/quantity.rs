@@ -246,6 +246,20 @@ impl Quantity {
 			Quantity::Rational { .. } => {panic!()}
 		}
 	}
+
+	pub fn is_negative(&self) -> bool {
+		match self {
+			Quantity::Float { v } => {v.is_sign_negative() && v.is_normal()},
+			Quantity::Rational { v } => {v.is_negative()}
+		}
+	}
+
+	pub fn is_positive(&self) -> bool {
+		match self {
+			Quantity::Float { v } => {v.is_sign_positive() && v.is_normal()},
+			Quantity::Rational { v } => {v.is_positive()}
+		}
+	}
 }
 
 impl Neg for Quantity where {

@@ -86,6 +86,9 @@ impl RationalQ {
 	}
 
 
+	pub fn is_negative(&self) -> bool { self.val.clone().signum() == -1 }
+	pub fn is_positive(&self) -> bool { self.val.clone().signum() == 1 }
+
 	pub fn exp(&self) -> Quantity {float!(self.to_float().exp())}
 
 	pub fn abs(&self) -> Quantity {rational!(self.val.clone().abs())}
