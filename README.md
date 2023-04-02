@@ -30,6 +30,7 @@ This is nowhere near complete. Stay tuned.
 ## Internals
  - Copy expression
  - Non-recursive treeify
+ - Faster factorial function. Maybe use gamma instead?
 
 ## Features
  - Variable definitions
