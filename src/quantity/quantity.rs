@@ -48,15 +48,16 @@ impl ToString for Quantity{
 			exp_u = exp.try_into().unwrap()
 		}
 
-		if exp_u >= 4 {
+		if exp_u >= PRINT_LEN {
 			// Exponential notation
 			let pre = &string[0..1];
 			let post = &string[1..];
 
 			format!(
-				"{pre}{}{post}e{}{exp}",
+				"{pre}{}{post}e{}",
 				if post.len() != 0 {"."} else {""},
-				if exp > 0 {"+"} else {""},
+				//if exp > 0 {"+"} else {""},
+				exp - 1
 			)
 		} else {
 			if exp <= 0 { // Decimal, needs `0.` and leading zeros
