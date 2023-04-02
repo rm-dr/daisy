@@ -102,11 +102,17 @@ impl Quantity {
 		}
 	}
 
-	pub fn new_float_from_string(s: &str) -> Quantity {
+	pub fn new_float_from_string(s: &str) -> Option<Quantity> {
 		let v = Float::parse(s);
-		return Quantity::Float {
-			v: Float::with_val(FLOAT_PRECISION, v.unwrap())
-		}
+
+		let v = match v {
+			Ok(x) => x,
+			Err(_) => return None
+		};
+
+		return Some(Quantity::Float {
+			v: Float::with_val(FLOAT_PRECISION, v)
+		})
 	}
 
 
@@ -189,6 +195,7 @@ impl Quantity {
 	}
 
 	quick_quant_fn!(fract);
+	quick_quant_fn!(exp);
 
 	quick_quant_fn!(abs);
 	quick_quant_fn!(floor);

@@ -86,6 +86,8 @@ impl RationalQ {
 	}
 
 
+	pub fn exp(&self) -> Quantity {float!(self.to_float().exp())}
+
 	pub fn abs(&self) -> Quantity {rational!(self.val.clone().abs())}
 	pub fn floor(&self) -> Quantity {rational!(self.val.clone().floor())}
 	pub fn ceil(&self) -> Quantity {rational!(self.val.clone().ceil())}
