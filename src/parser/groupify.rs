@@ -6,18 +6,18 @@ use crate::parser::ParserError;
 
 use crate::tokens::Operator;
 
-// Inserts implicit operators
-fn lookback(
+
+// Turn `-` into `neg`,
+// put `neg`s inside numbers.
+fn lookback_negatives(
 	g: &mut VecDeque<PreToken>
 ) -> Result<(), (LineLocation, ParserError)> {
 
-	for i in 0..g.len() {
-
-		println!("{i} {:?}", g);
-		
-		if i < 1 {
+	// Convert `-` operators to `neg` operators
+	let mut i: usize = 0;
+	while i < g.len() {
+		if i == 0 {
 			let a: PreToken = g.remove(i).unwrap();
-
 			match &a {
 				PreToken::PreOperator(l,o)
 				=> {
@@ -27,8 +27,89 @@ fn lookback(
 				},
 				_ => { g.insert(i, a); }
 			};
-	
+
 		} else {
+			let a: PreToken = g.remove(i-1).unwrap();
+			let b: PreToken = g.remove(i-1).unwrap();
+	
+			match (&a, &b) {
+				(PreToken::PreOperator(_, sa), PreToken::PreOperator(l,sb))
+				=> {
+					if sb == "-" && {
+						let o = Operator::from_string(sa);
+	
+						o.is_some() &&
+						(
+							o.as_ref().unwrap().is_binary() ||
+							!o.as_ref().unwrap().is_left_associative()
+						)
+					} {
+						g.insert(i-1, PreToken::PreOperator(*l, String::from("neg")));
+						g.insert(i-1, a);
+					} else { g.insert(i-1, b); g.insert(i-1, a); }
+				},
+
+				_ => { g.insert(i-1, b); g.insert(i-1, a); }
+			}
+		}
+
+		i += 1;
+	}
+
+	// Make negative numbers negative numbers.
+	// We don't need `neg` operators in this case.
+	// Note that we read the token array right-to-left, since `neg` is right-associative.
+	let mut i: usize = g.len();
+	loop {
+		if i > 1 { i -= 1; } else { break; }
+
+		let a: PreToken = g.remove(i-1).unwrap();
+		let b: PreToken = g.remove(i-1).unwrap();
+
+		match (&a, &b) {
+			(PreToken::PreOperator(la,sa), PreToken::PreNumber(lb,sb))
+			=> {
+				if sa == "neg" {
+					let first = &sb[0..1];
+					if first == "-" {
+						// Already negative. Remove the old one.
+						g.insert(i-1,
+							PreToken::PreNumber(
+								LineLocation { pos: la.pos, len: lb.pos - la.pos + lb.len },
+								format!("{}", &sb[1..])
+							)
+						);
+					} else {
+						// Not negative yet. Add one.
+						g.insert(i-1,
+							PreToken::PreNumber(
+								LineLocation { pos: la.pos, len: lb.pos - la.pos + lb.len },
+								format!("-{sb}")
+							)
+						);
+					}
+				} else { g.insert(i-1, b); g.insert(i-1, a); }
+			},
+
+			_ => { g.insert(i-1, b); g.insert(i-1, a); }
+		}
+	}
+
+	return Ok(());
+}
+
+
+// Inserts implicit operators
+fn lookback(
+	g: &mut VecDeque<PreToken>
+) -> Result<(), (LineLocation, ParserError)> {
+
+	lookback_negatives(g)?;
+
+
+	let mut i: usize = 0;
+	while i < g.len() {
+		if i >= 1 {
 			let a: PreToken = g.remove(i-1).unwrap();
 			let b: PreToken = g.remove(i-1).unwrap();
 	
@@ -53,31 +134,6 @@ fn lookback(
 					g.insert(i-1, a);
 				},
 	
-				// The following are syntax errors
-				(PreToken::PreNumber(la,_), PreToken::PreNumber(lb,_))
-				=> {
-					return Err((
-						LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
-						ParserError::Syntax
-					));
-				}
-	
-				(PreToken::PreOperator(_, sa), PreToken::PreOperator(l,sb))
-				=> {
-					if sb == "-" && {
-						let o = Operator::from_string(sa);
-	
-						o.is_some() &&
-						(
-							o.as_ref().unwrap().is_binary() ||
-							!o.as_ref().unwrap().is_left_associative()
-						)
-					} {
-						g.insert(i-1, PreToken::PreOperator(*l, String::from("neg")));
-						g.insert(i-1, a);
-					} else { g.insert(i-1, b); g.insert(i-1, a); }
-				}
-	
 				// Insert implicit multiplications for right-unary operators
 				(PreToken::PreNumber(_,_), PreToken::PreOperator(l,s))
 				| (PreToken::PreGroup(_,_), PreToken::PreOperator(l,s))
@@ -90,11 +146,6 @@ fn lookback(
 					if o.is_some() {
 						let o = o.unwrap();
 						if (!o.is_binary()) && (!o.is_left_associative()) {
-							g.insert(i-1, PreToken::PreOperator(
-								loc,
-								String::from("i*")
-							));
-						} else if (!o.is_binary()) && o.is_left_associative() {
 							g.insert(i-1, PreToken::PreOperator(
 								loc,
 								String::from("i*")
@@ -124,21 +175,22 @@ fn lookback(
 					}
 					g.insert(i-1, a);
 				},
-	
-				// This shouldn't ever happen.
-				(PreToken::PreGroupStart(_), _)
-				| (_, PreToken::PreGroupStart(_))
-				| (PreToken::PreGroupEnd(_), _)
-				| (_, PreToken::PreGroupEnd(_))
-				| (PreToken::Container(_), _)
-				| (_, PreToken::Container(_))
-				=> panic!()
+
+				// The following are syntax errors
+				(PreToken::PreNumber(la,_), PreToken::PreNumber(lb,_))
+				=> {
+					return Err((
+						LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
+						ParserError::Syntax
+					));
+				},
+				_ => {g.insert(i-1, b); g.insert(i-1, a);}
 			}
-		};
+		}
+
+		i += 1;
 	}
 
-	println!("{:?}", g);
-	
 	return Ok(());
 }
 
