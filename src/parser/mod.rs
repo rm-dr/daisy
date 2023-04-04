@@ -162,20 +162,38 @@ pub fn parse(
 
 
 pub fn substitute(
-	s: &String, // The string to subsitute
+	s: &String, // The string to substitute
 	c: usize    // Location of the cursor right now
-) -> String{
-	if s == "" { return s.clone() }
+) -> (
+	usize,  // Location of cursor in substituted string
+	String  // String with substitutions
+) {
+	if s == "" { return (c, s.clone()) }
 	let mut new_s = s.clone();
 
+	let l = s.chars().count();
 	let tokens = tokenize(s);
 	let (subs, _) = find_subs(tokens);
+	let mut new_c = l - c;
 
 	for r in subs.iter() {
-		if { // Don't subsitute if our cursor is inside the substitution
+		// find_subs gives substitutions in reverse order.
+
+		if { // Don't substitute if our cursor is inside the substitution
 			c >= r.0.pos &&
 			c < r.0.pos+r.0.len
 		} { continue; }
+
+		if c < r.0.pos {
+			let ct = r.1.chars().count();
+			if ct >= r.0.len {
+				if new_c >= ct - r.0.len {
+					new_c += ct - r.0.len
+				}
+			} else {
+				new_c -= r.0.len - ct
+			}
+		}
 
 		new_s.replace_range(
 			r.0.pos..r.0.pos+r.0.len,
@@ -183,5 +201,5 @@ pub fn substitute(
 		)
 	}
 
-	return new_s;
+	return (new_c, new_s);
 }

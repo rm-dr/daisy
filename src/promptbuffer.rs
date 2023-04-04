@@ -39,11 +39,12 @@ impl PromptBuffer {
 
 
 	pub fn write_prompt(&mut self, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
-		let i = self.buffer.chars().count();
-		let i = if i == 0 {0} else {i - self.cursor};
+		let l = self.buffer.chars().count();
+		let i = if l == 0 {0} else {l - self.cursor};
 
 		// Draw prettyprinted expression
-		let s = substitute(&self.get_contents(), i);
+		let (display_cursor, s) = substitute(&self.get_contents(), i);
+
 		write!(
 			stdout, "\r{}{}==>{}{} {}",
 			style::Bold,
@@ -52,7 +53,7 @@ impl PromptBuffer {
 			style::Reset,
 			s
 		)?;
-	
+
 		// If this string is shorter, clear the remaining old one.
 		if s.chars().count() < self.last_print_len {
 			write!(
@@ -61,12 +62,13 @@ impl PromptBuffer {
 				termion::cursor::Left((self.last_print_len - s.chars().count()) as u16)
 			)?;
 		}
-	
+
+
 		// Move cursor to correct position
-		if self.cursor != 0 {
+		if display_cursor != 0 {
 			write!(
 				stdout, "{}",
-				termion::cursor::Left(self.cursor as u16)
+				termion::cursor::Left(display_cursor as u16)
 			)?;
 			stdout.flush()?;
 		}
