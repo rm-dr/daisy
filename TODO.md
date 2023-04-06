@@ -8,6 +8,8 @@ Roadmap for fixes and features.
  - Documentation (comments)
  - Units, unit conversion
  - Fix negation: what should `-3^4` or `-x^2` be?
+ - Social media banner
+ - Releases
 
 ## General
  - CLI Options: version, help, evaluate
