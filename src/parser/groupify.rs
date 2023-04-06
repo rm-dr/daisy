@@ -7,13 +7,12 @@ use crate::parser::ParserError;
 use crate::tokens::Operator;
 
 
-// Turn `-` into `neg`,
-// put `neg`s inside numbers.
-fn lookback_negatives(
+fn lookback_signs(
 	g: &mut VecDeque<PreToken>
 ) -> Result<(), (LineLocation, ParserError)> {
 
 	// Convert `-` operators to `neg` operators
+	// Delete `+`s that mean "positive" instead of "add"
 	let mut i: usize = 0;
 	while i < g.len() {
 		if i == 0 {
@@ -23,7 +22,7 @@ fn lookback_negatives(
 				=> {
 					if o == "-" {
 						g.insert(i, PreToken::PreOperator(*l, String::from("neg")));
-					} else { g.insert(i, a); }
+					} else if o != "+" { g.insert(i, a); }
 				},
 				_ => { g.insert(i, a); }
 			};
@@ -46,6 +45,10 @@ fn lookback_negatives(
 					} {
 						g.insert(i-1, PreToken::PreOperator(*l, String::from("neg")));
 						g.insert(i-1, a);
+					} else if sb == "+" {
+						g.insert(i-1, a);
+						i -= 1; // g is now shorter, we don't need to advance i.
+						// This nullifies the i += 1 at the end of the loop.
 					} else { g.insert(i-1, b); g.insert(i-1, a); }
 				},
 
@@ -104,7 +107,7 @@ fn lookback(
 	g: &mut VecDeque<PreToken>
 ) -> Result<(), (LineLocation, ParserError)> {
 
-	lookback_negatives(g)?;
+	lookback_signs(g)?;
 
 
 	let mut i: usize = 0;

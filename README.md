@@ -8,7 +8,6 @@ This is nowhere near complete. Stay tuned.
 # TODO
 
 ## Before For 1.0 release
- - `+` as a unary operator
  - Commands
  - Documentation (usage)
  - Documentation (comments)

@@ -103,7 +103,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 			// The minus sign also needs special treatment.
 			// It can be the `neg` operator, the `minus` operator,
 			// or it can specify a negative exponent.
-			'-' => {
+			'-' | '+' => {
 				match &mut t {
 					Some(PreToken::PreNumber(_, val)) => {
 						if &val[val.len()-1..] == "e" {
@@ -117,16 +117,17 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 							push_token(&mut g, t, i);
 							t = Some(PreToken::PreOperator(
 								LineLocation{pos: i, len: 1},
-								String::from("-")
+								String::from(c)
 							));
 						}
 					},
 
+					// This may be a negative or a subtraction
 					_ => {
 						push_token(&mut g, t, i);
 						t = Some(PreToken::PreOperator(
 							LineLocation{pos: i, len: 1},
-							String::from("-")
+							String::from(c)
 						));
 					}
 				};
@@ -134,7 +135,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 
 			// Operator
 			'*'|'×'|'/'|'÷'|
-			'+'|'^'|'!'|'%'
+			'^'|'!'|'%'
 			=> {
 				match &mut t {
 					Some(PreToken::PreOperator(_, val)) => { val.push(c); },
