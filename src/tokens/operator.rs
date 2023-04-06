@@ -63,6 +63,17 @@ impl Operator {
 		return astr;
 	}
 
+	#[inline(always)]
+	fn add_parens_to_arg_strict(&self, arg: &Token) -> String {
+		let mut astr: String = arg.print();
+		if let Token::Operator(o,_) = arg {
+			if o <= self {
+				astr = format!("({})", astr);
+			}
+		}
+		return astr;
+	}
+
 	pub fn print(&self, args: &VecDeque<Token>) -> String {
 		match self {
 			Operator::ImplicitMultiply |
@@ -130,9 +141,9 @@ impl Operator {
 				let (b, sub) = (b, sub);
 
 				if sub {
-					return format!("{} - {}", self.add_parens_to_arg(a), self.add_parens_to_arg(&b));
+					return format!("{} - {}", self.add_parens_to_arg(a), self.add_parens_to_arg(b));
 				} else {
-					return format!("{} + {}", self.add_parens_to_arg(a), self.add_parens_to_arg(&b));
+					return format!("{} + {}", self.add_parens_to_arg(a), self.add_parens_to_arg(b));
 				}
 			},
 			
@@ -149,25 +160,10 @@ impl Operator {
 				}
 				let (b, div) = (b, div);
 
-
-				let mut astr: String = a.print();
-				if let Token::Operator(o,_) = a {
-					if o < self {
-						astr = format!("({})", astr);
-					}
-				}
-
-				let mut bstr: String = b.print();
-				if let Token::Operator(o,_) = b {
-					if o < self {
-						bstr = format!("({})", astr);
-					}
-				}
-
 				if div {
-					return format!("{} ÷ {}", astr, bstr);
+					return format!("{} ÷ {}", self.add_parens_to_arg_strict(a), self.add_parens_to_arg_strict(b));
 				} else {
-					return format!("{} × {}", astr, bstr);
+					return format!("{} × {}", self.add_parens_to_arg_strict(a), self.add_parens_to_arg_strict(b));
 				}
 			},
 
