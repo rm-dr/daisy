@@ -9,7 +9,6 @@ This is nowhere near complete. Stay tuned.
 
 ## Before For 1.0 release
  - `+` as a unary operator
- - Compare operators => *, / should have the same priority!
  - Commands
  - Documentation (usage)
  - Documentation (comments)

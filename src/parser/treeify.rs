@@ -92,31 +92,31 @@ fn treeify_binary(
 
 
 	// Precedence of this operator
-	let this_val = {
+	let this_op = {
 		let PreToken::PreOperator(l, s) = this else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
-		o.unwrap().as_int()
+		o.unwrap()
 	};
 
 	// Precedence of the operators contesting our arguments
-	let left_val = if i > 1 {
+	let left_op = if i > 1 {
 		let PreToken::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
-		Some(o.unwrap().as_int())
+		Some(o.unwrap())
 	} else { None };
 
-	let right_val = if i < g_inner.len()-2 {
+	let right_op = if i < g_inner.len()-2 {
 		let PreToken::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
-		Some(o.unwrap().as_int())
+		Some(o.unwrap())
 	} else { None };
 
 	if {
-		(left_val.is_none() || this_val >= left_val.unwrap()) &&
-		(right_val.is_none() || this_val >= right_val.unwrap())
+		(left_op.is_none() || this_op >= left_op.unwrap()) &&
+		(right_op.is_none() || this_op >= right_op.unwrap())
 	} {
 		// This operator has higher precedence, it takes both arguments
 		let left_pre = g_inner.remove(i-1).unwrap();
@@ -208,31 +208,31 @@ fn treeify_unary(
 	} else {
 
 		// Precedence of this operator
-		let this_val = {
+		let this_op = {
 			let PreToken::PreOperator(l, s) = this else {panic!()};
 			let o = Operator::from_string(s);
 			if o.is_none() { return Err((*l, ParserError::Syntax)); }
-			o.unwrap().as_int()
+			o.unwrap()
 		};
 
 		// Precedence of the operator contesting its argument
-		let next_val = if left_associative {
+		let next_op = if left_associative {
 			if i > 1 {
 				let PreToken::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
 				let o = Operator::from_string(s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
-				Some(o.unwrap().as_int())
+				Some(o.unwrap())
 			} else { None }
 		} else {
 			if i < g_inner.len()-2 {
 				let PreToken::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
 				let o = Operator::from_string(s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
-				Some(o.unwrap().as_int())
+				Some(o.unwrap())
 			} else { None }
 		};
 
-		if next_val.is_none() || this_val > next_val.unwrap() {
+		if next_op.is_none() || this_op > next_op.unwrap() {
 			let this_pre = g_inner.remove(i).unwrap();
 			let next_pre: PreToken; let next: Token;
 			if left_associative {

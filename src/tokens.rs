@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use std::cmp::Ordering;
 
 use crate::quantity::Quantity;
 
@@ -90,6 +91,27 @@ pub enum Operator {
 	// Not accessible from prompt
 	Flip,
 }
+
+impl PartialEq for Operator {
+	fn eq(&self, other: &Self) -> bool {
+		self.as_int() == other.as_int()
+	}
+}
+
+impl PartialOrd for Operator {
+	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+		match (self, other) {
+			(Operator::Add, Operator::Subtract)
+			| (Operator::Subtract, Operator::Add)
+			| (Operator::Multiply, Operator::Divide)
+			| (Operator::Divide, Operator::Multiply)
+			=> {Some(Ordering::Equal)}
+
+			_ => { self.as_int().partial_cmp(&other.as_int()) }
+		}
+	}
+}
+
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 pub enum Function {
@@ -243,7 +265,7 @@ impl Operator {
 	fn add_parens_to_arg(&self, arg: &Token) -> String {
 		let mut astr: String = arg.print();
 		if let Token::Operator(o,_) = arg {
-			if o.as_int() < self.as_int() {
+			if o < self {
 				astr = format!("({})", astr);
 			}
 		}
@@ -339,14 +361,14 @@ impl Operator {
 
 				let mut astr: String = a.print();
 				if let Token::Operator(o,_) = a {
-					if o.as_int() < self.as_int() {
+					if o < self {
 						astr = format!("({})", astr);
 					}
 				}
 
 				let mut bstr: String = b.print();
 				if let Token::Operator(o,_) = b {
-					if o.as_int() < self.as_int() {
+					if o < self {
 						bstr = format!("({})", astr);
 					}
 				}
