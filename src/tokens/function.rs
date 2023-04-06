@@ -2,7 +2,6 @@ use std::collections::VecDeque;
 
 use crate::tokens::Token;
 use crate::tokens::Operator;
-//use crate::quantity::Quantity;
 
 
 #[derive(Debug)]
@@ -12,8 +11,7 @@ pub enum Function {
 	Floor,
 	Ceil,
 	Round,
-	
-	// TODO: Add arbitrary log
+
 	NaturalLog,
 	TenLog,
 

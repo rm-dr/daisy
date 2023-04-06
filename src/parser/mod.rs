@@ -155,9 +155,7 @@ pub fn parse(
 	let tokens = tokenize(s);
 	let (_, tokens) = find_subs(tokens);
 	let g = groupify(tokens)?;
-	println!("{:#?}", g);
 	let g = treeify(g)?;
-
 
 	return Ok(g);
 }
