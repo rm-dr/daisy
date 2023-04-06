@@ -7,6 +7,7 @@ Roadmap for fixes and features.
  - Documentation (usage)
  - Documentation (comments)
  - Units, unit conversion
+ - Fix negation: what should `-3^4` or `-x^2` be?
 
 ## General
  - CLI Options: version, help, evaluate
