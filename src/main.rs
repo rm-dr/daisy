@@ -176,8 +176,6 @@ mod tests {
 	// Many of these have been borrowed from insect.
 	use crate::parser;
 	use crate::evaluate;
-	use crate::tokens;
-	use crate::quantity::Quantity;
 
 	fn eval_to_str(s: &str) -> Result<String, ()> {
 		let g = match parser::parse(&String::from(s)) {
