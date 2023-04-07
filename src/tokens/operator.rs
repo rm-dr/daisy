@@ -108,8 +108,8 @@ impl Operator {
 			Operator::Power => {
 				return format!(
 					"{}^{}",
-					self.add_parens_to_arg(&args[0]),
-					self.add_parens_to_arg(&args[1])
+					self.add_parens_to_arg_strict(&args[0]),
+					self.add_parens_to_arg_strict(&args[1])
 				);
 			},
 
@@ -146,7 +146,7 @@ impl Operator {
 					return format!("{} + {}", self.add_parens_to_arg(a), self.add_parens_to_arg(b));
 				}
 			},
-			
+
 			Operator::Multiply => {
 				let a = &args[0];
 				let mut b = &args[1];
@@ -344,7 +344,7 @@ impl Operator{
 				}
 				return Ok(Token::Number(sum));
 			},
-			
+
 			Operator::Multiply => {
 				let mut prod = Quantity::new_rational(1,1);
 				for i in args.iter() {
@@ -357,7 +357,7 @@ impl Operator{
 				}
 				return Ok(Token::Number(prod));
 			},
-		
+
 			Operator::ModuloLong
 			| Operator::Modulo => {
 				if args.len() != 2 {panic!()};
@@ -366,7 +366,7 @@ impl Operator{
 
 				if let Token::Number(va) = a {
 					if let Token::Number(vb) = b {
-						if vb <= Quantity::new_rational(1,1) { return Err(()); } 
+						if vb <= Quantity::new_rational(1,1) { return Err(()); }
 						if va.fract() != Quantity::new_rational(0,1) { return Err(()); }
 						if vb.fract() != Quantity::new_rational(0,1) { return Err(()); }
 
