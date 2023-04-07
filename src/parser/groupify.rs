@@ -34,7 +34,7 @@ fn lookback_signs(
 			match (&a, &b) {
 				(PreToken::PreOperator(_, sa), PreToken::PreOperator(l,sb))
 				=> {
-					if sb == "-" && {
+					if {
 						let o = Operator::from_string(sa);
 
 						o.is_some() &&
@@ -43,12 +43,14 @@ fn lookback_signs(
 							!o.as_ref().unwrap().is_left_associative()
 						)
 					} {
-						g.insert(i-1, PreToken::PreOperator(*l, String::from("neg")));
-						g.insert(i-1, a);
-					} else if sb == "+" {
-						g.insert(i-1, a);
-						i -= 1; // g is now shorter, we don't need to advance i.
-						// This nullifies the i += 1 at the end of the loop.
+						if sb == "-" {
+							g.insert(i-1, PreToken::PreOperator(*l, String::from("neg")));
+							g.insert(i-1, a);
+						} else if sb == "+" {
+							g.insert(i-1, a);
+							i -= 1; // g is now shorter, we don't need to advance i.
+							// This nullifies the i += 1 at the end of the loop.
+						} else { g.insert(i-1, b); g.insert(i-1, a); }
 					} else { g.insert(i-1, b); g.insert(i-1, a); }
 				},
 
