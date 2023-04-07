@@ -30,13 +30,13 @@ fn lookback_signs(
 		} else {
 			let a: PreToken = g.remove(i-1).unwrap();
 			let b: PreToken = g.remove(i-1).unwrap();
-	
+
 			match (&a, &b) {
 				(PreToken::PreOperator(_, sa), PreToken::PreOperator(l,sb))
 				=> {
 					if sb == "-" && {
 						let o = Operator::from_string(sa);
-	
+
 						o.is_some() &&
 						(
 							o.as_ref().unwrap().is_binary() ||
@@ -59,43 +59,29 @@ fn lookback_signs(
 		i += 1;
 	}
 
-	// Make negative numbers negative numbers.
-	// We don't need `neg` operators in this case.
-	// Note that we read the token array right-to-left, since `neg` is right-associative.
-	let mut i: usize = g.len();
-	loop {
-		if i > 1 { i -= 1; } else { break; }
-
+	// Delete consecutive `neg`s
+	let mut i: usize = 1;
+	while i < g.len() {
 		let a: PreToken = g.remove(i-1).unwrap();
 		let b: PreToken = g.remove(i-1).unwrap();
 
 		match (&a, &b) {
-			(PreToken::PreOperator(la,sa), PreToken::PreNumber(lb,sb))
+			(PreToken::PreOperator(_,sa), PreToken::PreOperator(_,sb))
 			=> {
-				if sa == "neg" {
-					let first = &sb[0..1];
-					if first == "-" {
-						// Already negative. Remove the old one.
-						g.insert(i-1,
-							PreToken::PreNumber(
-								LineLocation { pos: la.pos, len: lb.pos - la.pos + lb.len },
-								format!("{}", &sb[1..])
-							)
-						);
-					} else {
-						// Not negative yet. Add one.
-						g.insert(i-1,
-							PreToken::PreNumber(
-								LineLocation { pos: la.pos, len: lb.pos - la.pos + lb.len },
-								format!("-{sb}")
-							)
-						);
-					}
-				} else { g.insert(i-1, b); g.insert(i-1, a); }
+				if !((sa == "neg") && (sb == "neg")) {
+					g.insert(i-1, b);
+					g.insert(i-1, a);
+					i += 1;
+				}
 			},
 
-			_ => { g.insert(i-1, b); g.insert(i-1, a); }
+			_ => {
+				g.insert(i-1, b);
+				g.insert(i-1, a);
+				i += 1;
+			}
 		}
+
 	}
 
 	return Ok(());
@@ -115,7 +101,7 @@ fn lookback(
 		if i >= 1 {
 			let a: PreToken = g.remove(i-1).unwrap();
 			let b: PreToken = g.remove(i-1).unwrap();
-	
+
 			match (&a, &b) {
 				// Insert ImplicitMultiply
 				(PreToken::PreGroup(_,_), PreToken::PreGroup(l ,_))
@@ -136,7 +122,7 @@ fn lookback(
 					));
 					g.insert(i-1, a);
 				},
-	
+
 				// Insert implicit multiplications for right-unary operators
 				(PreToken::PreNumber(_,_), PreToken::PreOperator(l,s))
 				| (PreToken::PreGroup(_,_), PreToken::PreOperator(l,s))
@@ -157,7 +143,7 @@ fn lookback(
 					}
 					g.insert(i-1, a);
 				},
-	
+
 				// Insert implicit multiplications for left-unary operators.
 				(PreToken::PreOperator(_,s), PreToken::PreNumber(l,_))
 				| (PreToken::PreOperator(_,s), PreToken::PreGroup(l,_))
