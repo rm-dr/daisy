@@ -12,10 +12,7 @@ Roadmap for fixes and features.
 ## General
  - CLI Options: version, help, evaluate
  - Compile to WASM, publish a webapp
- - Better tests
-   - Direct expression printing
-   - Better comparison
-   - Trigonometry
+ - Trigonometry & function tests
  - Manpage
 
 
