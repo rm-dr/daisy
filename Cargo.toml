@@ -1,7 +1,7 @@
 [package]
 name = "daisy"
 version = "0.0.1"
-edition = "2023"
+edition = "2021"
 
 [profile.release]
 opt-level = 3
