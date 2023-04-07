@@ -72,7 +72,14 @@ impl PreToken {
 	#[inline(always)]
 	pub fn to_token(self) -> Result<Token, (LineLocation, ParserError)>{
 		match self {
-			PreToken::PreNumber(l, s) => {
+			PreToken::PreNumber(l, mut s) => {
+
+				// The length check here ensures that
+				// `.` is not parsed as `0.`
+				// That should be a syntax error.
+				if s.len() != 1 && &s[0..1] == "." {
+					s.insert(0, '0');
+				}
 
 				let r = Quantity::new_rational_from_float_string(&s);
 				if r.is_none() {
