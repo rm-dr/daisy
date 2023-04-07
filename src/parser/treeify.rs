@@ -10,7 +10,7 @@ use crate::tokens::Operator;
 fn treeify_binary(
 	i: usize,
 	g_inner: &mut VecDeque<PreToken>
-) -> Result<(), (LineLocation, ParserError)> {
+) -> Result<bool, (LineLocation, ParserError)> {
 
 	let this: &PreToken = &g_inner[i];
 
@@ -61,7 +61,7 @@ fn treeify_binary(
 			(!o.is_binary()) &&
 			o.is_left_associative()
 		} {
-			return Ok(());
+			return Ok(false);
 		} else {
 			let tl = *this.get_line_location();
 			return Err((
@@ -80,7 +80,7 @@ fn treeify_binary(
 			(!o.is_binary()) &&
 			!o.is_left_associative()
 		} {
-			return Ok(());
+			return Ok(false);
 		} else {
 			let tl = *this.get_line_location();
 			return Err((
@@ -91,7 +91,7 @@ fn treeify_binary(
 	}
 
 
-	// Precedence of this operator
+	// This operator
 	let this_op = {
 		let PreToken::PreOperator(l, s) = this else {panic!()};
 		let o = Operator::from_string(s);
@@ -99,7 +99,7 @@ fn treeify_binary(
 		o.unwrap()
 	};
 
-	// Precedence of the operators contesting our arguments
+	// The operators contesting our arguments
 	let left_op = if i > 1 {
 		let PreToken::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
 		let o = Operator::from_string(s);
@@ -113,6 +113,7 @@ fn treeify_binary(
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		Some(o.unwrap())
 	} else { None };
+
 
 	if {
 		(left_op.is_none() || this_op >= left_op.unwrap()) &&
@@ -139,9 +140,9 @@ fn treeify_binary(
 
 		g_inner.insert(i-1, PreToken::Container(o.into_token(new_token_args)));
 
-		return Ok(());
+		return Ok(true);
 	} else {
-		return Ok(());
+		return Ok(false);
 	};
 }
 
@@ -149,7 +150,7 @@ fn treeify_unary(
 	i: usize,
 	g_inner: &mut VecDeque<PreToken>,
 	left_associative: bool
-) -> Result<(), (LineLocation, ParserError)> {
+) -> Result<bool, (LineLocation, ParserError)> {
 
 	let this: &PreToken = &g_inner[i];
 	let next: &PreToken;
@@ -207,7 +208,7 @@ fn treeify_unary(
 
 	} else {
 
-		// Precedence of this operator
+		// This operator
 		let this_op = {
 			let PreToken::PreOperator(l, s) = this else {panic!()};
 			let o = Operator::from_string(s);
@@ -215,7 +216,7 @@ fn treeify_unary(
 			o.unwrap()
 		};
 
-		// Precedence of the operator contesting its argument
+		// The operator contesting our argument
 		let next_op = if left_associative {
 			if i > 1 {
 				let PreToken::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
@@ -258,11 +259,11 @@ fn treeify_unary(
 				g_inner.insert(i, PreToken::Container(o.into_token(new_token_args)));
 			}
 
-			return Ok(());
+			return Ok(true);
 		} else {
 			// The operator to the right has higher precedence.
 			// Move on, don't to anything yet.
-			return Ok(());
+			return Ok(false);
 		};
 	};
 }
@@ -281,7 +282,6 @@ pub(in crate::parser) fn treeify(
 	let mut j: i64 = 0;
 	while g_inner.len() > 1 {
 
-
 		if j <= -1 {
 			left_associative = true;
 			j = 0;
@@ -291,6 +291,9 @@ pub(in crate::parser) fn treeify(
 		}
 
 		let i = j as usize;
+
+		// Convert preoperators
+		// If not an operator, move on.
 		let this_op = match &g_inner[i] {
 			PreToken::PreOperator(l, s) => {
 				let o = Operator::from_string(&s);
@@ -304,14 +307,20 @@ pub(in crate::parser) fn treeify(
 		};
 
 		if left_associative {
+			let mut changed = false;
 			if this_op.is_left_associative() {
 				if this_op.is_binary() {
-					treeify_binary(i, g_inner)?;
+					changed = treeify_binary(i, g_inner)?;
 				} else {
-					treeify_unary(i, g_inner, left_associative)?;
+					changed = treeify_unary(i, g_inner, left_associative)?;
 				}
 			}
-			j += 1 
+
+			// We only need to change j if we don't treeify.
+			// If the array length changes, j will point to the next
+			// element automatically.
+			if !changed { j += 1; }
+
 		} else {
 			if !this_op.is_left_associative() {
 				if this_op.is_binary() {
@@ -334,7 +343,7 @@ pub(in crate::parser) fn treeify(
 		PreToken::PreGroup(_,_) => {
 			treeify(g)
 		},
-		
+
 		_ => { Ok(g.to_token()?) }
 	};
 }

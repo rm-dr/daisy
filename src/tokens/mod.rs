@@ -10,7 +10,7 @@ pub use crate::tokens::operator::Operator;
 use crate::quantity::Quantity;
 
 /// Tokens represent logical objects in an expession.
-/// 
+///
 /// Tokens starting with `Pre*` are intermediate tokens, and
 /// will never show up in a fully-parsed expression tree.
 #[derive(Debug)]
