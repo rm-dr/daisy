@@ -14,6 +14,7 @@ Roadmap for fixes and features.
  - Compile to WASM, publish a webapp
  - Trigonometry & function tests
  - Manpage
+ - Better print parens
 
 
 ## Internals
