@@ -22,7 +22,9 @@ fn lookback_signs(
 				=> {
 					if o == "-" {
 						g.insert(i, PreToken::PreOperator(*l, String::from("neg")));
-					} else if o != "+" { g.insert(i, a); }
+					} else if o == "+" {
+						continue; // We should not increment i if we remove a token
+					} else {g.insert(i, a);}
 				},
 				_ => { g.insert(i, a); }
 			};
