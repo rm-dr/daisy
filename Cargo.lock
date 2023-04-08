@@ -19,7 +19,6 @@ name = "daisy"
 version = "0.0.1"
 dependencies = [
  "rug",
- "signal-hook",
  "termion",
 ]
 
