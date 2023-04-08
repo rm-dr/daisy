@@ -20,7 +20,7 @@ Roadmap for fixes and features.
 ## Internals
  - Non-recursive treeify
  - Faster factorial function. Maybe use gamma instead?
- - Remove extra calls to `.clone()`
+ - Remove extra calls to `.clone()` in quantity module
  - Arbitrary precision float (rug doesn't offer arbitrary exponents)
 
 
