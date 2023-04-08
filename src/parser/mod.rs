@@ -12,7 +12,7 @@ use crate::parser::groupify::groupify;
 use crate::parser::treeify::treeify;
 use crate::parser::find_subs::find_subs;
 
-use crate::quantity::Quantity;
+use crate::quantity::{Quantity, BaseUnit};
 
 use crate::tokens::Token;
 
@@ -95,6 +95,19 @@ impl PreToken {
 					"π"|"pi" => { Token::Constant(Quantity::new_float_from_string("3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067").unwrap(), String::from("π")) },
 					"e" => { Token::Constant(Quantity::new_float_from_string("2.718281828459045235360287471352662497757247093699959574966967627724076630353547594571382178525166427").unwrap(), String::from("e")) },
 					"phi"|"φ" => { Token::Constant(Quantity::new_float_from_string("1.618033988749894848204586834365638117720309179805762862135448622705260462818902449707207204189391137").unwrap(), String::from("φ")) },
+
+					// Units
+					"m" => {
+						let mut u = Quantity::new_rational(1, 1);
+						u.add_unit(BaseUnit::Meter, 1f64);
+						Token::Number(u)
+					},
+
+					"s" => {
+						let mut u = Quantity::new_rational(1, 1);
+						u.add_unit(BaseUnit::Second, 1f64);
+						Token::Number(u)
+					}
 
 					_ => { return Err((l, ParserError::Undefined(s))); }
 				});

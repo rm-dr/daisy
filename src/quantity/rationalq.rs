@@ -11,17 +11,13 @@ use std::ops::{
 
 use std::cmp::Ordering;
 
-use crate::quantity::wrap_rational;
-use crate::quantity::Quantity;
 use crate::quantity::QuantBase;
 use crate::quantity::RationalBase;
 
 
-macro_rules! float_foward {
+macro_rules! cant_do {
 	( $x:ident ) => {
-		fn $x(&self) -> Quantity {
-			Quantity::float_from_rat(&wrap_rational!(self.clone())).$x()
-		}
+		fn $x(&self) -> Option<RationalQ> { None }
 	}
 }
 
@@ -43,52 +39,46 @@ fn to_sign_string_exp(&self, radix: i32, num_digits: Option<usize>) -> (bool, St
 
 impl ToString for RationalQ{
 	fn to_string(&self) -> String {
-		let v = Quantity::float_from_rat(&wrap_rational!(self.clone()));
-		return v.to_string();
+		return self.val.to_string();
 	}
 }
 
 impl QuantBase for RationalQ {
 
-	fn fract(&self) -> Quantity {
-		wrap_rational!(RationalQ{val: self.val.clone().fract_floor(Integer::new()).0})
+	fn fract(&self) -> Option<RationalQ> {
+		Some(RationalQ{val: self.val.clone().fract_floor(Integer::new()).0})
 	}
 
 	fn is_zero(&self) -> bool {self.val == Rational::from((0,1))}
 	fn is_negative(&self) -> bool { self.val.clone().signum() == -1 }
 	fn is_positive(&self) -> bool { self.val.clone().signum() == 1 }
 
-	fn abs(&self) -> Quantity {wrap_rational!(RationalQ{val: self.val.clone().abs()})}
-	fn floor(&self) -> Quantity {wrap_rational!(RationalQ{val: self.val.clone().floor()})}
-	fn ceil(&self) -> Quantity {wrap_rational!(RationalQ{val: self.val.clone().ceil()})}
-	fn round(&self) -> Quantity {wrap_rational!(RationalQ{val: self.val.clone().round()})}
+	fn abs(&self) -> Option<RationalQ> {Some(RationalQ{val: self.val.clone().abs()})}
+	fn floor(&self) -> Option<RationalQ> {Some(RationalQ{val: self.val.clone().floor()})}
+	fn ceil(&self) -> Option<RationalQ> {Some(RationalQ{val: self.val.clone().ceil()})}
+	fn round(&self) -> Option<RationalQ> {Some(RationalQ{val: self.val.clone().round()})}
 
-	float_foward!(sin);
-	float_foward!(cos);
-	float_foward!(tan);
-	float_foward!(asin);
-	float_foward!(acos);
-	float_foward!(atan);
+	cant_do!(sin);
+	cant_do!(cos);
+	cant_do!(tan);
+	cant_do!(asin);
+	cant_do!(acos);
+	cant_do!(atan);
 
-	float_foward!(sinh);
-	float_foward!(cosh);
-	float_foward!(tanh);
-	float_foward!(asinh);
-	float_foward!(acosh);
-	float_foward!(atanh);
+	cant_do!(sinh);
+	cant_do!(cosh);
+	cant_do!(tanh);
+	cant_do!(asinh);
+	cant_do!(acosh);
+	cant_do!(atanh);
 
-	float_foward!(exp);
-	float_foward!(ln);
-	float_foward!(log10);
-	float_foward!(log2);
+	cant_do!(exp);
+	cant_do!(ln);
+	cant_do!(log10);
+	cant_do!(log2);
 
-	fn log(&self, base: Quantity) -> Quantity {
-		Quantity::float_from_rat(&wrap_rational!(self.clone())).log10() / base.log10()
-	}
-
-	fn pow(&self, base: Quantity) -> Quantity {
-		Quantity::float_from_rat(&wrap_rational!(self.clone())).pow(base)
-	}
+	fn log(&self, _base: RationalQ) -> Option<RationalQ> { None }
+	fn pow(&self, _base: RationalQ) -> Option<RationalQ> { None }
 
 }
 

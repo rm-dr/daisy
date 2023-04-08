@@ -25,6 +25,9 @@ cross-compilation to other systems. RUG does not work on all systems.
 */
 
 pub mod quantity;
+mod unit;
+pub use crate::quantity::unit::Unit;
+pub use crate::quantity::unit::BaseUnit;
 
 cfg_if::cfg_if! {
 	if #[cfg(target_family = "unix")] {
@@ -36,11 +39,11 @@ cfg_if::cfg_if! {
 }
 
 macro_rules! wrap_rational {
-	( $x:expr ) => { Quantity::Rational{v: $x} }
+	( $x:expr, $y:expr ) => { Quantity::Rational{v: $x, u: $y} }
 }
 
 macro_rules! wrap_float {
-	( $x:expr ) => { Quantity::Float{v: $x} }
+	( $x:expr, $y:expr ) => { Quantity::Float{v: $x, u: $y} }
 }
 
 pub use crate::quantity::quantity::Quantity;
@@ -72,31 +75,31 @@ pub trait QuantBase:
 	Neg + Rem +
 	PartialEq + PartialOrd
 {
-	fn fract(&self) -> Quantity;
+	fn fract(&self) -> Option<Self>;
 	fn is_zero(&self) -> bool;
 	fn is_negative(&self) -> bool;
 	fn is_positive(&self) -> bool;
 
-	fn exp(&self) -> Quantity;
-	fn abs(&self) -> Quantity;
-	fn floor(&self) -> Quantity;
-	fn ceil(&self) -> Quantity;
-	fn round(&self) -> Quantity;
-	fn sin(&self) -> Quantity;
-	fn cos(&self) -> Quantity;
-	fn tan(&self) -> Quantity;
-	fn asin(&self) -> Quantity;
-	fn acos(&self) -> Quantity;
-	fn atan(&self) -> Quantity;
-	fn sinh(&self) -> Quantity;
-	fn cosh(&self) -> Quantity;
-	fn tanh(&self) -> Quantity;
-	fn asinh(&self) -> Quantity;
-	fn acosh(&self) -> Quantity;
-	fn atanh(&self) -> Quantity;
-	fn ln(&self) -> Quantity;
-	fn log10(&self) -> Quantity;
-	fn log2(&self) -> Quantity;
-	fn log(&self, base: Quantity) -> Quantity;
-	fn pow(&self, exp: Quantity) -> Quantity;
+	fn exp(&self) -> Option<Self>;
+	fn abs(&self) -> Option<Self>;
+	fn floor(&self) -> Option<Self>;
+	fn ceil(&self) -> Option<Self>;
+	fn round(&self) -> Option<Self>;
+	fn sin(&self) -> Option<Self>;
+	fn cos(&self) -> Option<Self>;
+	fn tan(&self) -> Option<Self>;
+	fn asin(&self) -> Option<Self>;
+	fn acos(&self) -> Option<Self>;
+	fn atan(&self) -> Option<Self>;
+	fn sinh(&self) -> Option<Self>;
+	fn cosh(&self) -> Option<Self>;
+	fn tanh(&self) -> Option<Self>;
+	fn asinh(&self) -> Option<Self>;
+	fn acosh(&self) -> Option<Self>;
+	fn atanh(&self) -> Option<Self>;
+	fn ln(&self) -> Option<Self>;
+	fn log10(&self) -> Option<Self>;
+	fn log2(&self) -> Option<Self>;
+	fn log(&self, base: Self) -> Option<Self>;
+	fn pow(&self, exp: Self) -> Option<Self>;
 }

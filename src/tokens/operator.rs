@@ -4,7 +4,6 @@ use std::cmp::Ordering;
 use crate::tokens::Token;
 use crate::tokens::Function;
 use crate::quantity::Quantity;
-use crate::quantity::QuantBase;
 
 /// Operator types, in order of increasing priority.
 #[derive(Debug)]

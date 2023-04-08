@@ -13,8 +13,6 @@ use std::ops::{
 
 use std::cmp::Ordering;
 
-use crate::quantity::wrap_float;
-use crate::quantity::Quantity;
 use crate::quantity::QuantBase;
 use crate::quantity::FloatBase;
 use crate::quantity::PRINT_LEN;
@@ -24,8 +22,8 @@ use super::FLOAT_PRECISION;
 
 macro_rules! foward {
 	( $x:ident ) => {
-		fn $x(&self) -> Quantity {
-			wrap_float!(FloatQ{ val: self.val.clone().$x()})
+		fn $x(&self) -> Option<FloatQ> {
+			Some(FloatQ{ val: self.val.clone().$x()})
 		}
 	}
 }
@@ -135,17 +133,12 @@ impl QuantBase for FloatQ {
 	foward!(log10);
 	foward!(log2);
 
-	fn log(&self, base: Quantity) -> Quantity {
-		wrap_float!(FloatQ{ val: self.val.clone().log10() }) /
-		Quantity::float_from_rat(&base).log10()
+	fn log(&self, base: FloatQ) -> Option<FloatQ> {
+		Some(FloatQ{ val: self.val.clone().log10() } / base.log10().unwrap())
 	}
 
-	fn pow(&self, base: Quantity) -> Quantity {
-		match base {
-			Quantity::Rational { .. } => self.pow(Quantity::float_from_rat(&base)),
-			Quantity::Float { v } => wrap_float!(FloatQ{ val: self.val.clone().pow(v.val)})
-		}
-		
+	fn pow(&self, base: FloatQ) -> Option<FloatQ> {
+		Some(FloatQ{ val: self.val.clone().pow(base.val)})
 	}
 
 }
@@ -242,8 +235,8 @@ impl Rem<FloatQ> for FloatQ {
 
 	fn rem(self, modulus: FloatQ) -> Self::Output {
 		if {
-			(!self.fract().is_zero()) ||
-			(!modulus.fract().is_zero())
+			(!self.fract().unwrap().is_zero()) ||
+			(!modulus.fract().unwrap().is_zero())
 		} { panic!() }
 
 		FloatQ{val : self.val.fract() % modulus.val.fract()}
