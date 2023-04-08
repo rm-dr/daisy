@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use crate::tokens::Token;
 use crate::tokens::Operator;
-
+use crate::quantity::QuantBase;
 
 #[derive(Debug)]
 #[derive(Copy, Clone)]

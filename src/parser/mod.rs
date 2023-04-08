@@ -81,7 +81,7 @@ impl PreToken {
 					s.insert(0, '0');
 				}
 
-				let r = Quantity::new_rational_from_float_string(&s);
+				let r = Quantity::new_rational_from_string(&s);
 				if r.is_none() {
 					return Err((l, ParserError::BadNumber))
 				}

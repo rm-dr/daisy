@@ -1,5 +1,3 @@
-use rug::Float;
-use rug::ops::Pow;
 use rug::Rational;
 use rug::Integer;
 
@@ -15,20 +13,19 @@ use std::cmp::Ordering;
 
 
 use crate::quantity::Quantity;
-use crate::quantity::FLOAT_PRECISION;
+use crate::quantity::QuantBase;
+use crate::quantity::RationalBase;
 
-macro_rules! rational {
-	( $x:expr ) => {
-		Quantity::Rational { v: RationalQ {
-			val : $x
-		}}
-	};
+macro_rules! wraprat {
+	( $x:expr ) => { Quantity::Rational{v: $x} }
 }
 
-macro_rules! float {
-	( $x:expr ) => {
-		Quantity::Float { v: $x }
-	};
+macro_rules! float_foward {
+	( $x:ident ) => {
+		fn $x(&self) -> Quantity {
+			Quantity::float_from_rat(&wraprat!(self.clone())).$x()
+		}
+	}
 }
 
 #[derive(Debug)]
@@ -37,93 +34,137 @@ pub struct RationalQ where {
 	pub val: Rational
 }
 
-impl ToString for RationalQ {
+/*
+fn to_string_radix(&self, radix: i32, num_digits: Option<usize>) -> String {
+	self.to_float().to_string_radix(radix, num_digits)
+}
+
+fn to_sign_string_exp(&self, radix: i32, num_digits: Option<usize>) -> (bool, String, Option<i32>) {
+	self.to_float().to_sign_string_exp(radix, num_digits)
+}
+*/
+
+impl ToString for RationalQ{
 	fn to_string(&self) -> String {
-		self.to_float().to_string()
+		let v = Quantity::float_from_rat(&wraprat!(self.clone()));
+		return v.to_string();
 	}
 }
 
-impl RationalQ {
-	pub fn new(top: i64, bot: i64) -> RationalQ {
+impl QuantBase for RationalQ {
+
+	fn fract(&self) -> Quantity {
+		wraprat!(RationalQ{val: self.val.clone().fract_floor(Integer::new()).0})
+	}
+
+	fn is_zero(&self) -> bool {self.val == Rational::from((0,1))}
+	fn is_negative(&self) -> bool { self.val.clone().signum() == -1 }
+	fn is_positive(&self) -> bool { self.val.clone().signum() == 1 }
+
+	fn abs(&self) -> Quantity {wraprat!(RationalQ{val: self.val.clone().abs()})}
+	fn floor(&self) -> Quantity {wraprat!(RationalQ{val: self.val.clone().floor()})}
+	fn ceil(&self) -> Quantity {wraprat!(RationalQ{val: self.val.clone().ceil()})}
+	fn round(&self) -> Quantity {wraprat!(RationalQ{val: self.val.clone().round()})}
+
+	float_foward!(sin);
+	float_foward!(cos);
+	float_foward!(tan);
+	float_foward!(asin);
+	float_foward!(acos);
+	float_foward!(atan);
+
+	float_foward!(sinh);
+	float_foward!(cosh);
+	float_foward!(tanh);
+	float_foward!(asinh);
+	float_foward!(acosh);
+	float_foward!(atanh);
+
+	float_foward!(exp);
+	float_foward!(ln);
+	float_foward!(log10);
+	float_foward!(log2);
+
+	fn log(&self, base: Quantity) -> Quantity {
+		Quantity::float_from_rat(&wraprat!(self.clone())).log10() / base.log10()
+	}
+
+	fn pow(&self, base: Quantity) -> Quantity {
+		Quantity::float_from_rat(&wraprat!(self.clone())).pow(base)
+	}
+
+}
+
+impl RationalBase for RationalQ {
+	fn from_frac(top: i64, bot: i64) -> RationalQ {
 		return RationalQ {
 			val: Rational::from((top, bot))
 		}
 	}
 
-	pub fn is_zero(&self) -> bool{
-		return self.val == Rational::from((0,1));
-	}
-	pub fn fract(&self) -> Quantity {
-		rational!(self.val.clone().fract_floor(Integer::new()).0)
-	}
-
-	pub fn from_f64(f: f64) -> Option<RationalQ> {
+	fn from_f64(f: f64) -> Option<RationalQ> {
 		let v = Rational::from_f64(f);
 		if v.is_none() { return None }
 		return Some(RationalQ{ val: v.unwrap() });
 	}
 
-	pub fn from_string(s: &str) -> Option<RationalQ> {
-		let v = Rational::from_str_radix(s, 10);
-		let v = match v {
+	fn from_string(s: &str) -> Option<RationalQ> {
+		// Scientific notation
+		let mut sci = s.split("e");
+		let num = sci.next().unwrap();
+		let exp = sci.next();
+
+		let exp = if exp.is_some() {
+			let r = exp.unwrap().parse::<isize>();
+			match r {
+				Ok(x) => x,
+				Err(_) => return None
+			}
+		} else {0isize};
+
+		// Split integer and decimal parts
+		let mut dec = num.split(".");
+		let a = dec.next().unwrap();
+		let b = dec.next();
+		let b = if b.is_some() {b.unwrap()} else {""};
+
+		// Error conditions
+		if {
+			dec.next().is_some() || // We should have at most one `.`
+			sci.next().is_some() || // We should have at most one `e`
+			a.len() == 0 // We need something in the numerator
+		} { return None; }
+
+		let s: String;
+		if exp < 0 {
+			let exp: usize = (-exp).try_into().unwrap();
+			s = format!("{a}{b}/1{}", "0".repeat(b.len() + exp));
+		} else if exp > 0 {
+			let exp: usize = exp.try_into().unwrap();
+			s = format!(
+				"{a}{b}{}/1{}",
+				"0".repeat(exp),
+				"0".repeat(b.len())
+			);
+		} else { // exp == 0
+			s = format!("{a}{b}/1{}", "0".repeat(b.len()));
+		};
+
+
+		// From fraction string
+		let r = Rational::from_str_radix(&s, 10);
+		let r = match r {
 			Ok(x) => x,
 			Err(_) => return None
 		};
-		return Some(RationalQ{ val: v });
+
+		return Some(RationalQ{val: r});
+
 	}
 
-	pub fn to_float(&self) -> Float {
-		Float::with_val(FLOAT_PRECISION, self.val.numer()) /
-		Float::with_val(FLOAT_PRECISION, self.val.denom())
-	}
-
-	pub fn to_string_radix(&self, radix: i32, num_digits: Option<usize>) -> String {
-		self.to_float().to_string_radix(radix, num_digits)
-	}
-
-	pub fn to_sign_string_exp(&self, radix: i32, num_digits: Option<usize>) -> (bool, String, Option<i32>) {
-		self.to_float().to_sign_string_exp(radix, num_digits)
-	}
-
-
-	pub fn is_negative(&self) -> bool { self.val.clone().signum() == -1 }
-	pub fn is_positive(&self) -> bool { self.val.clone().signum() == 1 }
-
-	pub fn exp(&self) -> Quantity {float!(self.to_float().exp())}
-
-	pub fn abs(&self) -> Quantity {rational!(self.val.clone().abs())}
-	pub fn floor(&self) -> Quantity {rational!(self.val.clone().floor())}
-	pub fn ceil(&self) -> Quantity {rational!(self.val.clone().ceil())}
-	pub fn round(&self) -> Quantity {rational!(self.val.clone().round())}
-
-	pub fn sin(&self) -> Quantity {float!(self.to_float().sin())}
-	pub fn cos(&self) -> Quantity {float!(self.to_float().cos())}
-	pub fn tan(&self) -> Quantity {float!(self.to_float().tan())}
-	pub fn asin(&self) -> Quantity {float!(self.to_float().asin())}
-	pub fn acos(&self) -> Quantity {float!(self.to_float().acos())}
-	pub fn atan(&self) -> Quantity {float!(self.to_float().atan())}
-
-	pub fn sinh(&self) -> Quantity {float!(self.to_float().sinh())}
-	pub fn cosh(&self) -> Quantity {float!(self.to_float().cosh())}
-	pub fn tanh(&self) -> Quantity {float!(self.to_float().tanh())}
-	pub fn asinh(&self) -> Quantity {float!(self.to_float().asinh())}
-	pub fn acosh(&self) -> Quantity {float!(self.to_float().acosh())}
-	pub fn atanh(&self) -> Quantity {float!(self.to_float().atanh())}
-
-	pub fn ln(&self) -> Quantity {float!(self.to_float().ln())}
-	pub fn log10(&self) -> Quantity {float!(self.to_float().log10())}
-	pub fn log2(&self) -> Quantity {float!(self.to_float().log2())}
-
-	pub fn log(&self, base: Quantity) -> Quantity {
-		float!(self.to_float().log10() / base.to_float().log10())
-	}
-	
-
-
-	pub fn pow(&self, exp: Quantity) -> Quantity {
-		float!(self.to_float().pow(exp.to_float()))
-	}
 }
+
+
 
 impl Add for RationalQ where {
 	type Output = Self;
