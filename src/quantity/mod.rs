@@ -7,12 +7,29 @@ use std::ops::{
 };
 
 
-
-mod rationalq;
-mod floatq;
 pub mod quantity;
 
+cfg_if::cfg_if! {
+	if #[cfg(target_arch = "unix")] {
+		mod rationalq;
+		mod floatq;
+	} else {
+		mod f64q;
+	}
+}
+
+macro_rules! wrap_rational {
+	( $x:expr ) => { Quantity::Rational{v: $x} }
+}
+
+macro_rules! wrap_float {
+	( $x:expr ) => { Quantity::Float{v: $x} }
+}
+
 pub use crate::quantity::quantity::Quantity;
+pub(in crate::quantity) use wrap_rational;
+pub(in crate::quantity) use wrap_float;
+
 
 const FLOAT_PRECISION: u32 = 1024;
 const PRINT_LEN: usize = 5; // How many significant digits we will show in output

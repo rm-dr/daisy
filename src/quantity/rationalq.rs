@@ -11,19 +11,16 @@ use std::ops::{
 
 use std::cmp::Ordering;
 
-
+use crate::quantity::wrap_rational;
 use crate::quantity::Quantity;
 use crate::quantity::QuantBase;
 use crate::quantity::RationalBase;
 
-macro_rules! wraprat {
-	( $x:expr ) => { Quantity::Rational{v: $x} }
-}
 
 macro_rules! float_foward {
 	( $x:ident ) => {
 		fn $x(&self) -> Quantity {
-			Quantity::float_from_rat(&wraprat!(self.clone())).$x()
+			Quantity::float_from_rat(&wrap_rational!(self.clone())).$x()
 		}
 	}
 }
@@ -46,7 +43,7 @@ fn to_sign_string_exp(&self, radix: i32, num_digits: Option<usize>) -> (bool, St
 
 impl ToString for RationalQ{
 	fn to_string(&self) -> String {
-		let v = Quantity::float_from_rat(&wraprat!(self.clone()));
+		let v = Quantity::float_from_rat(&wrap_rational!(self.clone()));
 		return v.to_string();
 	}
 }
@@ -54,17 +51,17 @@ impl ToString for RationalQ{
 impl QuantBase for RationalQ {
 
 	fn fract(&self) -> Quantity {
-		wraprat!(RationalQ{val: self.val.clone().fract_floor(Integer::new()).0})
+		wrap_rational!(RationalQ{val: self.val.clone().fract_floor(Integer::new()).0})
 	}
 
 	fn is_zero(&self) -> bool {self.val == Rational::from((0,1))}
 	fn is_negative(&self) -> bool { self.val.clone().signum() == -1 }
 	fn is_positive(&self) -> bool { self.val.clone().signum() == 1 }
 
-	fn abs(&self) -> Quantity {wraprat!(RationalQ{val: self.val.clone().abs()})}
-	fn floor(&self) -> Quantity {wraprat!(RationalQ{val: self.val.clone().floor()})}
-	fn ceil(&self) -> Quantity {wraprat!(RationalQ{val: self.val.clone().ceil()})}
-	fn round(&self) -> Quantity {wraprat!(RationalQ{val: self.val.clone().round()})}
+	fn abs(&self) -> Quantity {wrap_rational!(RationalQ{val: self.val.clone().abs()})}
+	fn floor(&self) -> Quantity {wrap_rational!(RationalQ{val: self.val.clone().floor()})}
+	fn ceil(&self) -> Quantity {wrap_rational!(RationalQ{val: self.val.clone().ceil()})}
+	fn round(&self) -> Quantity {wrap_rational!(RationalQ{val: self.val.clone().round()})}
 
 	float_foward!(sin);
 	float_foward!(cos);
@@ -86,11 +83,11 @@ impl QuantBase for RationalQ {
 	float_foward!(log2);
 
 	fn log(&self, base: Quantity) -> Quantity {
-		Quantity::float_from_rat(&wraprat!(self.clone())).log10() / base.log10()
+		Quantity::float_from_rat(&wrap_rational!(self.clone())).log10() / base.log10()
 	}
 
 	fn pow(&self, base: Quantity) -> Quantity {
-		Quantity::float_from_rat(&wraprat!(self.clone())).pow(base)
+		Quantity::float_from_rat(&wrap_rational!(self.clone())).pow(base)
 	}
 
 }

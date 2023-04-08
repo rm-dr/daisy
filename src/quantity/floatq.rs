@@ -13,7 +13,7 @@ use std::ops::{
 
 use std::cmp::Ordering;
 
-
+use crate::quantity::wrap_float;
 use crate::quantity::Quantity;
 use crate::quantity::QuantBase;
 use crate::quantity::FloatBase;
@@ -25,7 +25,7 @@ use super::FLOAT_PRECISION;
 macro_rules! foward {
 	( $x:ident ) => {
 		fn $x(&self) -> Quantity {
-			Quantity::Float{v: FloatQ{ val: self.val.clone().$x() }}
+			wrap_float!(FloatQ{ val: self.val.clone().$x()})
 		}
 	}
 }
@@ -136,14 +136,14 @@ impl QuantBase for FloatQ {
 	foward!(log2);
 
 	fn log(&self, base: Quantity) -> Quantity {
-		Quantity::Float{v: FloatQ{ val: self.val.clone().log10() }} /
+		wrap_float!(FloatQ{ val: self.val.clone().log10() }) /
 		Quantity::float_from_rat(&base).log10()
 	}
 
 	fn pow(&self, base: Quantity) -> Quantity {
 		match base {
 			Quantity::Rational { .. } => self.pow(Quantity::float_from_rat(&base)),
-			Quantity::Float { v } => Quantity::Float{v: FloatQ{ val: self.val.clone().pow(v.val) }}
+			Quantity::Float { v } => wrap_float!(FloatQ{ val: self.val.clone().pow(v.val)})
 		}
 		
 	}
