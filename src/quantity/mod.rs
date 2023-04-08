@@ -27,7 +27,7 @@ cross-compilation to other systems. RUG does not work on all systems.
 pub mod quantity;
 
 cfg_if::cfg_if! {
-	if #[cfg(target_arch = "unix")] {
+	if #[cfg(target_family = "unix")] {
 		mod rationalq;
 		mod floatq;
 	} else {

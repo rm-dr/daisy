@@ -16,7 +16,7 @@ use crate::quantity::FloatBase;
 
 
 cfg_if::cfg_if! {
-	if #[cfg(target_arch = "unix")] {
+	if #[cfg(target_family = "unix")] {
 		use crate::quantity::rationalq::RationalQ;
 		use crate::quantity::floatq::FloatQ;
 
@@ -42,7 +42,7 @@ cfg_if::cfg_if! {
 impl Quantity {
 
 	cfg_if::cfg_if! {
-		if #[cfg(target_arch = "unix")] {
+		if #[cfg(target_family = "unix")] {
 			pub fn new_rational(top: i64, bottom: i64) -> Quantity {
 				return wrap_rational!(RationalQ::from_frac(top, bottom));
 			}
