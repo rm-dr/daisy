@@ -10,20 +10,18 @@ use std::ops::{
 };
 
 use std::cmp::Ordering;
-
-use crate::quantity::QuantBase;
-use crate::quantity::RationalBase;
+use super::ScalarBase;
 
 
 macro_rules! cant_do {
 	( $x:ident ) => {
-		fn $x(&self) -> Option<RationalQ> { None }
+		fn $x(&self) -> Option<RationalBase> { None }
 	}
 }
 
 #[derive(Debug)]
 #[derive(Clone)]
-pub struct RationalQ where {
+pub struct RationalBase where {
 	pub val: Rational
 }
 
@@ -37,65 +35,22 @@ fn to_sign_string_exp(&self, radix: i32, num_digits: Option<usize>) -> (bool, St
 }
 */
 
-impl ToString for RationalQ{
+impl ToString for RationalBase{
 	fn to_string(&self) -> String {
 		return self.val.to_string();
 	}
 }
 
-impl QuantBase for RationalQ {
+impl ScalarBase for RationalBase {
 
-	fn fract(&self) -> Option<RationalQ> {
-		Some(RationalQ{val: self.val.clone().fract_floor(Integer::new()).0})
-	}
 
-	fn is_zero(&self) -> bool {self.val == Rational::from((0,1))}
-	fn is_negative(&self) -> bool { self.val.clone().signum() == -1 }
-	fn is_positive(&self) -> bool { self.val.clone().signum() == 1 }
-
-	fn abs(&self) -> Option<RationalQ> {Some(RationalQ{val: self.val.clone().abs()})}
-	fn floor(&self) -> Option<RationalQ> {Some(RationalQ{val: self.val.clone().floor()})}
-	fn ceil(&self) -> Option<RationalQ> {Some(RationalQ{val: self.val.clone().ceil()})}
-	fn round(&self) -> Option<RationalQ> {Some(RationalQ{val: self.val.clone().round()})}
-
-	cant_do!(sin);
-	cant_do!(cos);
-	cant_do!(tan);
-	cant_do!(asin);
-	cant_do!(acos);
-	cant_do!(atan);
-
-	cant_do!(sinh);
-	cant_do!(cosh);
-	cant_do!(tanh);
-	cant_do!(asinh);
-	cant_do!(acosh);
-	cant_do!(atanh);
-
-	cant_do!(exp);
-	cant_do!(ln);
-	cant_do!(log10);
-	cant_do!(log2);
-
-	fn log(&self, _base: RationalQ) -> Option<RationalQ> { None }
-	fn pow(&self, _base: RationalQ) -> Option<RationalQ> { None }
-
-}
-
-impl RationalBase for RationalQ {
-	fn from_frac(top: i64, bot: i64) -> RationalQ {
-		return RationalQ {
-			val: Rational::from((top, bot))
-		}
-	}
-
-	fn from_f64(f: f64) -> Option<RationalQ> {
+	fn from_f64(f: f64) -> Option<RationalBase> {
 		let v = Rational::from_f64(f);
 		if v.is_none() { return None }
-		return Some(RationalQ{ val: v.unwrap() });
+		return Some(RationalBase{ val: v.unwrap() });
 	}
 
-	fn from_string(s: &str) -> Option<RationalQ> {
+	fn from_string(s: &str) -> Option<RationalBase> {
 		// Scientific notation
 		let mut sci = s.split("e");
 		let num = sci.next().unwrap();
@@ -145,15 +100,50 @@ impl RationalBase for RationalQ {
 			Err(_) => return None
 		};
 
-		return Some(RationalQ{val: r});
+		return Some(RationalBase{val: r});
 
 	}
+
+
+	fn fract(&self) -> Option<RationalBase> {
+		Some(RationalBase{val: self.val.clone().fract_floor(Integer::new()).0})
+	}
+
+	fn is_zero(&self) -> bool {self.val == Rational::from((0,1))}
+	fn is_negative(&self) -> bool { self.val.clone().signum() == -1 }
+	fn is_positive(&self) -> bool { self.val.clone().signum() == 1 }
+
+	fn abs(&self) -> Option<RationalBase> {Some(RationalBase{val: self.val.clone().abs()})}
+	fn floor(&self) -> Option<RationalBase> {Some(RationalBase{val: self.val.clone().floor()})}
+	fn ceil(&self) -> Option<RationalBase> {Some(RationalBase{val: self.val.clone().ceil()})}
+	fn round(&self) -> Option<RationalBase> {Some(RationalBase{val: self.val.clone().round()})}
+
+	cant_do!(sin);
+	cant_do!(cos);
+	cant_do!(tan);
+	cant_do!(asin);
+	cant_do!(acos);
+	cant_do!(atan);
+
+	cant_do!(sinh);
+	cant_do!(cosh);
+	cant_do!(tanh);
+	cant_do!(asinh);
+	cant_do!(acosh);
+	cant_do!(atanh);
+
+	cant_do!(exp);
+	cant_do!(ln);
+	cant_do!(log10);
+	cant_do!(log2);
+
+	fn log(&self, _base: RationalBase) -> Option<RationalBase> { None }
+	fn pow(&self, _base: RationalBase) -> Option<RationalBase> { None }
 
 }
 
 
-
-impl Add for RationalQ where {
+impl Add for RationalBase where {
 	type Output = Self;
 
 	fn add(self, other: Self) -> Self::Output {
@@ -163,13 +153,13 @@ impl Add for RationalQ where {
 	}
 }
 
-impl AddAssign for RationalQ where {
+impl AddAssign for RationalBase where {
 	fn add_assign(&mut self, other: Self) {
 		self.val += other.val;
 	}
 }
 
-impl Sub for RationalQ {
+impl Sub for RationalBase {
 	type Output = Self;
 
 	fn sub(self, other: Self) -> Self::Output {
@@ -179,13 +169,13 @@ impl Sub for RationalQ {
 	}
 }
 
-impl SubAssign for RationalQ where {
+impl SubAssign for RationalBase where {
 	fn sub_assign(&mut self, other: Self) {
 		self.val -= other.val;
 	}
 }
 
-impl Mul for RationalQ {
+impl Mul for RationalBase {
 	type Output = Self;
 
 	fn mul(self, other: Self) -> Self::Output {
@@ -195,13 +185,13 @@ impl Mul for RationalQ {
 	}
 }
 
-impl MulAssign for RationalQ where {
+impl MulAssign for RationalBase where {
 	fn mul_assign(&mut self, other: Self) {
 		self.val *= other.val;
 	}
 }
 
-impl Div for RationalQ {
+impl Div for RationalBase {
 	type Output = Self;
 
 	fn div(self, other: Self) -> Self::Output {
@@ -211,13 +201,13 @@ impl Div for RationalQ {
 	}
 }
 
-impl DivAssign for RationalQ where {
+impl DivAssign for RationalBase where {
 	fn div_assign(&mut self, other: Self) {
 		self.val /= other.val;
 	}
 }
 
-impl Neg for RationalQ where {
+impl Neg for RationalBase where {
 	type Output = Self;
 
 	fn neg(self) -> Self::Output {
@@ -227,16 +217,16 @@ impl Neg for RationalQ where {
 	}
 }
 
-impl Rem<RationalQ> for RationalQ {
+impl Rem<RationalBase> for RationalBase {
 	type Output = Self;
 
-	fn rem(self, modulus: RationalQ) -> Self::Output {
+	fn rem(self, modulus: RationalBase) -> Self::Output {
 		if {
 			*self.val.denom() != 1 ||
 			*modulus.val.denom() != 1
 		} { panic!() }
 
-		RationalQ{
+		RationalBase{
 			val : Rational::from((
 				self.val.numer() % modulus.val.numer(),
 				1
@@ -245,13 +235,13 @@ impl Rem<RationalQ> for RationalQ {
 	}
 }
 
-impl PartialEq for RationalQ {
+impl PartialEq for RationalBase {
 	fn eq(&self, other: &Self) -> bool {
 		self.val == other.val
 	}
 }
 
-impl PartialOrd for RationalQ {
+impl PartialOrd for RationalBase {
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
 		self.val.partial_cmp(&other.val)
 	}

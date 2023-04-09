@@ -284,7 +284,7 @@ impl Operator {
 
 				Token::Operator(
 					Operator::Power,
-					VecDeque::from(vec!(a, Token::Number(Quantity::new_rational(1,2))))
+					VecDeque::from(vec!(a, Token::Number(Quantity::new_rational(0.5).unwrap())))
 				)
 			},
 
@@ -328,12 +328,12 @@ impl Operator{
 
 				if let Token::Number(v) = args {
 					if v.is_zero() { return Err(()); }
-					return Ok(Token::Number(Quantity::new_rational(1,1)/v));
+					return Ok(Token::Number(Quantity::new_rational(1f64).unwrap()/v));
 				} else { panic!(); }
 			},
 
 			Operator::Add => {
-				let mut sum = Quantity::new_rational(0,1);
+				let mut sum = Quantity::new_rational(0f64).unwrap();
 				for i in args.iter() {
 					let j = i.as_number();
 					if let Token::Number(v) = j {
@@ -346,7 +346,7 @@ impl Operator{
 			},
 
 			Operator::Multiply => {
-				let mut prod = Quantity::new_rational(1,1);
+				let mut prod = Quantity::new_rational(1f64).unwrap();
 				for i in args.iter() {
 					let j = i.as_number();
 					if let Token::Number(v) = j {
@@ -366,9 +366,9 @@ impl Operator{
 
 				if let Token::Number(va) = a {
 					if let Token::Number(vb) = b {
-						if vb <= Quantity::new_rational(1,1) { return Err(()); }
-						if va.fract() != Quantity::new_rational(0,1) { return Err(()); }
-						if vb.fract() != Quantity::new_rational(0,1) { return Err(()); }
+						if vb <= Quantity::new_rational(1f64).unwrap() { return Err(()); }
+						if va.fract() != Quantity::new_rational(0f64).unwrap() { return Err(()); }
+						if vb.fract() != Quantity::new_rational(0f64).unwrap() { return Err(()); }
 
 						return Ok(Token::Number(va%vb));
 					} else { panic!(); }
@@ -395,13 +395,13 @@ impl Operator{
 
 				if let Token::Number(v) = args {
 					if !v.fract().is_zero() { return Err(()); }
-					if v > Quantity::new_rational(50_000, 1) { return Err(()); }
+					if v > Quantity::new_rational(50_000f64).unwrap() { return Err(()); }
 
-					let mut prod = Quantity::new_rational(1, 1);
+					let mut prod = Quantity::new_rational(1f64).unwrap();
 					let mut u = v.clone();
-					while u > Quantity::new_rational(0, 1) {
+					while u > Quantity::new_rational(0f64).unwrap() {
 						prod *= u.clone();
-						u = u - Quantity::new_rational(1, 1);
+						u = u - Quantity::new_rational(1f64).unwrap();
 					}
 
 					return Ok(Token::Number(prod));

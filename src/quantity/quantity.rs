@@ -7,151 +7,74 @@ use std::ops::{
 };
 use std::cmp::Ordering;
 
-use crate::quantity::wrap_rational;
-use crate::quantity::wrap_float;
-
-use crate::quantity::QuantBase;
-use crate::quantity::RationalBase;
-use crate::quantity::FloatBase;
 
 use crate::quantity::Unit;
 use crate::quantity::BaseUnit;
 
-cfg_if::cfg_if! {
-	if #[cfg(target_family = "unix")] {
-		use crate::quantity::rationalq::RationalQ;
-		use crate::quantity::floatq::FloatQ;
 
-		#[derive(Debug)]
-		#[derive(Clone)]
-		pub enum Quantity {
-			Rational{ v: RationalQ, u: Unit },
-			Float{ v: FloatQ, u: Unit }
-		}
-	} else {
-		use crate::quantity::f64q::F64Q;
+use crate::quantity::Scalar;
 
-		#[derive(Debug)]
-		#[derive(Clone)]
-		pub enum Quantity {
-			Rational{ v: F64Q, u: Unit },
-			Float{ v: F64Q, u: Unit }
-		}
-	}
-}
-
-
-impl Quantity {
-
-	cfg_if::cfg_if! {
-		if #[cfg(target_family = "unix")] {
-			pub fn new_rational(top: i64, bottom: i64) -> Quantity {
-				return wrap_rational!(
-					RationalQ::from_frac(top, bottom),
-					Unit::new()
-				);
-			}
-		
-			pub fn new_float(v: f64) -> Quantity {
-				return wrap_float!(
-					FloatQ::from_f64(v).unwrap(),
-					Unit::new()
-				)
-			}
-		
-			pub fn new_rational_from_string(s: &str) -> Option<Quantity> {
-				let r = RationalQ::from_string(s);
-				if r.is_none() { return None; }
-				return Some(wrap_rational!(
-					r.unwrap(),
-					Unit::new()
-				));
-			}
-		
-			pub fn new_float_from_string(s: &str) -> Option<Quantity> {
-				let v = FloatQ::from_string(s);
-				if v.is_none() { return None; }
-				return Some(wrap_float!(
-					v.unwrap(),
-					Unit::new()
-				))
-			}
-
-			pub fn float_from_rat(r: &Quantity) -> Quantity {
-				match &r {
-					Quantity::Float { .. } => r.clone(),
-					Quantity::Rational { v, u } => wrap_float!(
-						FloatQ::from(v.val.numer()).unwrap() /
-						FloatQ::from(v.val.denom()).unwrap(),
-						u.clone()
-					)
-				}
-			}
-		} else {
-			pub fn new_rational(top: i64, bottom: i64) -> Quantity {
-				return wrap_float!(F64Q::from_f64( (top as f64) / (bottom as f64)).unwrap())
-			}
-		
-			pub fn new_float(v: f64) -> Quantity {
-				return wrap_float!(F64Q::from_f64(v).unwrap())
-			}
-		
-			pub fn new_rational_from_string(s: &str) -> Option<Quantity> {
-				let r = F64Q::from_string(s);
-				if r.is_none() { return None; }
-				return Some(wrap_rational!(r.unwrap()));
-			}
-		
-			pub fn new_float_from_string(s: &str) -> Option<Quantity> {
-				let v = F64Q::from_string(s);
-				if v.is_none() { return None; }
-				return Some(wrap_float!(v.unwrap()))
-			}
-
-			pub fn float_from_rat(r: &Quantity) -> Quantity {
-				match &r {
-					Quantity::Float { .. } => r.clone(),
-					Quantity::Rational { .. } => r.clone()
-				}
-			}
-		}
-	}
-
-	pub fn is_nan(&self) -> bool {
-		match self {
-			Quantity::Float { v, .. } => {v.val.is_nan()},
-			Quantity::Rational { .. } => {panic!()}
-		}
-	}
-
-	pub fn add_unit(&mut self, ui: BaseUnit, pi: f64) {
-		match self {
-			Quantity::Float { u, .. } => {u.insert(ui, pi)},
-			Quantity::Rational { u, .. } => {u.insert(ui, pi)}
-		}
-	}
+#[derive(Debug)]
+#[derive(Clone)]
+pub struct Quantity {
+	v: Scalar,
+	u: Unit
 }
 
 
 
 impl ToString for Quantity {
 	fn to_string(&self) -> String {
-		let mut n: String;
-		let u: &Unit;
-		match self {
-			Quantity::Rational{u:un, ..} => {
-				n = Quantity::float_from_rat(self).to_string();
-				u = un
-			},
-			Quantity::Float{v, u:un} => {
-				n = v.to_string();
-				u = un;
-			},
-		};
-
+		let n = self.v.to_string();
 		//n.push(' ');
 		//n.push_str(&u.to_string());
 		n
+	}
+}
+
+impl Quantity {
+	pub fn new_float(f: f64) -> Option<Quantity> {
+		let v = Scalar::new_float(f);
+		if v.is_none() { return None; }
+
+		return Some(Quantity{
+			v: v.unwrap(),
+			u: Unit::new()
+		});
+	}
+
+	pub fn new_rational(f: f64) -> Option<Quantity> {
+		let v = Scalar::new_rational(f);
+		if v.is_none() { return None; }
+
+		return Some(Quantity{
+			v: v.unwrap(),
+			u: Unit::new()
+		});
+	}
+
+	pub fn new_float_from_string(s: &str) -> Option<Quantity> {
+		let v = Scalar::new_float_from_string(s);
+		if v.is_none() { return None; }
+
+		return Some(Quantity{
+			v: v.unwrap(),
+			u: Unit::new()
+		});
+	}
+
+	pub fn new_rational_from_string(s: &str) -> Option<Quantity> {
+		let v = Scalar::new_rational_from_string(s);
+		if v.is_none() { return None; }
+
+		return Some(Quantity{
+			v: v.unwrap(),
+			u: Unit::new()
+		});
+	}
+
+	pub fn add_unit(&mut self, ui: BaseUnit, pi: f64) {
+		self.u.insert(ui, pi)
 	}
 }
 
@@ -159,19 +82,10 @@ impl ToString for Quantity {
 macro_rules! quant_foward {
 	( $x:ident ) => {
 		pub fn $x(&self) -> Quantity {
-			match self {
-				Quantity::Rational{v, u} => {
-					if !u.unitless() { panic!() }
-					let r = v.$x();
-					if r.is_none() {
-						let v = Quantity::float_from_rat(self);
-						return v.$x();
-					} else {wrap_rational!(r.unwrap(), u.clone())}
-				},
-				Quantity::Float{v, u} => {
-					if !u.unitless() { panic!() }
-					wrap_float!(v.$x().unwrap(), u.clone())
-				},
+			if !self.unitless() { panic!() }
+			Quantity {
+				v: self.v.$x(),
+				u: self.u.clone()
 			}
 		}
 	}
@@ -179,33 +93,11 @@ macro_rules! quant_foward {
 
 impl Quantity {
 
-	pub fn is_zero(&self) -> bool {
-		match self {
-			Quantity::Rational{v, .. } => v.is_zero(),
-			Quantity::Float{v, .. } => v.is_zero(),
-		}
-	}
-
-	pub fn is_negative(&self) -> bool {
-		match self {
-			Quantity::Rational{v, .. } => v.is_negative(),
-			Quantity::Float{v, .. } => v.is_negative(),
-		}
-	}
-
-	pub fn is_positive(&self) -> bool {
-		match self {
-			Quantity::Rational{v, .. } => v.is_positive(),
-			Quantity::Float{v, .. } => v.is_positive(),
-		}
-	}
-
-	pub fn unitless(&self) -> bool {
-		match self {
-			Quantity::Rational{ u, .. } => u.unitless(),
-			Quantity::Float{ u, .. } => u.unitless(),
-		}
-	}
+	pub fn is_zero(&self) -> bool { self.v.is_zero() }
+	pub fn is_nan(&self) -> bool { self.v.is_nan() }
+	pub fn is_negative(&self) -> bool { self.v.is_negative() }
+	pub fn is_positive(&self) -> bool { self.v.is_positive() }
+	pub fn unitless(&self) -> bool { self.u.unitless() }
 
 	quant_foward!(fract);
 	quant_foward!(abs);
@@ -230,67 +122,30 @@ impl Quantity {
 	quant_foward!(log2);
 
 	pub fn log(&self, base: Quantity) -> Quantity {
-
 		if !self.unitless() { panic!() }
-		
-		match self {
-			Quantity::Rational{u, .. } => {
-				if !u.unitless() { panic!() }
-				Quantity::float_from_rat(self).log(Quantity::float_from_rat(&base))
-			},
-			Quantity::Float{u, .. } => {
-				if !u.unitless() { panic!() }
-				Quantity::float_from_rat(self).log(base)
-			},
+		Quantity {
+			v: self.v.log(base.v),
+			u: self.u.clone()
 		}
 	}
-	pub fn pow(&self, base: Quantity) -> Quantity {
-		match self {
-			Quantity::Rational{u, .. } => {
-				let a = match Quantity::float_from_rat(self) {
-					Quantity::Rational{ .. } => panic!(),
-					Quantity::Float{v, .. } => v,
-				};
 
-				let b = match Quantity::float_from_rat(&base) {
-					Quantity::Rational{ .. } => panic!(),
-					Quantity::Float{v, .. } => v,
-				};
-
-				let mut nu = u.clone();
-				nu.pow(2f64);
-				wrap_float!(a.pow(b).unwrap(), nu)
-			},
-			Quantity::Float{u, .. } => {
-				if !u.unitless() { panic!() }
-
-				let a = match Quantity::float_from_rat(self) {
-					Quantity::Rational{ .. } => panic!(),
-					Quantity::Float{v, .. } => v,
-				};
-
-				let b = match Quantity::float_from_rat(&base) {
-					Quantity::Rational{ .. } => panic!(),
-					Quantity::Float{v, .. } => v,
-				};
-				let mut nu = u.clone();
-				nu.pow(2f64);
-				wrap_float!(a.pow(b).unwrap(), nu)
-
-			},
+	pub fn pow(&self, pwr: Quantity) -> Quantity {
+		if !self.unitless() { panic!() }
+		Quantity {
+			v: self.v.pow(pwr.v),
+			u: self.u.clone()
 		}
 	}
 }
-
 
 
 impl Neg for Quantity where {
 	type Output = Self;
 
 	fn neg(self) -> Self::Output {
-		match self {
-			Quantity::Float { v, u } => {wrap_float!(-v, u)},
-			Quantity::Rational { v, u } => {wrap_rational!(-v, u)},
+		Quantity {
+			v: -self.v,
+			u: self.u
 		}
 	}
 }
@@ -299,35 +154,19 @@ impl Add for Quantity {
 	type Output = Self;
 
 	fn add(self, other: Self) -> Self::Output {
-		match (&self, &other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				wrap_float!(va.clone()+vb.clone(), ua.clone())
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {self + Quantity::float_from_rat(&other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {Quantity::float_from_rat(&self) + other},
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				wrap_rational!(va.clone()+vb.clone(), ua.clone())
-			},
+		if self.u != other.u { panic!() }
+
+		Quantity {
+			v: self.v + other.v,
+			u: self.u
 		}
 	}
 }
 
 impl AddAssign for Quantity where {
 	fn add_assign(&mut self, other: Self) {
-		match (&mut *self, &other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				*va += vb.clone()
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {*self += Quantity::float_from_rat(&other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {*self = Quantity::float_from_rat(self) + other },
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				*va += vb.clone()
-			},
-		}
+		if self.u != other.u { panic!() }
+		self.v += other.v
 	}
 }
 
@@ -335,35 +174,19 @@ impl Sub for Quantity {
 	type Output = Self;
 
 	fn sub(self, other: Self) -> Self::Output {
-		match (&self, &other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				wrap_float!(va.clone()-vb.clone(), ua.clone())
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {self - Quantity::float_from_rat(&other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {Quantity::float_from_rat(&self) - other},
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				wrap_rational!(va.clone()-vb.clone(), ua.clone())
-			},
+		if self.u != other.u { panic!() }
+
+		Quantity {
+			v: self.v - other.v,
+			u: self.u
 		}
 	}
 }
 
 impl SubAssign for Quantity where {
 	fn sub_assign(&mut self, other: Self) {
-		match (&mut *self, &other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				*va -= vb.clone()
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {*self -= Quantity::float_from_rat(&other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {*self = Quantity::float_from_rat(self) - other },
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				*va -= vb.clone()
-			},
-		}
+		if self.u != other.u { panic!() }
+		self.v -= other.v
 	}
 }
 
@@ -371,35 +194,17 @@ impl Mul for Quantity {
 	type Output = Self;
 
 	fn mul(self, other: Self) -> Self::Output {
-		match (&self, &other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				let u = ua.clone()*ub.clone();
-				wrap_float!(va.clone()*vb.clone(), u)
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {self * Quantity::float_from_rat(&other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {Quantity::float_from_rat(&self) * self},
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				let u = ua.clone()*ub.clone();
-				wrap_rational!(va.clone()*vb.clone(), u)
-			},
+		Quantity {
+			v: self.v * other.v,
+			u: self.u * other.u
 		}
 	}
 }
 
 impl MulAssign for Quantity where {
 	fn mul_assign(&mut self, other: Self) {
-		match (&mut *self, &other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				*ua *= ub.clone();
-				*va *= vb.clone()
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {*self *= Quantity::float_from_rat(&other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {*self = Quantity::float_from_rat(self) * other },
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				*ua *= ub.clone();
-				*va *= vb.clone()
-			},
-		}
+		self.v *= other.v;
+		self.u *= other.u;
 	}
 }
 
@@ -407,35 +212,17 @@ impl Div for Quantity {
 	type Output = Self;
 
 	fn div(self, other: Self) -> Self::Output {
-		match (&self, &other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				let u = ua.clone()/ub.clone();
-				wrap_float!(va.clone()/vb.clone(), u)
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {self / Quantity::float_from_rat(&other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {Quantity::float_from_rat(&self) / other},
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				let u = ua.clone()/ub.clone();
-				wrap_rational!(va.clone()/vb.clone(), u)
-			},
+		Quantity {
+			v: self.v / other.v,
+			u: self.u / other.u
 		}
 	}
 }
 
 impl DivAssign for Quantity where {
 	fn div_assign(&mut self, other: Self) {
-		match (&mut *self, &other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				*ua /= ub.clone();
-				*va /= vb.clone()
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {*self /= Quantity::float_from_rat(&other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {*self = Quantity::float_from_rat(self) / other },
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				*ua /= ub.clone();
-				*va /= vb.clone()
-			}
-		}
+		self.v /= other.v;
+		self.u /= other.u;
 	}
 }
 
@@ -443,45 +230,27 @@ impl Rem<Quantity> for Quantity {
 	type Output = Self;
 
 	fn rem(self, other: Quantity) -> Self::Output {
-		match (&self, &other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				wrap_float!(va.clone()%vb.clone(), ua.clone())
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {self % Quantity::float_from_rat(&other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {Quantity::float_from_rat(&self) % other},
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				wrap_rational!(va.clone()%vb.clone(), ua.clone())
-			},
+		if !self.u.unitless() { panic!() }
+		if !other.u.unitless() { panic!() }
+
+		Quantity {
+			v: self.v % other.v,
+			u: self.u
 		}
 	}
 }
 
 impl PartialEq for Quantity {
 	fn eq(&self, other: &Self) -> bool {
-		match (self, other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => { if ua!=ub {false} else {va == vb} },
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {*self == Quantity::float_from_rat(other)},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {Quantity::float_from_rat(self) == *other},
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => { if ua!=ub {false} else {va == vb} },
+		if self.u != other.u {false} else {
+			self.v == other.v
 		}
 	}
 }
 
 impl PartialOrd for Quantity {
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-		match (self, other) {
-			(Quantity::Float{v:va,u:ua}, Quantity::Float{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				va.partial_cmp(vb)
-			},
-			(Quantity::Float{ .. }, Quantity::Rational{ .. }) => {(*self).partial_cmp(&Quantity::float_from_rat(other))},
-			(Quantity::Rational{ .. }, Quantity::Float{ .. }) => {Quantity::float_from_rat(self).partial_cmp(other)},
-			(Quantity::Rational{v:va,u:ua}, Quantity::Rational{v:vb,u:ub}) => {
-				if ua != ub { panic!() }
-				va.partial_cmp(vb)
-			},
-		}
+		if self.u != other.u { panic!() }
+		self.v.partial_cmp(&other.v)
 	}
 }

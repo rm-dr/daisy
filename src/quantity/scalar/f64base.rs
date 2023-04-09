@@ -7,33 +7,43 @@ use std::ops::{
 };
 
 use std::cmp::Ordering;
-
-use crate::quantity::wrap_float;
-use crate::quantity::Quantity;
-use crate::quantity::QuantBase;
-use crate::quantity::FloatBase;
+use super::ScalarBase;
 
 
 macro_rules! foward {
 	( $x:ident ) => {
-		fn $x(&self) -> Quantity {
-			wrap_float!(F64Q{ val: self.val.clone().$x() })
+		fn $x(&self) -> Option<F64Base> {
+			Some(F64Base{ val: self.val.clone().$x() })
 		}
 	}
 }
 
 #[derive(Debug)]
 #[derive(Clone)]
-pub struct F64Q where {
+pub struct F64Base where {
 	pub val: f64
 }
 
-impl ToString for F64Q {
+impl ToString for F64Base {
 	fn to_string(&self) -> String { self.val.to_string() }
 }
 
 
-impl QuantBase for F64Q {
+impl ScalarBase for F64Base {
+
+	fn from_f64(f: f64) -> Option<F64Base> {
+		return Some(F64Base{ val: f });
+	}
+
+	fn from_string(s: &str) -> Option<F64Base> {
+		let v = s.parse::<f64>();
+		let v = match v {
+			Ok(x) => x,
+			Err(_) => return None
+		};
+
+		return Some(F64Base{ val: v });
+	}
 
 	foward!(fract);
 
@@ -65,40 +75,17 @@ impl QuantBase for F64Q {
 	foward!(log10);
 	foward!(log2);
 
-	fn log(&self, base: Quantity) -> Quantity {
-		wrap_float!(F64Q{ val: self.val.clone().log10() }) /
-		Quantity::float_from_rat(&base).log10()
+	fn log(&self, base: Self) -> Option<Self> {
+		Some(F64Base{ val: self.val.clone().log10() } / base.log10().unwrap())
 	}
 
-	fn pow(&self, base: Quantity) -> Quantity {
-		match base {
-			Quantity::Rational { .. } => self.pow(Quantity::float_from_rat(&base)),
-			Quantity::Float { v } => wrap_float!(F64Q{ val: self.val.clone().powf(v.val) })
-		}
-		
+	fn pow(&self, base: Self) -> Option<Self> {
+		Some(F64Base{ val: self.val.clone().powf(base.val)})
 	}
 
 }
 
-impl FloatBase for F64Q {
-	fn from_f64(f: f64) -> Option<F64Q> {
-		return Some(F64Q{ val: f });
-	}
-
-	fn from_string(s: &str) -> Option<F64Q> {
-		let v = s.parse::<f64>();
-		let v = match v {
-			Ok(x) => x,
-			Err(_) => return None
-		};
-
-		return Some(F64Q{ val: v });
-	}
-}
-
-
-
-impl Add for F64Q where {
+impl Add for F64Base where {
 	type Output = Self;
 
 	fn add(self, other: Self) -> Self::Output {
@@ -106,13 +93,13 @@ impl Add for F64Q where {
 	}
 }
 
-impl AddAssign for F64Q where {
+impl AddAssign for F64Base where {
 	fn add_assign(&mut self, other: Self) {
 		self.val += other.val;
 	}
 }
 
-impl Sub for F64Q {
+impl Sub for F64Base {
 	type Output = Self;
 
 	fn sub(self, other: Self) -> Self::Output {
@@ -120,13 +107,13 @@ impl Sub for F64Q {
 	}
 }
 
-impl SubAssign for F64Q where {
+impl SubAssign for F64Base where {
 	fn sub_assign(&mut self, other: Self) {
 		self.val -= other.val;
 	}
 }
 
-impl Mul for F64Q {
+impl Mul for F64Base {
 	type Output = Self;
 
 	fn mul(self, other: Self) -> Self::Output {
@@ -134,13 +121,13 @@ impl Mul for F64Q {
 	}
 }
 
-impl MulAssign for F64Q where {
+impl MulAssign for F64Base where {
 	fn mul_assign(&mut self, other: Self) {
 		self.val *= other.val;
 	}
 }
 
-impl Div for F64Q {
+impl Div for F64Base {
 	type Output = Self;
 
 	fn div(self, other: Self) -> Self::Output {
@@ -148,13 +135,13 @@ impl Div for F64Q {
 	}
 }
 
-impl DivAssign for F64Q where {
+impl DivAssign for F64Base where {
 	fn div_assign(&mut self, other: Self) {
 		self.val /= other.val;
 	}
 }
 
-impl Neg for F64Q where {
+impl Neg for F64Base where {
 	type Output = Self;
 
 	fn neg(self) -> Self::Output {
@@ -162,26 +149,26 @@ impl Neg for F64Q where {
 	}
 }
 
-impl Rem<F64Q> for F64Q {
+impl Rem<F64Base> for F64Base {
 	type Output = Self;
 
-	fn rem(self, modulus: F64Q) -> Self::Output {
+	fn rem(self, modulus: F64Base) -> Self::Output {
 		if {
-			(!self.fract().is_zero()) ||
-			(!modulus.fract().is_zero())
+			(!self.fract().unwrap().is_zero()) ||
+			(!modulus.fract().unwrap().is_zero())
 		} { panic!() }
 
-		F64Q{val : self.val.fract() % modulus.val.fract()}
+		F64Base{val : self.val.fract() % modulus.val.fract()}
 	}
 }
 
-impl PartialEq for F64Q {
+impl PartialEq for F64Base {
 	fn eq(&self, other: &Self) -> bool {
 		self.val == other.val
 	}
 }
 
-impl PartialOrd for F64Q {
+impl PartialOrd for F64Base {
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
 		self.val.partial_cmp(&other.val)
 	}
