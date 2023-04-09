@@ -24,6 +24,7 @@ pub trait ScalarBase:
 	// Utility
 	fn fract(&self) -> Option<Self>;
 	fn is_zero(&self) -> bool;
+	fn is_one(&self) -> bool;
 	fn is_negative(&self) -> bool;
 	fn is_positive(&self) -> bool;
 
@@ -160,6 +161,13 @@ impl Scalar {
 		match self {
 			Scalar::Rational{v} => v.is_zero(),
 			Scalar::Float{v} => v.is_zero(),
+		}
+	}
+
+	pub fn is_one(&self) -> bool {
+		match self {
+			Scalar::Rational{v} => v.is_one(),
+			Scalar::Float{v} => v.is_one(),
 		}
 	}
 

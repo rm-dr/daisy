@@ -123,6 +123,7 @@ impl ScalarBase for FloatBase {
 	foward!(fract);
 
 	fn is_zero(&self) -> bool {self.val.is_zero()}
+	fn is_one(&self) -> bool {self.val == Float::with_val(FLOAT_PRECISION, 1)}
 	fn is_negative(&self) -> bool { self.val.is_sign_negative() }
 	fn is_positive(&self) -> bool { self.val.is_sign_positive() }
 

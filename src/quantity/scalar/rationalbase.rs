@@ -110,6 +110,7 @@ impl ScalarBase for RationalBase {
 	}
 
 	fn is_zero(&self) -> bool {self.val == Rational::from((0,1))}
+	fn is_one(&self) -> bool {self.val == Rational::from((1,1))}
 	fn is_negative(&self) -> bool { self.val.clone().signum() == -1 }
 	fn is_positive(&self) -> bool { self.val.clone().signum() == 1 }
 

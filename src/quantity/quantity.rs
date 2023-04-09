@@ -25,12 +25,13 @@ pub struct Quantity {
 
 impl ToString for Quantity {
 	fn to_string(&self) -> String {
-		let mut n = self.v.to_string();
+		let n = self.v.to_string();
 		if self.unitless() { return n; }
 
-		n.push(' ');
-		n.push_str(&self.u.to_string());
-		return n;
+		let u = self.u.to_string();
+		if self.is_one() { return u; };
+
+		return format!("{n} {u}");
 	}
 }
 
@@ -75,9 +76,8 @@ impl Quantity {
 		});
 	}
 
-	pub fn add_unit(&mut self, ui: BaseUnit, pi: f64) {
-		self.u.insert(ui, pi)
-	}
+	pub fn insert_unit(&mut self, ui: BaseUnit, pi: f64) { self.u.insert(ui, pi) }
+	pub fn set_unit(&mut self, u: Unit) { self.u = u; }
 }
 
 
@@ -96,6 +96,7 @@ macro_rules! quant_foward {
 impl Quantity {
 
 	pub fn is_zero(&self) -> bool { self.v.is_zero() }
+	pub fn is_one(&self) -> bool { self.v.is_one() }
 	pub fn is_nan(&self) -> bool { self.v.is_nan() }
 	pub fn is_negative(&self) -> bool { self.v.is_negative() }
 	pub fn is_positive(&self) -> bool { self.v.is_positive() }

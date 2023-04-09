@@ -48,6 +48,7 @@ impl ScalarBase for F64Base {
 	foward!(fract);
 
 	fn is_zero(&self) -> bool {self.val == 0f64}
+	fn is_one(&self) -> bool {self.val == 1f64}
 	fn is_negative(&self) -> bool { self.val.is_sign_negative() }
 	fn is_positive(&self) -> bool { self.val.is_sign_positive() }
 

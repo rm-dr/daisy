@@ -161,9 +161,34 @@ impl Operator {
 				let (b, div) = (b, div);
 
 				if div {
-					return format!("{} ÷ {}", self.add_parens_to_arg_strict(a), self.add_parens_to_arg_strict(b));
+					return format!("{} ÷ {}",
+						self.add_parens_to_arg_strict(a),
+						self.add_parens_to_arg_strict(b)
+					);
 				} else {
-					return format!("{} × {}", self.add_parens_to_arg_strict(a), self.add_parens_to_arg_strict(b));
+
+					// Ommit times sign when we have a number
+					// multiplied by a unit (like 10 m)
+					// Times sign should stay in all other cases.
+					let no_times = if let Token::Number(p) = b {
+						if let Token::Number(q) = a {
+							(!p.unitless() && p.is_one()) &&
+							!(!q.unitless() && p.is_one())
+						} else {false}
+					} else {false};
+
+					if no_times {
+						return format!("{} {}",
+							self.add_parens_to_arg_strict(a),
+							self.add_parens_to_arg_strict(b)
+						);
+					} else {
+						return format!("{} × {}",
+							self.add_parens_to_arg_strict(a),
+							self.add_parens_to_arg_strict(b)
+						);
+					}
+
 				}
 			},
 
