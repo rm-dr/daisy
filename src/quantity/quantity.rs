@@ -26,9 +26,11 @@ pub struct Quantity {
 impl ToString for Quantity {
 	fn to_string(&self) -> String {
 		let mut n = self.v.to_string();
+		if self.unitless() { return n; }
+
 		n.push(' ');
 		n.push_str(&self.u.to_string());
-		n
+		return n;
 	}
 }
 

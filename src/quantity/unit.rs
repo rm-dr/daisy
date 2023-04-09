@@ -30,7 +30,36 @@ pub struct Unit {
 
 impl ToString for Unit {
 	fn to_string(&self) -> String {
-		format!("{:?}", self)
+		if self.unitless() { return String::new(); };
+
+		let mut t = String::new();
+		let mut b = String::new();
+
+		for (u, p) in &self.val {
+			let c = match u {
+				BaseUnit::Second => "s",
+				BaseUnit::Meter => "m",
+				BaseUnit::Kilogram => "kg",
+				BaseUnit::Ampere => "a",
+				BaseUnit::Kelvin => "k",
+				BaseUnit::Mole => "mol",
+				BaseUnit::Candela => "c"
+			};
+
+			if *p == 1f64 {
+				t.push_str(&format!("{c}"));
+			} else if *p == -1f64 {
+				b.push_str(&format!("{c}"));
+			} else if *p > 0f64 {
+				t.push_str(&format!("{c}^{p}"));
+			} else {
+				b.push_str(&format!("{c}^{}", -p));
+			}
+		};
+
+		if b.len() != 0 {
+			format!("{t}/{b}")
+		} else {t}
 	}
 }
 
