@@ -95,6 +95,22 @@ impl Unit {
 		return u;
 	}
 
+	pub fn from_string(s: &str) -> Option<Unit> {
+		let b = match s {
+			"m" => BaseUnit::Meter,
+			"s" => BaseUnit::Second,
+			"kg" => BaseUnit::Kilogram,
+			"a" => BaseUnit::Ampere,
+			"k" => BaseUnit::Kelvin,
+			"mol" => BaseUnit::Mole,
+			"c" => BaseUnit::Candela,
+			_ => { return None; }
+		};
+
+		let mut u = Unit::new();
+		u.insert(b, 1f64);
+		return Some(u);
+	}
 }
 
 
