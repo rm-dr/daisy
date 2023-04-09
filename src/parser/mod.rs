@@ -98,13 +98,13 @@ impl PreToken {
 
 					// Units
 					"m" => {
-						let mut u = Quantity::new_rational_from_string("1").unwrap();
+						let mut u = Quantity::new_rational(1f64).unwrap();
 						u.add_unit(BaseUnit::Meter, 1f64);
 						Token::Number(u)
 					},
 
 					"s" => {
-						let mut u = Quantity::new_rational_from_string("1").unwrap();
+						let mut u = Quantity::new_rational(1f64).unwrap();
 						u.add_unit(BaseUnit::Second, 1f64);
 						Token::Number(u)
 					}

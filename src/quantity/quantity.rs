@@ -25,9 +25,9 @@ pub struct Quantity {
 
 impl ToString for Quantity {
 	fn to_string(&self) -> String {
-		let n = self.v.to_string();
-		//n.push(' ');
-		//n.push_str(&u.to_string());
+		let mut n = self.v.to_string();
+		n.push(' ');
+		n.push_str(&self.u.to_string());
 		n
 	}
 }
@@ -130,10 +130,9 @@ impl Quantity {
 	}
 
 	pub fn pow(&self, pwr: Quantity) -> Quantity {
-		if !self.unitless() { panic!() }
 		Quantity {
 			v: self.v.pow(pwr.v),
-			u: self.u.clone()
+			u: self.u.pow(2f64)
 		}
 	}
 }

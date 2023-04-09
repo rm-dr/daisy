@@ -328,19 +328,27 @@ impl Operator{
 
 				if let Token::Number(v) = args {
 					if v.is_zero() { return Err(()); }
-					return Ok(Token::Number(Quantity::new_rational(1f64).unwrap()/v));
+					return Ok(Token::Number(
+						Quantity::new_rational(1f64).unwrap()/v
+					));
 				} else { panic!(); }
 			},
 
 			Operator::Add => {
-				let mut sum = Quantity::new_rational(0f64).unwrap();
-				for i in args.iter() {
-					let j = i.as_number();
+				let mut sum;
+				if let Token::Number(s) = args[0].as_number() {
+					sum = s;
+				} else {panic!()};
+
+				let mut i: usize = 1;
+				while i < args.len() {
+					let j = args[i].as_number();
 					if let Token::Number(v) = j {
 						sum += v;
 					} else {
 						panic!();
 					}
+					i += 1;
 				}
 				return Ok(Token::Number(sum));
 			},

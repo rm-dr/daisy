@@ -58,10 +58,12 @@ impl Unit {
 		};
 	}
 
-	pub fn pow(&mut self, pwr: f64) {
-		for (_, p) in &mut self.val {
+	pub fn pow(&self, pwr: f64) -> Unit {
+		let mut u = self.clone();
+		for (_, p) in &mut u.val {
 			*p *= pwr;
-		}
+		};
+		return u;
 	}
 
 }
