@@ -6,7 +6,9 @@ Roadmap for fixes and features.
  - Commands (help, clear, reset, quit, list constants, list units)
  - Documentation (usage)
  - Documentation (comments)
- - Units, unit conversion
+ - Unit conversion, more units, better printing
+ - Unit tests
+ - Better unit powers
  - Releases
 
 ## General
