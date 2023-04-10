@@ -81,7 +81,7 @@ pub fn main() -> Result<(), std::io::Error> {
 							Ok(g) => {
 								#[cfg(debug_assertions)]
 								RawTerminal::suspend_raw_mode(&stdout)?;
-								let out_str = g.print();
+								let out_str = g.to_string();
 								let g = evaluate::evaluate(g);
 								#[cfg(debug_assertions)]
 								RawTerminal::activate_raw_mode(&stdout)?;
@@ -100,7 +100,7 @@ pub fn main() -> Result<(), std::io::Error> {
 											style::Bold,
 											color::Fg(color::Green),
 											style::Reset,
-											q.print(),
+											q.to_string_outer(),
 											color::Fg(color::Reset)
 										)?;
 									},
