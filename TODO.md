@@ -9,8 +9,8 @@ Roadmap for fixes and features.
  - Unit conversion, more units, better printing
  - Unit tests
  - Fix unit power
- - Fix single unit printing
  - Better unit powers
+ - Catch errors when units incompatible
  - Releases
 
 ## General
