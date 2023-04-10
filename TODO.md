@@ -8,6 +8,8 @@ Roadmap for fixes and features.
  - Documentation (comments)
  - Unit conversion, more units, better printing
  - Unit tests
+ - Fix unit power
+ - Fix single unit printing
  - Better unit powers
  - Releases
 
@@ -48,5 +50,6 @@ Roadmap for fixes and features.
 
 ## Prompt
  - Live syntax/output (like firefox js terminal)
+ - Syntax highlight input and output
  - fish-style tab completion
  - Numbered expressions, history recall
