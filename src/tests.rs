@@ -174,3 +174,23 @@ fn operators() {
 	bad_expr("3.1!");
 	bad_expr("pi!");
 }
+
+#[test]
+fn units() {
+	//good_expr("4 m*s", "2 m * 2s");
+	good_expr("1 m/s", "2 m / 2s");
+	good_expr("10 m", "10 m");
+	good_expr("10 m", "10 * m");
+	good_expr("12 m", "(2 + 10) m");
+
+	good_expr("2 m^2", "2m^2");
+	good_expr("4 m^2", "(2m)^2");
+	good_expr("2 m^2", "2m * m");
+	good_expr("1 m^2", "m m");
+
+	good_expr("2 m", "rt (4m^2)");
+
+	bad_expr("m + s");
+	bad_expr("m ^ s");
+	bad_expr("m ^ pi");
+}
