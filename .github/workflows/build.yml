@@ -1,6 +1,7 @@
+name: CI
+
 on: [push]
 
-name: CI
 
 jobs:
   build_and_test:
@@ -8,14 +9,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --all-features
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release
+
+      - name: Update toolchain
+        run: |
+          rustup update
+          rustup install stable
+
+      - name: Status
+        run: |
+          cargo --version --verbose
+          rustc --version
+
+      --name: Test
+        run: |
+          cd daisy
+          cargo check
+          cargo test --all
+
+      - name: Build
+        run: |
+          cd daisy
+          cargo build --release
