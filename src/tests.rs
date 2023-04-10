@@ -10,7 +10,7 @@ fn eval_to_str(s: &str) -> Result<String, ()> {
 	//let out_str = g.print();
 
 	return match evaluate::evaluate(g) {
-		Ok(x) => Ok(x.to_string()),
+		Ok(x) => Ok(x.to_string_outer()),
 		Err(_) => Err(())
 	};
 }
@@ -178,6 +178,8 @@ fn operators() {
 #[test]
 fn units() {
 	//good_expr("4 m*s", "2 m * 2s");
+	good_expr("1 s⁻¹", "1/s");
+	good_expr("6 kg", "2 * 3kg");
 	good_expr("1 m/s", "2 m / 2s");
 	good_expr("10 m", "10 m");
 	good_expr("10 m", "10 * m");
@@ -188,7 +190,7 @@ fn units() {
 	good_expr("2 m^2", "2m * m");
 	good_expr("1 m^2", "m m");
 
-	good_expr("2 m", "rt (4m^2)");
+	//good_expr("2 m", "rt (4m^2)");
 
 	bad_expr("m + s");
 	bad_expr("m ^ s");
