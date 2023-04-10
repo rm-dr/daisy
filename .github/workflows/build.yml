@@ -20,7 +20,7 @@ jobs:
           cargo --version --verbose
           rustc --version
 
-      --name: Test
+      - name: Test
         run: |
           cd daisy
           cargo check
