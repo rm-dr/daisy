@@ -36,6 +36,16 @@ impl ToString for Quantity {
 }
 
 impl Quantity {
+	pub fn to_string_outer(&self) -> String {
+		let n = self.v.to_string();
+		if self.unitless() { return n; }
+
+		let u = self.u.to_string();
+		return format!("{n} {u}");
+	}
+
+
+
 	pub fn new_float(f: f64) -> Option<Quantity> {
 		let v = Scalar::new_float(f);
 		if v.is_none() { return None; }

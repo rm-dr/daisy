@@ -54,7 +54,7 @@ impl Operator {
 
 	#[inline(always)]
 	fn add_parens_to_arg(&self, arg: &Token) -> String {
-		let mut astr: String = arg.print();
+		let mut astr: String = arg.to_string();
 		if let Token::Operator(o,_) = arg {
 			if o < self {
 				astr = format!("({})", astr);
@@ -65,7 +65,7 @@ impl Operator {
 
 	#[inline(always)]
 	fn add_parens_to_arg_strict(&self, arg: &Token) -> String {
-		let mut astr: String = arg.print();
+		let mut astr: String = arg.to_string();
 		if let Token::Operator(o,_) = arg {
 			if o <= self {
 				astr = format!("({})", astr);
@@ -193,7 +193,7 @@ impl Operator {
 			},
 
 			Operator::Function(s) => {
-				return format!("{}({})", s.to_string(), args[0].print());
+				return format!("{}({})", s.to_string(), args[0].to_string());
 			}
 		};
 	}

@@ -26,15 +26,28 @@ pub enum Token {
 	),
 }
 
-impl Token {
-
-	pub fn print(&self) -> String {
+impl ToString for Token {
+	fn to_string(&self) -> String {
 		match self {
 			Token::Number(v) => v.to_string(),
-			Token::Constant(_,s) => s.clone(),
+			Token::Constant(_, s) => s.clone(),
 			Token::Operator(o,a) => o.print(a)
 		}
 	}
+}
+
+impl Token {
+
+	// This is called only when this is the outermost token.
+	// This sometimes leads to different--usually more verbose--behavior.
+	pub fn to_string_outer(&self) -> String {
+		match self {
+			Token::Number(v) => v.to_string_outer(),
+			Token::Constant(_, s) => s.clone(),
+			Token::Operator(o,a) => o.print(a)
+		}
+	}
+
 
 	#[inline(always)]
 	pub fn get_args(&self) -> Option<&VecDeque<Token>> {

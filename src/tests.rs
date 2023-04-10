@@ -10,7 +10,7 @@ fn eval_to_str(s: &str) -> Result<String, ()> {
 	//let out_str = g.print();
 
 	return match evaluate::evaluate(g) {
-		Ok(x) => Ok(x.print()),
+		Ok(x) => Ok(x.to_string()),
 		Err(_) => Err(())
 	};
 }
