@@ -32,6 +32,17 @@ impl ToString for Unit {
 	fn to_string(&self) -> String {
 		if self.unitless() { return String::new(); };
 
+		let mut top_empty = true;
+		let mut bottom_empty = true;
+
+		for (_, p) in &self.val {
+			if *p > 0f64 {
+				top_empty = false;
+			} else {
+				bottom_empty = false;
+			}
+		};
+
 		let mut t = String::new();
 		let mut b = String::new();
 
@@ -47,19 +58,31 @@ impl ToString for Unit {
 			};
 
 			if *p == 1f64 {
-				t.push_str(&format!("{c}"));
+				t.push_str(&format!("{c}·"));
 			} else if *p == -1f64 {
-				b.push_str(&format!("{c}"));
+				if top_empty {
+					b.push_str(&format!("{c}⁻¹·"));
+				} else {
+					b.push_str(&format!("{c}·"));
+				}
 			} else if *p > 0f64 {
-				t.push_str(&format!("{c}^{p}"));
+				t.push_str(&format!("{c}^{p}·"));
 			} else {
-				b.push_str(&format!("{c}^{}", -p));
+				if top_empty {
+					b.push_str(&format!("{c}^{}·", p));
+				} else {
+					b.push_str(&format!("{c}^{}·", -p));
+				}
 			}
 		};
 
-		if b.len() != 0 {
-			format!("{t}/{b}")
-		} else {t}
+		if top_empty {
+			format!("{}", &b[..b.len()-2]) // Slice cuts off the last `·` (2 bytes)
+		} else if bottom_empty {
+			format!("{}", &t[..t.len()-2])
+		} else {
+			format!("{}/{}", &t[..t.len()-2], &b[..b.len()-2])
+		}
 	}
 }
 
