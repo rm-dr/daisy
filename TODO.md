@@ -10,7 +10,6 @@ Roadmap for fixes and features.
  - Unit tests
  - Fix unit power
  - Better unit powers
- - Catch errors when units incompatible
  - Releases
 
 ## General
@@ -18,7 +17,6 @@ Roadmap for fixes and features.
  - Compile to WASM, publish a webapp
  - Trigonometry & function tests
  - Manpage
- - Better print parens
 
 
 ## Internals
@@ -26,7 +24,7 @@ Roadmap for fixes and features.
  - Faster factorial function. Maybe use gamma instead?
  - Remove extra calls to `.clone()` in quantity module
  - Arbitrary precision float (rug doesn't offer arbitrary exponents)
-
+ - Backend-independent colorful printing
 
 ## Math Features
  - Config file
@@ -34,7 +32,6 @@ Roadmap for fixes and features.
  - Reference previous results
  - Variable definitions
  - Function definitions
- - Units
  - Dice
  - Mean, Median, Min, Max: arrays and multi-argument functions
  - Arbitrary base logarithm
