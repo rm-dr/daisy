@@ -111,6 +111,7 @@ impl Quantity {
 	pub fn is_negative(&self) -> bool { self.v.is_negative() }
 	pub fn is_positive(&self) -> bool { self.v.is_positive() }
 	pub fn unitless(&self) -> bool { self.u.unitless() }
+	pub fn unit(&self) -> &Unit { &self.u }
 
 	quant_foward!(fract);
 	quant_foward!(abs);

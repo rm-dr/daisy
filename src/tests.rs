@@ -191,7 +191,7 @@ fn units() {
 
 	//good_expr("2 m", "rt (4m^2)");
 
-	//bad_expr("m + s");
-	//bad_expr("m ^ s");
+	bad_expr("m + s");
+	bad_expr("m ^ s");
 	//bad_expr("m ^ pi");
 }

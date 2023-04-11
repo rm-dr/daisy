@@ -369,6 +369,11 @@ impl Operator{
 				while i < args.len() {
 					let j = args[i].as_number();
 					if let Token::Number(v) = j {
+
+						if sum.unit() != v.unit() {
+							return Err(());
+						}
+
 						sum += v;
 					} else {
 						panic!();
@@ -399,6 +404,11 @@ impl Operator{
 
 				if let Token::Number(va) = a {
 					if let Token::Number(vb) = b {
+
+						if !(va.unitless() && vb.unitless()) {
+							return Err(());
+						}
+
 						if vb <= Quantity::new_rational(1f64).unwrap() { return Err(()); }
 						if va.fract() != Quantity::new_rational(0f64).unwrap() { return Err(()); }
 						if vb.fract() != Quantity::new_rational(0f64).unwrap() { return Err(()); }
@@ -415,6 +425,11 @@ impl Operator{
 
 				if let Token::Number(va) = a {
 					if let Token::Number(vb) = b {
+
+						if va.unit() != vb.unit() {
+							return Err(());
+						}
+
 						let p = va.pow(vb);
 						if p.is_nan() {return Err(());}
 						return Ok(Token::Number(p));
@@ -427,6 +442,11 @@ impl Operator{
 				let args = args[0].as_number();
 
 				if let Token::Number(v) = args {
+
+					if !v.unitless() {
+						return Err(());
+					}
+
 					if !v.fract().is_zero() { return Err(()); }
 					if v > Quantity::new_rational(50_000f64).unwrap() { return Err(()); }
 

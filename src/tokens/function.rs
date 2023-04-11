@@ -70,6 +70,10 @@ impl Function {
 		let a = args[0].as_number();
 		let Token::Number(q) = a else {panic!()};
 
+		if !q.unitless() {
+			return Err(());
+		}
+
 		match self {
 			Function::Abs => { return Ok(Token::Number(q.abs())); },
 			Function::Floor => { return Ok(Token::Number(q.floor())); },
