@@ -22,6 +22,11 @@ pub(in crate::quantity) use crate::quantity::scalar::Scalar;
 mod unit;
 pub use crate::quantity::unit::Unit;
 pub use crate::quantity::unit::BaseUnit;
+pub(in crate::quantity) use crate::quantity::unit::CompoundUnit;
 
 mod quantity;
 pub use crate::quantity::quantity::Quantity;
+
+
+
+

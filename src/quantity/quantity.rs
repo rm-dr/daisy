@@ -7,9 +7,9 @@ use std::ops::{
 };
 use std::cmp::Ordering;
 
-
 use crate::quantity::Unit;
 use crate::quantity::BaseUnit;
+use crate::quantity::CompoundUnit;
 
 
 use crate::quantity::Scalar;
@@ -43,8 +43,6 @@ impl Quantity {
 		let u = self.u.to_string();
 		return format!("{n} {u}");
 	}
-
-
 
 	pub fn new_float(f: f64) -> Option<Quantity> {
 		let v = Scalar::new_float(f);
@@ -88,6 +86,48 @@ impl Quantity {
 
 	pub fn insert_unit(&mut self, ui: BaseUnit, pi: f64) { self.u.insert(ui, pi) }
 	pub fn set_unit(&mut self, u: Unit) { self.u = u; }
+
+	pub fn from_unit_string(s: &str) -> Option<Quantity> {
+		// Base Units
+		let b = match s {
+			"m" => Some(BaseUnit::Meter),
+			"s" => Some(BaseUnit::Second),
+			"kg" => Some(BaseUnit::Kilogram),
+			"a" => Some(BaseUnit::Ampere),
+			"k" => Some(BaseUnit::Kelvin),
+			"mol" => Some(BaseUnit::Mole),
+			"c" => Some(BaseUnit::Candela),
+			_ => { None }
+		};
+
+		if b.is_some() {
+			let mut u = Unit::new();
+			u.insert(b.unwrap(), 1f64);
+
+			let mut q = Quantity::new_rational(1f64).unwrap();
+			q.set_unit(u);
+
+			return Some(q);
+		};
+
+		// Compound units
+		let b = match s {
+			"ft" => Some(CompoundUnit::FOOT),
+			_ => { None }
+		};
+
+		if b.is_some() {
+			let b = b.unwrap();
+			let q = Quantity{
+				v: b.coef(),
+				u: b.unit()
+			};
+			return Some(q);
+		};
+
+		return None;
+	}
+
 }
 
 
