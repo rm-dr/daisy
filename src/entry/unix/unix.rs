@@ -12,9 +12,7 @@ use termion::{
 };
 
 use super::promptbuffer::PromptBuffer;
-
 use crate::parser;
-use crate::evaluate;
 
 #[inline(always)]
 fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
@@ -82,7 +80,7 @@ pub fn main() -> Result<(), std::io::Error> {
 								#[cfg(debug_assertions)]
 								RawTerminal::suspend_raw_mode(&stdout)?;
 								let out_str = g.to_string();
-								let g = evaluate::evaluate(g);
+								let g = g.evaluate();
 								#[cfg(debug_assertions)]
 								RawTerminal::activate_raw_mode(&stdout)?;
 

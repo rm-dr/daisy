@@ -1,6 +1,5 @@
 pub mod tokens;
 pub mod parser;
-pub mod evaluate;
 pub mod quantity;
 
 //use crate::tokens::Token;
