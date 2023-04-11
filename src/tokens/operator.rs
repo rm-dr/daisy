@@ -3,7 +3,9 @@ use std::cmp::Ordering;
 
 use crate::tokens::Token;
 use crate::tokens::Function;
+use crate::tokens::EvalError;
 use crate::quantity::Quantity;
+
 
 /// Operator types, in order of increasing priority.
 #[derive(Debug)]
@@ -331,7 +333,7 @@ impl Operator {
 }
 
 impl Operator{
-	pub fn apply(&self, args: &VecDeque<Token>) -> Result<Token, ()> {
+	pub fn apply(&self, args: &VecDeque<Token>) -> Result<Token, EvalError> {
 		match self {
 			Operator::ImplicitMultiply |
 			Operator::Sqrt |
@@ -352,7 +354,7 @@ impl Operator{
 				let args = args[0].as_number();
 
 				if let Token::Number(v) = args {
-					if v.is_zero() { return Err(()); }
+					if v.is_zero() { return Err(EvalError::BadMath); }
 					return Ok(Token::Number(
 						Quantity::new_rational(1f64).unwrap()/v
 					));
@@ -371,7 +373,7 @@ impl Operator{
 					if let Token::Number(v) = j {
 
 						if sum.unit() != v.unit() {
-							return Err(());
+							return Err(EvalError::IncompatibleUnit);
 						}
 
 						sum += v;
@@ -406,12 +408,12 @@ impl Operator{
 					if let Token::Number(vb) = b {
 
 						if !(va.unitless() && vb.unitless()) {
-							return Err(());
+							return Err(EvalError::IncompatibleUnit);
 						}
 
-						if vb <= Quantity::new_rational(1f64).unwrap() { return Err(()); }
-						if va.fract() != Quantity::new_rational(0f64).unwrap() { return Err(()); }
-						if vb.fract() != Quantity::new_rational(0f64).unwrap() { return Err(()); }
+						if vb <= Quantity::new_rational(1f64).unwrap() { return Err(EvalError::BadMath); }
+						if va.fract() != Quantity::new_rational(0f64).unwrap() { return Err(EvalError::BadMath); }
+						if vb.fract() != Quantity::new_rational(0f64).unwrap() { return Err(EvalError::BadMath); }
 
 						return Ok(Token::Number(va%vb));
 					} else { panic!(); }
@@ -427,11 +429,11 @@ impl Operator{
 					if let Token::Number(vb) = b {
 
 						if va.unit() != vb.unit() {
-							return Err(());
+							return Err(EvalError::IncompatibleUnit);
 						}
 
 						let p = va.pow(vb);
-						if p.is_nan() {return Err(());}
+						if p.is_nan() {return Err(EvalError::BadMath);}
 						return Ok(Token::Number(p));
 					} else { panic!(); }
 				} else { panic!(); }
@@ -444,11 +446,11 @@ impl Operator{
 				if let Token::Number(v) = args {
 
 					if !v.unitless() {
-						return Err(());
+						return Err(EvalError::IncompatibleUnit);
 					}
 
-					if !v.fract().is_zero() { return Err(()); }
-					if v > Quantity::new_rational(50_000f64).unwrap() { return Err(()); }
+					if !v.fract().is_zero() { return Err(EvalError::BadMath); }
+					if v > Quantity::new_rational(50_000f64).unwrap() { return Err(EvalError::IncompatibleUnit); }
 
 					let mut prod = Quantity::new_rational(1f64).unwrap();
 					let mut u = v.clone();

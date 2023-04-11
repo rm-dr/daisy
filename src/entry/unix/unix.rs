@@ -11,6 +11,7 @@ use termion::{
 	style,
 };
 
+use crate::tokens::EvalError;
 use super::promptbuffer::PromptBuffer;
 use crate::parser;
 
@@ -103,9 +104,19 @@ pub fn main() -> Result<(), std::io::Error> {
 										)?;
 									},
 
-									Err(_) => {
+									Err(EvalError::BadMath) => {
 										write!(
-											stdout, "\n  {}{}Mathematical Error: {}Failed to evaluate expression.{}\r\n\n",
+											stdout, "\n  {}{}Mathematical Error: {}Failed to evaluate expression{}\r\n\n",
+											style::Bold,
+											color::Fg(color::Red),
+											style::Reset,
+											color::Fg(color::Reset),
+										)?;
+									},
+
+									Err(EvalError::IncompatibleUnit) => {
+										write!(
+											stdout, "\n  {}{}Evaluation Error: {}Incompatible units{}\r\n\n",
 											style::Bold,
 											color::Fg(color::Red),
 											style::Reset,

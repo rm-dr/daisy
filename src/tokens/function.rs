@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::tokens::Token;
+use crate::tokens::EvalError;
 use crate::tokens::Operator;
 
 #[derive(Debug)]
@@ -65,13 +66,13 @@ impl Function {
 		}
 	}
 
-	pub fn apply(&self, args: &VecDeque<Token>) -> Result<Token, ()> {
+	pub fn apply(&self, args: &VecDeque<Token>) -> Result<Token, EvalError> {
 		if args.len() != 1 {panic!()};
 		let a = args[0].as_number();
 		let Token::Number(q) = a else {panic!()};
 
 		if !q.unitless() {
-			return Err(());
+			return Err(EvalError::IncompatibleUnit);
 		}
 
 		match self {

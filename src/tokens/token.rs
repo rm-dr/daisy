@@ -1,7 +1,9 @@
 use std::collections::VecDeque;
 
+use crate::tokens::EvalError;
 use crate::tokens::Operator;
 use crate::quantity::Quantity;
+
 
 /// Tokens represent logical objects in an expession.
 ///
@@ -60,7 +62,7 @@ impl Token {
 	}
 
 	#[inline(always)]
-	pub fn eval(&self) -> Result<Token, ()> {
+	pub fn eval(&self) -> Result<Token, EvalError> {
 		Ok(match self {
 			Token::Number(_) => { self.clone() },
 			Token::Constant(v,_) => { Token::Number(v.clone()) },
@@ -96,7 +98,7 @@ impl Token {
 	}
 
 
-	pub fn evaluate(&self) -> Result<Token, ()> {
+	pub fn evaluate(&self) -> Result<Token, EvalError> {
 		let mut g = self.clone();
 		let mut coords: Vec<usize> = Vec::with_capacity(16);
 		coords.push(0);
