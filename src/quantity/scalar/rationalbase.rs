@@ -1,5 +1,6 @@
 use rug::Rational;
 use rug::Integer;
+use rug::ops::Pow;
 
 use std::ops::{
 	Add, Sub, Mul, Div,
@@ -107,6 +108,10 @@ impl ScalarBase for RationalBase {
 
 	fn fract(&self) -> Option<RationalBase> {
 		Some(RationalBase{val: self.val.clone().fract_floor(Integer::new()).0})
+	}
+
+	fn is_int(&self) -> bool {
+		self.fract() == RationalBase::from_f64(0f64)
 	}
 
 	fn is_zero(&self) -> bool {self.val == Rational::from((0,1))}

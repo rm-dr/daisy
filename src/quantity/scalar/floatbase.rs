@@ -17,15 +17,6 @@ use super::ScalarBase;
 use super::PRINT_LEN;
 use super::FLOAT_PRECISION;
 
-
-macro_rules! foward {
-	( $x:ident ) => {
-		fn $x(&self) -> Option<FloatBase> {
-			Some(FloatBase{ val: self.val.clone().$x()})
-		}
-	}
-}
-
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct FloatBase where {
@@ -99,6 +90,14 @@ impl ToString for FloatBase {
 }
 
 
+macro_rules! foward {
+	( $x:ident ) => {
+		fn $x(&self) -> Option<FloatBase> {
+			Some(FloatBase{ val: self.val.clone().$x()})
+		}
+	}
+}
+
 impl ScalarBase for FloatBase {
 
 	fn from_f64(f: f64) -> Option<FloatBase> {
@@ -126,6 +125,10 @@ impl ScalarBase for FloatBase {
 	fn is_one(&self) -> bool {self.val == Float::with_val(FLOAT_PRECISION, 1)}
 	fn is_negative(&self) -> bool { self.val.is_sign_negative() }
 	fn is_positive(&self) -> bool { self.val.is_sign_positive() }
+
+	fn is_int(&self) -> bool {
+		self.fract() == FloatBase::from_f64(0f64)
+	}
 
 	foward!(abs);
 	foward!(floor);
