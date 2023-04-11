@@ -9,7 +9,6 @@ use std::cmp::Ordering;
 
 use crate::quantity::Unit;
 use crate::quantity::BaseUnit;
-use crate::quantity::CompoundUnit;
 
 
 use crate::quantity::Scalar;
@@ -17,8 +16,8 @@ use crate::quantity::Scalar;
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct Quantity {
-	v: Scalar,
-	u: Unit
+	pub v: Scalar,
+	pub u: Unit
 }
 
 
@@ -97,6 +96,7 @@ impl Quantity {
 			"k" => Some(BaseUnit::Kelvin),
 			"mol" => Some(BaseUnit::Mole),
 			"c" => Some(BaseUnit::Candela),
+			"ft" => Some(BaseUnit::Foot),
 			_ => { None }
 		};
 
@@ -107,21 +107,6 @@ impl Quantity {
 			let mut q = Quantity::new_rational(1f64).unwrap();
 			q.set_unit(u);
 
-			return Some(q);
-		};
-
-		// Compound units
-		let b = match s {
-			"ft" => Some(CompoundUnit::FOOT),
-			_ => { None }
-		};
-
-		if b.is_some() {
-			let b = b.unwrap();
-			let q = Quantity{
-				v: b.coef(),
-				u: b.unit()
-			};
 			return Some(q);
 		};
 

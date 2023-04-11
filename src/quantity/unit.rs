@@ -6,6 +6,8 @@ use std::ops::{
 
 use crate::quantity::Scalar;
 
+use super::Quantity;
+
 #[derive(Debug)]
 #[derive(Hash)]
 #[derive(Eq, PartialEq)]
@@ -17,41 +19,37 @@ pub enum BaseUnit {
 	Ampere,
 	Kelvin,
 	Mole,
-	Candela
+	Candela,
+
+	Foot,
 }
 
-pub struct CompoundUnit {
-	coef_str: &'static str,
-	rational: bool,
-	units: &'static[(BaseUnit, f64)],
-	pub str: &'static str
-}
+impl BaseUnit {
+	pub fn is_base(&self) -> bool {
+		match self {
+			BaseUnit::Second
+			| BaseUnit::Meter
+			| BaseUnit::Kilogram
+			| BaseUnit::Ampere
+			| BaseUnit::Kelvin
+			| BaseUnit::Mole
+			| BaseUnit::Candela
+			=> true,
 
-impl CompoundUnit {
-	pub const FOOT: CompoundUnit = CompoundUnit {
-		coef_str: "0.3048",
-		rational: false,
-		units: &[(BaseUnit::Meter, 1f64)],
-		str: "ft"
-	};
-
-	pub fn unit(&self) -> Unit {
-		let mut n = Unit::new();
-		for (u, p) in self.units.iter() {
-			n.insert(*u, *p);
+			_ => false
 		}
-		return n;
 	}
 
-	pub fn coef(&self) -> Scalar {
-		if self.rational {
-			Scalar::new_rational_from_string(self.coef_str).unwrap()
-		} else {
-			Scalar::new_float_from_string(self.coef_str).unwrap()
+	pub fn to_base(&self) -> Option<Quantity> {
+		match self {
+			BaseUnit::Foot => Some(Quantity {
+				v: Scalar::new_float_from_string("0.3048").unwrap(),
+				u: Unit::from_array(&[(BaseUnit::Meter, 1f64)])
+			}),
+			_ => None
 		}
 	}
 }
-
 
 
 #[derive(Debug)]
@@ -88,7 +86,9 @@ impl ToString for Unit {
 				BaseUnit::Ampere => "a",
 				BaseUnit::Kelvin => "k",
 				BaseUnit::Mole => "mol",
-				BaseUnit::Candela => "c"
+				BaseUnit::Candela => "c",
+
+				BaseUnit::Foot => "ft",
 			};
 
 			if *p == 1f64 {
@@ -127,6 +127,14 @@ impl Unit {
 		return Unit{
 			val: HashMap::new()
 		}
+	}
+
+	pub fn from_array(a: &[(BaseUnit, f64)]) -> Unit {
+		let mut n = Unit::new();
+		for (u, p) in a.iter() {
+			n.insert(*u, *p);
+		}
+		return n;
 	}
 
 	pub fn unitless(&self) -> bool { self.val.len() == 0 }
