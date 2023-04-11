@@ -82,6 +82,13 @@ impl Quantity {
 		});
 	}
 
+	pub fn from_scalar(s: Scalar) -> Quantity {
+		return Quantity{
+			v: s,
+			u: Unit::new()
+		};
+	}
+
 	pub fn insert_unit(&mut self, ui: BaseUnit, pi: Scalar) { self.u.insert(ui, pi) }
 	pub fn set_unit(&mut self, u: Unit) { self.u = u; }
 
@@ -96,6 +103,9 @@ impl Quantity {
 			"mol" => Some(BaseUnit::Mole),
 			"c" => Some(BaseUnit::Candela),
 			"ft" => Some(BaseUnit::Foot),
+			"mile" => Some(BaseUnit::Mile),
+			"hour" => Some(BaseUnit::Hour),
+			"min" => Some(BaseUnit::Minute),
 			_ => { None }
 		};
 
@@ -110,6 +120,17 @@ impl Quantity {
 		};
 
 		return None;
+	}
+
+	pub fn convert_to(self, other: Quantity) -> Option<Quantity> {
+		let fa = self.u.to_base_factor();
+		let fb = other.u.to_base_factor();
+		let r = self * fa / fb;
+
+		// If this didn't work, units are incompatible
+		if r.u != other.u { return None; };
+
+		return Some(r);
 	}
 
 }

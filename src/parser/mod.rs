@@ -13,7 +13,6 @@ use crate::parser::treeify::treeify;
 use crate::parser::find_subs::find_subs;
 
 use crate::quantity::Quantity;
-use crate::quantity::Unit;
 
 use crate::tokens::Token;
 

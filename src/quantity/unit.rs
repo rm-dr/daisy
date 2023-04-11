@@ -21,30 +21,59 @@ pub enum BaseUnit {
 	Candela,
 
 	Foot,
+	Mile,
+	Minute,
+	Hour
 }
 
 impl BaseUnit {
-	pub fn is_base(&self) -> bool {
-		match self {
-			BaseUnit::Second
-			| BaseUnit::Meter
-			| BaseUnit::Kilogram
-			| BaseUnit::Ampere
-			| BaseUnit::Kelvin
-			| BaseUnit::Mole
-			| BaseUnit::Candela
-			=> true,
-
-			_ => false
-		}
-	}
-
 	pub fn to_base(&self) -> Option<Quantity> {
 		match self {
+
+			// Returns the unit we need to multiply by to get a base
+			// unit, or `None` if this is already a base unit.
+			//
+			// Example:
+			// 1 foot  = 0.3048 m,
+			// so 1 ft * (0.3084 m / ft) will give meters.
+			//
+			// The units here MUST be in terms of base units.
+			// If they aren't, things will break.
 			BaseUnit::Foot => Some(Quantity {
 				v: Scalar::new_float_from_string("0.3048").unwrap(),
-				u: Unit::from_array(&[(BaseUnit::Meter, Scalar::new_rational(1f64).unwrap())])
+				u: Unit::from_array(&[
+					(BaseUnit::Meter, Scalar::new_rational(1f64).unwrap()),
+					(BaseUnit::Foot, Scalar::new_rational(-1f64).unwrap())
+				])
 			}),
+
+			BaseUnit::Mile => Some(Quantity {
+				v: Scalar::new_float_from_string("1609").unwrap(),
+				u: Unit::from_array(&[
+					(BaseUnit::Meter, Scalar::new_rational(1f64).unwrap()),
+					(BaseUnit::Mile, Scalar::new_rational(-1f64).unwrap())
+				])
+			}),
+
+
+			BaseUnit::Minute => Some(Quantity {
+				v: Scalar::new_rational_from_string("60").unwrap(),
+				u: Unit::from_array(&[
+					(BaseUnit::Second, Scalar::new_rational(1f64).unwrap()),
+					(BaseUnit::Minute, Scalar::new_rational(-1f64).unwrap())
+				])
+			}),
+
+
+			BaseUnit::Hour => Some(Quantity {
+				v: Scalar::new_rational_from_string("3600").unwrap(),
+				u: Unit::from_array(&[
+					(BaseUnit::Second, Scalar::new_rational(1f64).unwrap()),
+					(BaseUnit::Hour, Scalar::new_rational(-1f64).unwrap())
+				])
+			}),
+
+			// Only base units should be missing a conversion factor.
 			_ => None
 		}
 	}
@@ -88,6 +117,9 @@ impl ToString for Unit {
 				BaseUnit::Candela => "c",
 
 				BaseUnit::Foot => "ft",
+				BaseUnit::Mile => "mile",
+				BaseUnit::Hour => "hour",
+				BaseUnit::Minute => "min",
 			};
 
 			if *p == Scalar::new_rational(1f64).unwrap() {
@@ -157,6 +189,19 @@ impl Unit {
 			*p *= pwr.clone();
 		};
 		return u;
+	}
+
+	pub fn to_base_factor(&self) -> Quantity {
+		let mut q = Quantity::new_rational(1f64).unwrap();
+
+		for (u, p) in self.val.iter() {
+			let b = u.to_base();
+			if b.is_some() {
+				q *= b.unwrap().pow(Quantity::from_scalar(p.clone()));
+			}
+		}
+
+		return q;
 	}
 }
 

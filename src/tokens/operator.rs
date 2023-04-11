@@ -13,6 +13,7 @@ use crate::quantity::Quantity;
 #[repr(usize)]
 pub enum Operator {
 	ModuloLong = 0, // Mod invoked with "mod"
+	UnitConvert,
 	Subtract,
 	Add,
 	Divide,
@@ -94,6 +95,14 @@ impl Operator {
 			Operator::ModuloLong => {
 				return format!(
 					"{} mod {}",
+					self.add_parens_to_arg(&args[0]),
+					self.add_parens_to_arg(&args[1])
+				);
+			},
+
+			Operator::UnitConvert => {
+				return format!(
+					"{} to {}",
 					self.add_parens_to_arg(&args[0]),
 					self.add_parens_to_arg(&args[1])
 				);
@@ -211,6 +220,7 @@ impl Operator {
 			"i*"     => {Some( Operator::ImplicitMultiply )},
 			"%"      => {Some( Operator::Modulo )},
 			"mod"    => {Some( Operator::ModuloLong )},
+			"to"    => {Some( Operator::UnitConvert )},
 			"^"|"**" => {Some( Operator::Power )},
 			"!"      => {Some( Operator::Factorial )},
 			"sqrt"|"rt"|"√" => {Some( Operator::Sqrt )},
@@ -327,6 +337,7 @@ impl Operator {
 			| Operator::Modulo
 			| Operator::Power
 			| Operator::ModuloLong
+			| Operator::UnitConvert
 			=> { Token::Operator(self, args) },
 		}
 	}
@@ -416,6 +427,23 @@ impl Operator{
 						if vb.fract() != Quantity::new_rational(0f64).unwrap() { return Err(EvalError::BadMath); }
 
 						return Ok(Token::Number(va%vb));
+					} else { panic!(); }
+				} else { panic!(); }
+			},
+
+			Operator::UnitConvert
+			=> {
+				if args.len() != 2 {panic!()};
+				let a = args[0].as_number();
+				let b = args[1].as_number();
+
+				if let Token::Number(va) = a {
+					if let Token::Number(vb) = b {
+						let n = va.convert_to(vb);
+						if n.is_none() {
+							return Err(EvalError::IncompatibleUnit);
+						}
+						return Ok(Token::Number(n.unwrap()));
 					} else { panic!(); }
 				} else { panic!(); }
 			},
