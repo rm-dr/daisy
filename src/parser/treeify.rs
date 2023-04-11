@@ -65,7 +65,7 @@ fn treeify_binary(
 		} else {
 			let tl = *this.get_line_location();
 			return Err((
-				LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
+				LineLocation{pos: l.pos, len: tl.pos - l.pos + tl.len},
 				ParserError::Syntax
 			));
 		}
