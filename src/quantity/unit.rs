@@ -4,8 +4,7 @@ use std::ops::{
 	MulAssign, DivAssign
 };
 
-use crate::quantity::Scalar;
-
+use super::Scalar;
 use super::Quantity;
 
 #[derive(Debug)]
@@ -44,7 +43,7 @@ impl BaseUnit {
 		match self {
 			BaseUnit::Foot => Some(Quantity {
 				v: Scalar::new_float_from_string("0.3048").unwrap(),
-				u: Unit::from_array(&[(BaseUnit::Meter, 1f64)])
+				u: Unit::from_array(&[(BaseUnit::Meter, Scalar::new_rational(1f64).unwrap())])
 			}),
 			_ => None
 		}
@@ -56,7 +55,7 @@ impl BaseUnit {
 #[derive(Clone)]
 pub struct Unit {
 	// Unit, power.
-	pub val: HashMap<BaseUnit, f64>
+	pub val: HashMap<BaseUnit, Scalar>
 }
 
 
@@ -68,7 +67,7 @@ impl ToString for Unit {
 		let mut bottom_empty = true;
 
 		for (_, p) in &self.val {
-			if *p > 0f64 {
+			if p.is_positive() {
 				top_empty = false;
 			} else {
 				bottom_empty = false;
@@ -91,21 +90,21 @@ impl ToString for Unit {
 				BaseUnit::Foot => "ft",
 			};
 
-			if *p == 1f64 {
+			if *p == Scalar::new_rational(1f64).unwrap() {
 				t.push_str(&format!("{c}·"));
-			} else if *p == -1f64 {
+			} else if *p == Scalar::new_rational(-1f64).unwrap() {
 				if top_empty {
 					b.push_str(&format!("{c}⁻¹·"));
 				} else {
 					b.push_str(&format!("{c}·"));
 				}
-			} else if *p > 0f64 {
-				t.push_str(&format!("{c}^{p}·"));
+			} else if p.is_positive() {
+				t.push_str(&format!("{c}^{}·", p.to_string()));
 			} else {
 				if top_empty {
-					b.push_str(&format!("{c}^{}·", p));
+					b.push_str(&format!("{c}^{}·", p.to_string()));
 				} else {
-					b.push_str(&format!("{c}^{}·", -p));
+					b.push_str(&format!("{c}^{}·", (-p.clone()).to_string()));
 				}
 			}
 		};
@@ -129,22 +128,22 @@ impl Unit {
 		}
 	}
 
-	pub fn from_array(a: &[(BaseUnit, f64)]) -> Unit {
+	pub fn from_array(a: &[(BaseUnit, Scalar)]) -> Unit {
 		let mut n = Unit::new();
 		for (u, p) in a.iter() {
-			n.insert(*u, *p);
+			n.insert(*u, p.clone());
 		}
 		return n;
 	}
 
 	pub fn unitless(&self) -> bool { self.val.len() == 0 }
 
-	pub fn insert(&mut self, u: BaseUnit, p: f64) {
+	pub fn insert(&mut self, u: BaseUnit, p: Scalar) {
 		match self.val.get_mut(&u) {
 			Some(i) => {
-				let n = *i + p;
+				let n = i.clone() + p;
 
-				if n == 0f64 {
+				if n.is_zero() {
 					self.val.remove(&u);
 				} else { *i = n; }
 			},
@@ -152,10 +151,10 @@ impl Unit {
 		};
 	}
 
-	pub fn pow(&self, pwr: f64) -> Unit {
+	pub fn pow(&self, pwr: Scalar) -> Unit {
 		let mut u = self.clone();
 		for (_, p) in &mut u.val {
-			*p *= pwr;
+			*p *= pwr.clone();
 		};
 		return u;
 	}
@@ -179,14 +178,14 @@ impl Mul for Unit {
 
 	fn mul(self, other: Self) -> Self::Output {
 		let mut o = self.clone();
-		for (u, p) in &other.val { o.insert(*u, *p); }
+		for (u, p) in &other.val { o.insert(*u, p.clone()); }
 		return o;
 	}
 }
 
 impl MulAssign for Unit where {
 	fn mul_assign(&mut self, other: Self) {
-		for (u, p) in &other.val { self.insert(*u, *p); }
+		for (u, p) in &other.val { self.insert(*u, p.clone()); }
 	}
 }
 
@@ -195,13 +194,13 @@ impl Div for Unit {
 
 	fn div(self, other: Self) -> Self::Output {
 		let mut o = self.clone();
-		for (u, p) in &other.val { o.insert(*u, -*p); }
+		for (u, p) in &other.val { o.insert(*u, -p.clone()); }
 		return o;
 	}
 }
 
 impl DivAssign for Unit where {
 	fn div_assign(&mut self, other: Self) {
-		for (u, p) in &other.val { self.insert(*u, -*p); }
+		for (u, p) in &other.val { self.insert(*u, -p.clone()); }
 	}
 }

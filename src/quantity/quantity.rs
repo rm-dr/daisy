@@ -10,7 +10,6 @@ use std::cmp::Ordering;
 use crate::quantity::Unit;
 use crate::quantity::BaseUnit;
 
-
 use crate::quantity::Scalar;
 
 #[derive(Debug)]
@@ -83,7 +82,7 @@ impl Quantity {
 		});
 	}
 
-	pub fn insert_unit(&mut self, ui: BaseUnit, pi: f64) { self.u.insert(ui, pi) }
+	pub fn insert_unit(&mut self, ui: BaseUnit, pi: Scalar) { self.u.insert(ui, pi) }
 	pub fn set_unit(&mut self, u: Unit) { self.u = u; }
 
 	pub fn from_unit_string(s: &str) -> Option<Quantity> {
@@ -102,7 +101,7 @@ impl Quantity {
 
 		if b.is_some() {
 			let mut u = Unit::new();
-			u.insert(b.unwrap(), 1f64);
+			u.insert(b.unwrap(), Scalar::new_rational(1f64).unwrap());
 
 			let mut q = Quantity::new_rational(1f64).unwrap();
 			q.set_unit(u);
@@ -170,8 +169,8 @@ impl Quantity {
 
 	pub fn pow(&self, pwr: Quantity) -> Quantity {
 		Quantity {
-			v: self.v.pow(pwr.v),
-			u: self.u.pow(2f64)
+			v: self.v.pow(pwr.v.clone()),
+			u: self.u.pow(pwr.v)
 		}
 	}
 }
