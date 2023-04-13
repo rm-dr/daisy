@@ -8,7 +8,7 @@ use std::ops::{
 use std::cmp::Ordering;
 
 use crate::quantity::Unit;
-use crate::quantity::BaseUnit;
+use crate::quantity::FreeUnit;
 
 use crate::quantity::Scalar;
 
@@ -89,38 +89,10 @@ impl Quantity {
 		};
 	}
 
-	pub fn insert_unit(&mut self, ui: BaseUnit, pi: Scalar) { self.u.insert(ui, pi) }
+	pub fn insert_unit(&mut self, ui: FreeUnit, pi: Scalar) { self.u.insert(ui, pi) }
 	pub fn set_unit(&mut self, u: Unit) { self.u = u; }
 
-	pub fn from_unit_string(s: &str) -> Option<Quantity> {
-		// Base Units
-		let b = match s {
-			"m" => Some(BaseUnit::Meter),
-			"s" => Some(BaseUnit::Second),
-			"kg" => Some(BaseUnit::Kilogram),
-			"a" => Some(BaseUnit::Ampere),
-			"k" => Some(BaseUnit::Kelvin),
-			"mol" => Some(BaseUnit::Mole),
-			"c" => Some(BaseUnit::Candela),
-			"ft" => Some(BaseUnit::Foot),
-			"mile" => Some(BaseUnit::Mile),
-			"hour" => Some(BaseUnit::Hour),
-			"min" => Some(BaseUnit::Minute),
-			_ => { None }
-		};
 
-		if b.is_some() {
-			let mut u = Unit::new();
-			u.insert(b.unwrap(), Scalar::new_rational(1f64).unwrap());
-
-			let mut q = Quantity::new_rational(1f64).unwrap();
-			q.set_unit(u);
-
-			return Some(q);
-		};
-
-		return None;
-	}
 
 	pub fn convert_to(self, other: Quantity) -> Option<Quantity> {
 		let fa = self.u.to_base_factor();
@@ -132,7 +104,6 @@ impl Quantity {
 
 		return Some(r);
 	}
-
 }
 
 

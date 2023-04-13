@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::f32::consts::E;
 use std::ops::{
 	Mul, Div,
 	MulAssign, DivAssign
@@ -7,29 +8,194 @@ use std::ops::{
 use super::Scalar;
 use super::Quantity;
 
-#[derive(Debug)]
+
 #[derive(Hash)]
-#[derive(Eq, PartialEq)]
+#[derive(Debug)]
 #[derive(Copy, Clone)]
-pub enum BaseUnit {
+#[derive(Eq, PartialEq)]
+pub enum UnitBase {
+	// Base Units
 	Second,
 	Meter,
-	Kilogram,
+	Gram, // Technically kilogram, but that messes with prefix architecture.
 	Ampere,
 	Kelvin,
 	Mole,
 	Candela,
 
+	// Length units
+	Inch,
 	Foot,
 	Mile,
+
+	// Time units
 	Minute,
-	Hour
+	Hour,
+	Day,
+	//Week,
+	//Month,
 }
 
-impl BaseUnit {
-	pub fn to_base(&self) -> Option<Quantity> {
-		match self {
+#[derive(Hash)]
+#[derive(Debug)]
+#[derive(Copy, Clone)]
+#[derive(Eq, PartialEq)]
+pub enum Prefix {
+	None,
 
+	Quetta,
+	Ronna,
+	Yotta,
+	Zetta,
+	Exa,
+	Peta,
+	Tera,
+	Giga,
+	Mega,
+	Kilo,
+	Hecto,
+	Deka,
+
+	Deci,
+	Centi,
+	Milli,
+	Micro,
+	Nano,
+	Pico,
+	Femto,
+	Atto,
+	Zepto,
+	Yocto,
+	Ronto,
+	Quecto
+}
+
+impl Prefix {
+	pub fn to_ratio(&self) -> Quantity {
+		let q = Quantity::new_rational_from_string(match self {
+			Prefix::Quetta => "1e30",
+			Prefix::Ronna => "1e27",
+			Prefix::Yotta => "1e24",
+			Prefix::Zetta => "1e21",
+			Prefix::Exa => "1e18",
+			Prefix::Peta => "1e15",
+			Prefix::Tera => "1e12",
+			Prefix::Giga => "1e9",
+			Prefix::Mega => "1e6",
+			Prefix::Kilo => "1e3",
+			Prefix::Hecto => "1e2",
+			Prefix::Deka => "1e1",
+
+			Prefix::Deci => "1e-1",
+			Prefix::Centi => "1e-2",
+			Prefix::Milli => "1e-3",
+			Prefix::Micro => "1e-6",
+			Prefix::Nano => "1e-9",
+			Prefix::Pico => "1e-12",
+			Prefix::Femto => "1e-15",
+			Prefix::Atto => "1e-18",
+			Prefix::Zepto => "1e-21",
+			Prefix::Yocto => "1e-24",
+			Prefix::Ronto => "1e-27",
+			Prefix::Quecto => "1e-30",
+
+			Prefix::None => { "1" }
+		}).unwrap();
+
+		return q;
+
+	}
+}
+
+impl ToString for Prefix {
+	fn to_string(&self) -> String {
+		String::from(match self {
+			Prefix::Quetta => "Q",
+			Prefix::Ronna => "R",
+			Prefix::Yotta => "Y",
+			Prefix::Zetta => "Z",
+			Prefix::Exa => "E",
+			Prefix::Peta => "P",
+			Prefix::Tera => "T",
+			Prefix::Giga => "G",
+			Prefix::Mega => "M",
+			Prefix::Kilo => "k",
+			Prefix::Hecto => "h",
+			Prefix::Deka => "da",
+
+			Prefix::Deci => "d",
+			Prefix::Centi => "c",
+			Prefix::Milli => "m",
+			Prefix::Micro => "u",
+			Prefix::Nano => "n",
+			Prefix::Pico => "p",
+			Prefix::Femto => "f",
+			Prefix::Atto => "a",
+			Prefix::Zepto => "z",
+			Prefix::Yocto => "y",
+			Prefix::Ronto => "r",
+			Prefix::Quecto => "q",
+
+			Prefix::None => ""
+		})
+	}
+}
+
+
+#[derive(Hash)]
+#[derive(Debug)]
+#[derive(Copy, Clone)]
+#[derive(Eq, PartialEq)]
+pub struct FreeUnit {
+	u: UnitBase,
+	p: Prefix
+}
+
+macro_rules! quick_base_factor {
+	(float, $u:expr, $s:expr, $( ($x:expr, $p:expr) ),* ) => {
+		Some(Quantity {
+			v: Scalar::new_float_from_string($s).unwrap(),
+			u: Unit::from_array(&[
+				$(
+					(FreeUnit::from_base($x), Scalar::new_rational($p).unwrap()),
+				)*
+				(FreeUnit::from_base($u), Scalar::new_rational(-1f64).unwrap())
+			])
+		})
+	};
+
+	(rational, $u:expr, $s:expr, $( ($x:expr, $p:expr) ),* ) => {
+		Some(Quantity {
+			v: Scalar::new_float_from_string($s).unwrap(),
+			u: Unit::from_array(&[
+				$(
+					(FreeUnit::from_base($x), Scalar::new_rational($p).unwrap()),
+				)*
+				(FreeUnit::from_base($u), Scalar::new_rational(-1f64).unwrap())
+			])
+		})
+	};
+}
+
+
+impl FreeUnit {
+	pub fn from_base(u: UnitBase) -> FreeUnit {
+		return FreeUnit {
+			u,
+			p: Prefix::None
+		}
+	}
+
+	pub fn from_base_prefix(u: UnitBase, p: Prefix) -> FreeUnit {
+		return FreeUnit { u, p }
+	}
+
+	pub fn set_prefix(&mut self, p: Prefix) {
+		self.p = p;
+	}
+
+	pub fn to_base_factor(&self) -> Quantity {
+		let q = match self.u {
 			// Returns the unit we need to multiply by to get a base
 			// unit, or `None` if this is already a base unit.
 			//
@@ -39,54 +205,91 @@ impl BaseUnit {
 			//
 			// The units here MUST be in terms of base units.
 			// If they aren't, things will break.
-			BaseUnit::Foot => Some(Quantity {
-				v: Scalar::new_float_from_string("0.3048").unwrap(),
-				u: Unit::from_array(&[
-					(BaseUnit::Meter, Scalar::new_rational(1f64).unwrap()),
-					(BaseUnit::Foot, Scalar::new_rational(-1f64).unwrap())
-				])
-			}),
 
-			BaseUnit::Mile => Some(Quantity {
-				v: Scalar::new_float_from_string("1609").unwrap(),
-				u: Unit::from_array(&[
-					(BaseUnit::Meter, Scalar::new_rational(1f64).unwrap()),
-					(BaseUnit::Mile, Scalar::new_rational(-1f64).unwrap())
-				])
-			}),
+			UnitBase::Foot => quick_base_factor!(float,
+				UnitBase::Foot,
+				"0.3048",
+				(UnitBase::Meter, 1f64)
+			),
 
+			UnitBase::Inch => quick_base_factor!(float,
+				UnitBase::Inch,
+				"0.0254",
+				(UnitBase::Meter, 1f64)
+			),
 
-			BaseUnit::Minute => Some(Quantity {
-				v: Scalar::new_rational_from_string("60").unwrap(),
-				u: Unit::from_array(&[
-					(BaseUnit::Second, Scalar::new_rational(1f64).unwrap()),
-					(BaseUnit::Minute, Scalar::new_rational(-1f64).unwrap())
-				])
-			}),
+			UnitBase::Mile => quick_base_factor!(rational,
+				UnitBase::Mile,
+				"1609",
+				(UnitBase::Meter, 1f64)
+			),
 
+			UnitBase::Minute => quick_base_factor!(rational,
+				UnitBase::Minute,
+				"60",
+				(UnitBase::Second, 1f64)
+			),
 
-			BaseUnit::Hour => Some(Quantity {
-				v: Scalar::new_rational_from_string("3600").unwrap(),
-				u: Unit::from_array(&[
-					(BaseUnit::Second, Scalar::new_rational(1f64).unwrap()),
-					(BaseUnit::Hour, Scalar::new_rational(-1f64).unwrap())
-				])
-			}),
+			UnitBase::Hour => quick_base_factor!(rational,
+				UnitBase::Hour,
+				"3600",
+				(UnitBase::Second, 1f64)
+			),
+
+			UnitBase::Day => quick_base_factor!(rational,
+				UnitBase::Day,
+				"86400",
+				(UnitBase::Second, 1f64)
+			),
 
 			// Only base units should be missing a conversion factor.
 			_ => None
-		}
+		};
+
+		let mut q = q.unwrap_or(Quantity::new_rational_from_string("1").unwrap());
+
+		let mut p = self.p.to_ratio();
+		p.insert_unit(FreeUnit::from_base(self.u), Scalar::new_rational(1f64).unwrap());
+		p.insert_unit(FreeUnit::from_base_prefix(self.u, self.p), Scalar::new_rational(-1f64).unwrap());
+		q *= p;
+
+		return q;
 	}
 }
 
+
+impl ToString for FreeUnit {
+	fn to_string(&self) -> String {
+		let s = match self.u {
+			UnitBase::Second => "s",
+			UnitBase::Meter => "m",
+			UnitBase::Gram => "g",
+			UnitBase::Ampere => "a",
+			UnitBase::Kelvin => "k",
+			UnitBase::Mole => "mol",
+			UnitBase::Candela => "c",
+
+			UnitBase::Foot => "ft",
+			UnitBase::Inch => "in",
+			UnitBase::Mile => "mile",
+
+			UnitBase::Hour => "hour",
+			UnitBase::Minute => "min",
+			UnitBase::Day => "day",
+		};
+
+		let p = self.p.to_string();
+
+		format!("{p}{s}")
+	}
+}
 
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct Unit {
 	// Unit, power.
-	pub val: HashMap<BaseUnit, Scalar>
+	pub val: HashMap<FreeUnit, Scalar>
 }
-
 
 impl ToString for Unit {
 	fn to_string(&self) -> String {
@@ -95,7 +298,7 @@ impl ToString for Unit {
 		let mut top_empty = true;
 		let mut bottom_empty = true;
 
-		for (_, p) in &self.val {
+		for (_, p) in self.get_val() {
 			if p.is_positive() {
 				top_empty = false;
 			} else {
@@ -106,21 +309,8 @@ impl ToString for Unit {
 		let mut t = String::new();
 		let mut b = String::new();
 
-		for (u, p) in &self.val {
-			let c = match u {
-				BaseUnit::Second => "s",
-				BaseUnit::Meter => "m",
-				BaseUnit::Kilogram => "kg",
-				BaseUnit::Ampere => "a",
-				BaseUnit::Kelvin => "k",
-				BaseUnit::Mole => "mol",
-				BaseUnit::Candela => "c",
-
-				BaseUnit::Foot => "ft",
-				BaseUnit::Mile => "mile",
-				BaseUnit::Hour => "hour",
-				BaseUnit::Minute => "min",
-			};
+		for (u, p) in self.get_val() {
+			let c = u.to_string();
 
 			if *p == Scalar::new_rational(1f64).unwrap() {
 				t.push_str(&format!("{c}·"));
@@ -153,14 +343,16 @@ impl ToString for Unit {
 
 
 impl Unit {
-
 	pub fn new() -> Unit {
-		return Unit{
+		return Unit {
 			val: HashMap::new()
 		}
 	}
 
-	pub fn from_array(a: &[(BaseUnit, Scalar)]) -> Unit {
+	pub fn get_val(&self) -> &HashMap<FreeUnit, Scalar> { &self.val }
+	pub fn get_val_mut(&mut self) -> &mut HashMap<FreeUnit, Scalar> { &mut self.val }
+
+	pub fn from_array(a: &[(FreeUnit, Scalar)]) -> Unit {
 		let mut n = Unit::new();
 		for (u, p) in a.iter() {
 			n.insert(*u, p.clone());
@@ -168,37 +360,87 @@ impl Unit {
 		return n;
 	}
 
-	pub fn unitless(&self) -> bool { self.val.len() == 0 }
+	pub fn unitless(&self) -> bool { self.get_val().len() == 0 }
 
-	pub fn insert(&mut self, u: BaseUnit, p: Scalar) {
-		match self.val.get_mut(&u) {
+	pub fn insert(&mut self, u: FreeUnit, p: Scalar) {
+		let v = self.get_val_mut();
+		match v.get_mut(&u) {
 			Some(i) => {
 				let n = i.clone() + p;
 
 				if n.is_zero() {
-					self.val.remove(&u);
+					v.remove(&u);
 				} else { *i = n; }
 			},
-			None => { self.val.insert(u, p); }
+			None => { v.insert(u, p); }
 		};
 	}
 
 	pub fn pow(&self, pwr: Scalar) -> Unit {
 		let mut u = self.clone();
-		for (_, p) in &mut u.val {
+		for (_, p) in u.get_val_mut() {
 			*p *= pwr.clone();
 		};
 		return u;
 	}
 
+
+	pub fn from_string(s: &str) -> Option<Quantity> {
+		// Base Units
+		let b = match s {
+			"m" => Some(UnitBase::Meter),
+			"s" => Some(UnitBase::Second),
+			"sec" => Some(UnitBase::Second),
+			"g" => Some(UnitBase::Gram),
+			"a" => Some(UnitBase::Ampere),
+			"k" => Some(UnitBase::Kelvin),
+			"mol" => Some(UnitBase::Mole),
+			"c" => Some(UnitBase::Candela),
+			"ft" => Some(UnitBase::Foot),
+			"mile" => Some(UnitBase::Mile),
+			"hour" => Some(UnitBase::Hour),
+			"min" => Some(UnitBase::Minute),
+			"day" => Some(UnitBase::Day),
+			_ => { None }
+		};
+
+		if b.is_some() {
+			let mut u = Unit::new();
+			let b = FreeUnit::from_base(b.unwrap());
+
+			u.insert(b, Scalar::new_rational(1f64).unwrap());
+
+			let mut q = Quantity::new_rational(1f64).unwrap();
+			q.set_unit(u);
+
+			return Some(q);
+		};
+
+		if b.is_none() {
+			if s == "kg" {
+				let mut u = Unit::new();
+				let mut b = FreeUnit::from_base(UnitBase::Gram);
+				b.set_prefix(Prefix::Kilo);
+
+				u.insert(b, Scalar::new_rational(1f64).unwrap());
+
+				let mut q = Quantity::new_rational(1f64).unwrap();
+				q.set_unit(u);
+
+				return Some(q);
+			}
+		}
+
+		return None;
+	}
+
+
 	pub fn to_base_factor(&self) -> Quantity {
 		let mut q = Quantity::new_rational(1f64).unwrap();
 
-		for (u, p) in self.val.iter() {
-			let b = u.to_base();
-			if b.is_some() {
-				q *= b.unwrap().pow(Quantity::from_scalar(p.clone()));
-			}
+		for (u, p) in self.get_val().iter() {
+			let b = u.to_base_factor();
+			q *= b.pow(Quantity::from_scalar(p.clone()));
 		}
 
 		return q;
@@ -208,8 +450,9 @@ impl Unit {
 
 impl PartialEq for Unit {
 	fn eq(&self, other: &Self) -> bool {
-		for (u, p) in &other.val {
-			match self.val.get(u) {
+		let v = self.get_val();
+		for (u, p) in other.get_val() {
+			match v.get(u) {
 				Some(i) => { if i != p { return false; } },
 				None => { return false; }
 			};
@@ -223,14 +466,14 @@ impl Mul for Unit {
 
 	fn mul(self, other: Self) -> Self::Output {
 		let mut o = self.clone();
-		for (u, p) in &other.val { o.insert(*u, p.clone()); }
+		for (u, p) in other.get_val() { o.insert(*u, p.clone()); }
 		return o;
 	}
 }
 
 impl MulAssign for Unit where {
 	fn mul_assign(&mut self, other: Self) {
-		for (u, p) in &other.val { self.insert(*u, p.clone()); }
+		for (u, p) in other.get_val() { self.insert(*u, p.clone()); }
 	}
 }
 
@@ -239,13 +482,13 @@ impl Div for Unit {
 
 	fn div(self, other: Self) -> Self::Output {
 		let mut o = self.clone();
-		for (u, p) in &other.val { o.insert(*u, -p.clone()); }
+		for (u, p) in other.get_val() { o.insert(*u, -p.clone()); }
 		return o;
 	}
 }
 
 impl DivAssign for Unit where {
 	fn div_assign(&mut self, other: Self) {
-		for (u, p) in &other.val { self.insert(*u, -p.clone()); }
+		for (u, p) in other.get_val() { self.insert(*u, -p.clone()); }
 	}
 }

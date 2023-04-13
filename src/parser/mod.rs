@@ -13,6 +13,7 @@ use crate::parser::treeify::treeify;
 use crate::parser::find_subs::find_subs;
 
 use crate::quantity::Quantity;
+use crate::quantity::Unit;
 
 use crate::tokens::Token;
 
@@ -112,8 +113,7 @@ impl PreToken {
 					return Ok(Token::Constant(a, b));
 				}
 
-				let c = Quantity::from_unit_string(&s);
-
+				let c = Unit::from_string(&s);
 				if c.is_some() { return Ok(Token::Number(c.unwrap())); }
 
 				return Err((l, ParserError::Undefined(s)));
