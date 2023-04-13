@@ -6,9 +6,11 @@ use std::ops::{
 
 use crate::quantity::Scalar;
 use crate::quantity::Quantity;
+use super::FreeUnit;
 use super::UnitBase;
 use super::Prefix;
-use super::FreeUnit;
+use super::fromstring_db;
+use super::str_to_prefix;
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -72,6 +74,15 @@ impl Unit {
 		return Unit {
 			val: HashMap::new()
 		}
+	}
+
+	pub fn from_free(f: FreeUnit) -> Unit {
+		let mut u = Unit {
+			val: HashMap::new()
+		};
+
+		u.insert(f, Scalar::new_rational(1f64).unwrap());
+		return u;
 	}
 
 	pub fn get_val(&self) -> &HashMap<FreeUnit, Scalar> { &self.val }
@@ -149,68 +160,6 @@ impl Unit {
 		return u;
 	}
 
-
-	pub fn from_string(s: &str) -> Option<Quantity> {
-		// Base Units
-		let b = match s {
-			"m" => Some(UnitBase::Meter),
-			"s" => Some(UnitBase::Second),
-			"sec" => Some(UnitBase::Second),
-			"g" => Some(UnitBase::Gram),
-			"a" => Some(UnitBase::Ampere),
-			"k" => Some(UnitBase::Kelvin),
-			"mol" => Some(UnitBase::Mole),
-			"c" => Some(UnitBase::Candela),
-			"ft" => Some(UnitBase::Foot),
-			"mile" => Some(UnitBase::Mile),
-			"hour" => Some(UnitBase::Hour),
-			"min" => Some(UnitBase::Minute),
-			"day" => Some(UnitBase::Day),
-			_ => { None }
-		};
-
-		if b.is_some() {
-			let mut u = Unit::new();
-			let b = FreeUnit::from_base(b.unwrap());
-
-			u.insert(b, Scalar::new_rational(1f64).unwrap());
-
-			let mut q = Quantity::new_rational(1f64).unwrap();
-			q.set_unit(u);
-
-			return Some(q);
-		};
-
-		if b.is_none() {
-			if s == "kg" {
-				let mut u = Unit::new();
-				let b = FreeUnit::from_base_prefix(UnitBase::Gram, Prefix::Kilo);
-
-				u.insert(b, Scalar::new_rational(1f64).unwrap());
-
-				let mut q = Quantity::new_rational(1f64).unwrap();
-				q.set_unit(u);
-
-				return Some(q);
-			}
-
-			if s == "km" {
-				let mut u = Unit::new();
-				let b = FreeUnit::from_base_prefix(UnitBase::Meter, Prefix::Kilo);
-
-				u.insert(b, Scalar::new_rational(1f64).unwrap());
-
-				let mut q = Quantity::new_rational(1f64).unwrap();
-				q.set_unit(u);
-
-				return Some(q);
-			}
-		}
-
-		return None;
-	}
-
-
 	pub fn to_base_factor(&self) -> Quantity {
 		let mut q = Quantity::new_rational(1f64).unwrap();
 
@@ -222,6 +171,55 @@ impl Unit {
 		return q;
 	}
 }
+
+
+
+impl Unit {
+	pub fn from_string(s: &str) -> Option<Quantity> {
+		macro_rules! unpack_fromstring {
+			(
+				$(
+					(
+						$unit:expr,
+						$string:literal
+						$(, (
+							$( $prefix:tt ),*
+						))?
+					)
+				),*
+			) => {
+				// Build match statement for each unit and prefix
+				match s {
+					$(
+						// No prefix--every unit has this
+						$string => Some(FreeUnit::from_base($unit)),
+
+						// Arms for prefixes
+						$($(
+							concat!(
+								$prefix,
+								$string
+							) => Some(FreeUnit::from_base_prefix($unit, str_to_prefix!($prefix))),
+						)*)*
+					)*
+					_ => None
+				}
+			};
+		}
+
+		// Big match statement
+		let b = fromstring_db!(unpack_fromstring);
+
+		if b.is_none() { return None; }
+		let b = Unit::from_free(b.unwrap());
+		let mut q = Quantity::new_rational(1f64).unwrap();
+		q.set_unit(b);
+		return Some(q);
+
+	}
+}
+
+
 
 
 impl PartialEq for Unit {

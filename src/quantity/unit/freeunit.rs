@@ -5,6 +5,7 @@ use crate::quantity::Quantity;
 use super::UnitBase;
 use super::Prefix;
 use super::Unit;
+use super::unit_db;
 
 
 #[derive(Debug)]
@@ -28,27 +29,45 @@ impl PartialEq for FreeUnit {
 }
 
 
-macro_rules! quick_base_factor {
-	(float, $u:expr, $s:expr, $( ($x:expr, $p:expr) ),* ) => {
+macro_rules! unpack_base_factor {
+	(
+		$unit:expr,
+		$display_string:expr,
+		base
+	) => { None };
+
+	(
+		$unit:expr,
+		$display_string:expr,
+		float,
+		$value:expr,
+		$( ($u:expr, $p:expr) ),*
+	) => {
 		Some(Quantity {
-			scalar: Scalar::new_float_from_string($s).unwrap(),
+			scalar: Scalar::new_float_from_string($value).unwrap(),
 			unit: Unit::from_array(&[
 				$(
-					(FreeUnit::from_base($x), Scalar::new_rational($p).unwrap()),
+					(FreeUnit::from_base($u), Scalar::new_rational($p).unwrap()),
 				)*
-				(FreeUnit::from_base($u), Scalar::new_rational(-1f64).unwrap())
+				(FreeUnit::from_base($unit), Scalar::new_rational(-1f64).unwrap())
 			])
 		})
 	};
 
-	(rational, $u:expr, $s:expr, $( ($x:expr, $p:expr) ),* ) => {
+	(
+		$unit:expr,
+		$display_string:expr,
+		rational,
+		$value:expr,
+		$( ($u:expr, $p:expr) ),*
+	) => {
 		Some(Quantity {
-			scalar: Scalar::new_float_from_string($s).unwrap(),
+			scalar: Scalar::new_rational_from_string($value).unwrap(),
 			unit: Unit::from_array(&[
 				$(
-					(FreeUnit::from_base($x), Scalar::new_rational($p).unwrap()),
+					(FreeUnit::from_base($u), Scalar::new_rational($p).unwrap()),
 				)*
-				(FreeUnit::from_base($u), Scalar::new_rational(-1f64).unwrap())
+				(FreeUnit::from_base($unit), Scalar::new_rational(-1f64).unwrap())
 			])
 		})
 	};
@@ -70,57 +89,8 @@ impl FreeUnit {
 
 
 	pub fn to_base_factor(&self) -> Quantity {
-		let q = match self.base {
-			// Returns the unit we need to multiply by to get a base
-			// unit, or `None` if this is already a base unit.
-			//
-			// Example:
-			// 1 foot  = 0.3048 m,
-			// so 1 ft * (0.3084 m / ft) will give meters.
-			//
-			// The units here MUST be in terms of base units.
-			// If they aren't, things will break.
 
-			UnitBase::Foot => quick_base_factor!(float,
-				UnitBase::Foot,
-				"0.3048",
-				(UnitBase::Meter, 1f64)
-			),
-
-			UnitBase::Inch => quick_base_factor!(float,
-				UnitBase::Inch,
-				"0.0254",
-				(UnitBase::Meter, 1f64)
-			),
-
-			UnitBase::Mile => quick_base_factor!(rational,
-				UnitBase::Mile,
-				"1609",
-				(UnitBase::Meter, 1f64)
-			),
-
-			UnitBase::Minute => quick_base_factor!(rational,
-				UnitBase::Minute,
-				"60",
-				(UnitBase::Second, 1f64)
-			),
-
-			UnitBase::Hour => quick_base_factor!(rational,
-				UnitBase::Hour,
-				"3600",
-				(UnitBase::Second, 1f64)
-			),
-
-			UnitBase::Day => quick_base_factor!(rational,
-				UnitBase::Day,
-				"86400",
-				(UnitBase::Second, 1f64)
-			),
-
-			// Only base units should be missing a conversion factor.
-			_ => None
-		};
-
+		let q = unit_db!(self.base, unpack_base_factor);
 		let mut q = q.unwrap_or(Quantity::new_rational_from_string("1").unwrap());
 
 		let mut p = self.prefix.to_ratio();
@@ -133,26 +103,18 @@ impl FreeUnit {
 }
 
 
+
+macro_rules! unpack_string {
+	(
+		$u:expr, $s:expr,
+		$( $_:expr ),*
+	) => { $s };
+}
+
 impl ToString for FreeUnit {
 	fn to_string(&self) -> String {
-		let s = match self.base {
-			UnitBase::Second => "s",
-			UnitBase::Meter => "m",
-			UnitBase::Gram => "g",
-			UnitBase::Ampere => "a",
-			UnitBase::Kelvin => "k",
-			UnitBase::Mole => "mol",
-			UnitBase::Candela => "c",
 
-			UnitBase::Foot => "ft",
-			UnitBase::Inch => "in",
-			UnitBase::Mile => "mile",
-
-			UnitBase::Hour => "hour",
-			UnitBase::Minute => "min",
-			UnitBase::Day => "day",
-		};
-
+		let s = unit_db!(self.base, unpack_string);
 		let p = self.prefix.to_string();
 
 		format!("{p}{s}")
