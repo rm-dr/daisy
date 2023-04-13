@@ -1,4 +1,4 @@
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
 
 use crate::quantity::Scalar;
 use crate::quantity::Quantity;
@@ -8,24 +8,13 @@ use super::Unit;
 use super::unit_db;
 
 
+#[derive(Hash)]
 #[derive(Debug)]
 #[derive(Copy, Clone)]
+#[derive(PartialEq, Eq)]
 pub struct FreeUnit {
 	pub (in super) base: UnitBase,
 	pub (in super) prefix: Prefix
-}
-
-impl Hash for FreeUnit {
-	fn hash<H: Hasher>(&self, state: &mut H) {
-		self.base.hash(state);
-	}
-}
-
-impl Eq for FreeUnit {}
-impl PartialEq for FreeUnit {
-	fn eq(&self, other: &Self) -> bool {
-		self.base.eq(&other.base)
-	}
 }
 
 
@@ -83,11 +72,6 @@ impl FreeUnit {
 	pub fn set_prefix(&mut self, prefix: Prefix) { self.prefix = prefix; }
 	pub fn get_prefix(&self) -> Prefix { self.prefix }
 
-	pub fn same_with_prefix(&self, other: &FreeUnit) -> bool {
-		self.base.eq(&other.base) && self.prefix.eq(&other.prefix)
-	}
-
-
 	pub fn to_base_factor(&self) -> Quantity {
 
 		let q = unit_db!(self.base, unpack_base_factor);
@@ -96,7 +80,7 @@ impl FreeUnit {
 		let mut p = self.prefix.to_ratio();
 		p.insert_unit(FreeUnit::from_base(self.base), Scalar::new_rational(1f64).unwrap());
 		p.insert_unit(FreeUnit::from_base_prefix(self.base, self.prefix), Scalar::new_rational(-1f64).unwrap());
-		q *= p;
+		q.mul_assign_no_convert(p);
 
 		return q;
 	}

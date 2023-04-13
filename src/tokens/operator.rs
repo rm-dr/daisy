@@ -383,7 +383,7 @@ impl Operator{
 					let j = args[i].as_number();
 					if let Token::Number(v) = j {
 
-						if sum.unit() != v.unit() {
+						if !sum.unit.compatible_with(&v.unit) {
 							return Err(EvalError::IncompatibleUnit);
 						}
 
@@ -456,7 +456,7 @@ impl Operator{
 				if let Token::Number(va) = a {
 					if let Token::Number(vb) = b {
 
-						if va.unit() != vb.unit() {
+						if !vb.unitless() {
 							return Err(EvalError::IncompatibleUnit);
 						}
 

@@ -97,46 +97,11 @@ impl Unit {
 		return n;
 	}
 
-	pub fn prefixes_match(&self, other: &Unit) -> bool {
-		let v = self.get_val();
-		for (u, _) in other.get_val() {
-			let k = v.get_key_value(u);
-
-			if k.is_some() {
-				let k = k.unwrap().0;
-				if !u.same_with_prefix(k) { return false; }
-			}
-		}
-		return true;
+	pub fn compatible_with(&self, other: &Unit) -> bool {
+		let s = self.clone() * self.to_base_factor().unit;
+		let o = other.clone() * other.to_base_factor().unit;
+		return o == s;
 	}
-
-	pub fn match_prefix_factor(&self, other: &Unit) -> Quantity {
-		let mut f = Quantity::new_rational(1f64).unwrap();
-
-		let v = self.get_val();
-		for (ou, op) in other.get_val() {
-			let k = v.get_key_value(ou);
-
-			if k.is_some() {
-				let (su, _) = k.unwrap();
-
-				// Conversion factor ou -> basic
-				let mut p = ou.prefix.to_ratio();
-				p.insert_unit(FreeUnit::from_base(ou.base), Scalar::new_rational(1f64).unwrap());
-				p.insert_unit(FreeUnit::from_base_prefix(ou.base, ou.prefix), Scalar::new_rational(-1f64).unwrap());
-
-				// Conversion factor su -> basic
-				let mut q = su.prefix.to_ratio();
-				q.insert_unit(FreeUnit::from_base(su.base), Scalar::new_rational(1f64).unwrap());
-				q.insert_unit(FreeUnit::from_base_prefix(su.base, su.prefix), Scalar::new_rational(-1f64).unwrap());
-
-				f = f * (p / q).pow(Quantity::from_scalar(op.clone()));
-			}
-		}
-
-		return f;
-	}
-
 
 	pub fn insert(&mut self, u: FreeUnit, p: Scalar) {
 		let v = self.get_val_mut();
@@ -165,14 +130,12 @@ impl Unit {
 
 		for (u, p) in self.get_val().iter() {
 			let b = u.to_base_factor();
-			q *= b.pow(Quantity::from_scalar(p.clone()));
+			q.mul_assign_no_convert(b.pow(Quantity::from_scalar(p.clone())));
 		}
 
 		return q;
 	}
 }
-
-
 
 impl Unit {
 	pub fn from_string(s: &str) -> Option<Quantity> {
@@ -220,8 +183,6 @@ impl Unit {
 }
 
 
-
-
 impl PartialEq for Unit {
 	fn eq(&self, other: &Self) -> bool {
 		let v = self.get_val();
@@ -231,6 +192,15 @@ impl PartialEq for Unit {
 				None => { return false; }
 			};
 		}
+
+		let v = other.get_val();
+		for (u, p) in self.get_val() {
+			match v.get(u) {
+				Some(i) => { if i != p { return false; } },
+				None => { return false; }
+			};
+		}
+
 		return true;
 	}
 }

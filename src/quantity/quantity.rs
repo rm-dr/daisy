@@ -94,14 +94,12 @@ impl Quantity {
 
 
 	pub fn convert_to(self, other: Quantity) -> Option<Quantity> {
+		if !self.unit.compatible_with(&other.unit) { return None; }
+
 		let fa = self.unit.to_base_factor();
 		let fb = other.unit.to_base_factor();
-		let r = self * fa / fb;
 
-		// If this didn't work, units are incompatible
-		if r.unit != other.unit { return None; };
-
-		return Some(r);
+		return Some(self * fa / fb)
 	}
 }
 
@@ -167,6 +165,33 @@ impl Quantity {
 }
 
 
+impl Quantity {
+	pub fn mul_no_convert(self, other: Self) -> Self {
+		Quantity {
+			scalar: self.scalar * other.scalar,
+			unit: self.unit * other.unit
+		}
+	}
+
+	pub fn mul_assign_no_convert(&mut self, other: Self) {
+		self.scalar *= other.scalar;
+		self.unit *= other.unit;
+	}
+
+	pub fn div_no_convert(self, other: Self) -> Self {
+		Quantity {
+			scalar: self.scalar / other.scalar,
+			unit: self.unit / other.unit
+		}
+	}
+
+	pub fn div_assign_no_convert(&mut self, other: Self) {
+		self.scalar *= other.scalar;
+		self.unit *= other.unit;
+	}
+}
+
+
 impl Neg for Quantity where {
 	type Output = Self;
 
@@ -182,10 +207,10 @@ impl Add for Quantity {
 	type Output = Self;
 
 	fn add(self, other: Self) -> Self::Output {
-		if self.unit != other.unit { panic!() }
+		if !self.unit.compatible_with(&other.unit) { panic!() }
 
 		let mut o = other;
-		if !o.unit.prefixes_match(&self.unit) {
+		if self.unit != o.unit {
 			o = o.convert_to(self.clone()).unwrap();
 		}
 
@@ -198,10 +223,10 @@ impl Add for Quantity {
 
 impl AddAssign for Quantity where {
 	fn add_assign(&mut self, other: Self) {
-		if self.unit != other.unit { panic!() }
+		if !self.unit.compatible_with(&other.unit) { panic!() }
 
 		let mut o = other;
-		if !o.unit.prefixes_match(&self.unit) {
+		if self.unit != o.unit {
 			o = o.convert_to(self.clone()).unwrap();
 		}
 
@@ -213,10 +238,10 @@ impl Sub for Quantity {
 	type Output = Self;
 
 	fn sub(self, other: Self) -> Self::Output {
-		if self.unit != other.unit { panic!() }
+		if !self.unit.compatible_with(&other.unit) { panic!() }
 
 		let mut o = other;
-		if !o.unit.prefixes_match(&self.unit) {
+		if self.unit != o.unit {
 			o = o.convert_to(self.clone()).unwrap();
 		}
 
@@ -229,10 +254,10 @@ impl Sub for Quantity {
 
 impl SubAssign for Quantity where {
 	fn sub_assign(&mut self, other: Self) {
-		if self.unit != other.unit { panic!() }
+		if !self.unit.compatible_with(&other.unit) { panic!() }
 
 		let mut o = other;
-		if !o.unit.prefixes_match(&self.unit) {
+		if self.unit != o.unit {
 			o = o.convert_to(self.clone()).unwrap();
 		}
 
@@ -240,26 +265,38 @@ impl SubAssign for Quantity where {
 	}
 }
 
+
 impl Mul for Quantity {
 	type Output = Self;
 
 	fn mul(self, other: Self) -> Self::Output {
 
-		let f = self.unit.match_prefix_factor(&other.unit);
+		let mut o = other;
+		if self.unit != o.unit {
+			if self.unit.compatible_with(&o.unit) {
+				o = o.convert_to(self.clone()).unwrap()
+			}
+		}
 
 		Quantity {
-			scalar: self.scalar * other.scalar * f.scalar,
-			unit: self.unit * other.unit * f.unit,
+			scalar: self.scalar * o.scalar,
+			unit: self.unit * o.unit
 		}
 	}
 }
 
 impl MulAssign for Quantity where {
 	fn mul_assign(&mut self, other: Self) {
-		let f = self.unit.match_prefix_factor(&other.unit);
 
-		self.scalar *= other.scalar * f.scalar;
-		self.unit *= other.unit * f.unit;
+		let mut o = other;
+		if self.unit != o.unit {
+			if o.unit.compatible_with(&self.unit) {
+				o = o.convert_to(self.clone()).unwrap()
+			}
+		}
+
+		self.scalar *= o.scalar;
+		self.unit *= o.unit;
 	}
 }
 
@@ -267,17 +304,33 @@ impl Div for Quantity {
 	type Output = Self;
 
 	fn div(self, other: Self) -> Self::Output {
+
+		let mut o = other;
+		if self.unit != o.unit {
+			if self.unit.compatible_with(&o.unit) {
+				o = o.convert_to(self.clone()).unwrap()
+			}
+		}
+
 		Quantity {
-			scalar: self.scalar / other.scalar,
-			unit: self.unit / other.unit
+			scalar: self.scalar / o.scalar,
+			unit: self.unit / o.unit
 		}
 	}
 }
 
 impl DivAssign for Quantity where {
 	fn div_assign(&mut self, other: Self) {
-		self.scalar /= other.scalar;
-		self.unit /= other.unit;
+
+		let mut o = other;
+		if self.unit != o.unit {
+			if self.unit.compatible_with(&o.unit) {
+				o = o.convert_to(self.clone()).unwrap()
+			}
+		}
+
+		self.scalar /= o.scalar;
+		self.unit /= o.unit;
 	}
 }
 
