@@ -49,7 +49,7 @@ Note that implicit multiplication has a higher priority than mulitiplication and
 | Logarithm (base e)        | `ln`                        |
 | Logarithm (base 10)       | `log`                       |
 | sin, arcsin, cosecant     | `sin`, `asin`, `csc`        |
-| cos, arccos, secant       | `cos`, `acos`, `sec`        |
+| cos, arccos, secant       | `cos`, `acos`, `secant`     |
 | tan, arctan, cotan        | `tan`, `atan`, `cot`        |
 | hyperbolic sin, etc       | `sinh`, `asinh`, `csch`     |
 | hyperbolic cos, etc       | `cosh`, `acosh`, `sech`     |
