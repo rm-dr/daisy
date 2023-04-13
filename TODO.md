@@ -11,6 +11,9 @@ Roadmap for fixes and features.
  - Fix unit power
  - Better unit powers
  - Releases
+ - Fix unit conversion
+ - Minute + second
+ - 2sec + day -> broken print
 
 ## General
  - CLI Options: version, help, evaluate
@@ -43,6 +46,8 @@ Roadmap for fixes and features.
  - Extra roots? (for convenience)
  - Sums and products
  - "per" as division?
+ - -> as "to"
+ - strip_unit function
 
 
 ## Prompt
