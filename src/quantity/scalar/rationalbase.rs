@@ -1,6 +1,5 @@
 use rug::Rational;
 use rug::Integer;
-use rug::ops::Pow;
 
 use std::ops::{
 	Add, Sub, Mul, Div,
