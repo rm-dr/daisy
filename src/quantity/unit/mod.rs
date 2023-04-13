@@ -24,16 +24,21 @@ pub enum UnitBase {
 	Candela,
 
 	// Length units
+	Angstrom,
+	Thou,
+	Point, // pt, typesetting unit
 	Inch,
 	Foot,
 	Mile,
+	Furlong,
 
 	// Time units
 	Minute,
 	Hour,
 	Day,
-	//Week,
-	//Month,
+	Week,
+	Month,
+	Fortnight,
 }
 
 
@@ -46,19 +51,58 @@ pub enum UnitBase {
 // (Unit, string from, (prefixes_to_generate))
 // Prefixes must be valid prefixes as defined in
 // Prefix::str_to_prefix.
+//
+// Prefix array can be ommited to prevent prefix generation.
 pub (self) use prefix::str_to_prefix;
 macro_rules! fromstring_db {
 	($X:ident) => {
 		$X!(
-			// No prefix
+			// Base units
 			(UnitBase::Meter, "meter"),
-			(UnitBase::Foot, "ft"),
-			(UnitBase::Mile, "mile"),
-			(UnitBase::Hour, "hour"),
-			(UnitBase::Minute, "min"),
-			(UnitBase::Day, "day"),
-			(UnitBase::Second, "sec"),
+			(UnitBase::Meter, "meters"),
+			(UnitBase::Ampere, "ampere"),
+			(UnitBase::Ampere, "amperes"),
+			(UnitBase::Gram, "gram"),
+			(UnitBase::Gram, "grams"),
+			(UnitBase::Kelvin, "kelvin"),
+			(UnitBase::Mole, "mole"),
+			(UnitBase::Candela, "candela"),
 
+			// Length
+			(UnitBase::Angstrom, "angstrom"),
+			(UnitBase::Angstrom, "Å"),
+			(UnitBase::Thou, "thou"),
+			(UnitBase::Point, "pt"),
+			(UnitBase::Point, "point"),
+			(UnitBase::Inch, "in"),
+			(UnitBase::Inch, "inch"),
+			(UnitBase::Foot, "ft"),
+			(UnitBase::Foot, "foot"),
+			(UnitBase::Foot, "feet"),
+			(UnitBase::Mile, "mi"),
+			(UnitBase::Mile, "mile"),
+			(UnitBase::Mile, "miles"),
+
+			// Time
+			(UnitBase::Second, "sec"),
+			(UnitBase::Second, "second"),
+			(UnitBase::Second, "seconds"),
+			(UnitBase::Minute, "min"),
+			(UnitBase::Minute, "minute"),
+			(UnitBase::Minute, "minutes"),
+			(UnitBase::Hour, "h"),
+			(UnitBase::Hour, "hour"),
+			(UnitBase::Hour, "hours"),
+			(UnitBase::Day, "d"),
+			(UnitBase::Day, "day"),
+			(UnitBase::Day, "days"),
+			(UnitBase::Week, "w"),
+			(UnitBase::Week, "week"),
+			(UnitBase::Week, "weeks"),
+			(UnitBase::Month, "month"),
+			(UnitBase::Month, "months"),
+			(UnitBase::Fortnight, "fortnight"),
+			(UnitBase::Fortnight, "fortnights"),
 
 			(UnitBase::Meter, "m",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
@@ -72,11 +116,11 @@ macro_rules! fromstring_db {
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Ampere, "a",
+			(UnitBase::Ampere, "A",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Kelvin, "k",
+			(UnitBase::Kelvin, "K",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
@@ -84,7 +128,7 @@ macro_rules! fromstring_db {
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Candela, "c",
+			(UnitBase::Candela, "cd",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			)
 		)
@@ -121,11 +165,11 @@ macro_rules! unit_db {
 				base
 			),
 			UnitBase::Ampere => $X!(
-				UnitBase::Ampere, "a",
+				UnitBase::Ampere, "A",
 				base
 			),
 			UnitBase::Kelvin => $X!(
-				UnitBase::Kelvin, "k",
+				UnitBase::Kelvin, "K",
 				base
 			),
 			UnitBase::Mole => $X!(
@@ -133,10 +177,9 @@ macro_rules! unit_db {
 				base
 			),
 			UnitBase::Candela => $X!(
-				UnitBase::Candela, "c",
+				UnitBase::Candela, "cd",
 				base
 			),
-
 
 
 			UnitBase::Minute => $X!(
@@ -170,9 +213,39 @@ macro_rules! unit_db {
 				(UnitBase::Second, 1f64)
 			),
 
-			UnitBase::Foot => $X!(
-				UnitBase::Foot, "ft",
-				float, "0.3048",
+			UnitBase::Week => $X!(
+				UnitBase::Week, "week",
+				rational, "604800",
+				(UnitBase::Second, 1f64)
+			),
+
+			UnitBase::Month => $X!(
+				UnitBase::Month, "month",
+				rational, "2629746",
+				(UnitBase::Second, 1f64)
+			),
+
+			UnitBase::Fortnight => $X!(
+				UnitBase::Fortnight, "fortnight",
+				rational, "1209600",
+				(UnitBase::Second, 1f64)
+			),
+
+			UnitBase::Angstrom => $X!(
+				UnitBase::Angstrom, "Å",
+				rational, "1e-10",
+				(UnitBase::Meter, 1f64)
+			),
+
+			UnitBase::Thou => $X!(
+				UnitBase::Thou, "thou",
+				float, "0.0000254",
+				(UnitBase::Meter, 1f64)
+			),
+
+			UnitBase::Point => $X!(
+				UnitBase::Point, "pt",
+				float, "0.000352778",
 				(UnitBase::Meter, 1f64)
 			),
 
@@ -182,9 +255,21 @@ macro_rules! unit_db {
 				(UnitBase::Meter, 1f64)
 			),
 
+			UnitBase::Foot => $X!(
+				UnitBase::Foot, "ft",
+				float, "0.3048",
+				(UnitBase::Meter, 1f64)
+			),
+
 			UnitBase::Mile => $X!(
-				UnitBase::Mile, "mile",
+				UnitBase::Mile, "mi",
 				float, "1609",
+				(UnitBase::Meter, 1f64)
+			),
+
+			UnitBase::Furlong => $X!(
+				UnitBase::Furlong, "furlong",
+				float, "201.168",
 				(UnitBase::Meter, 1f64)
 			),
 		}
