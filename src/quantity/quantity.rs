@@ -93,7 +93,6 @@ impl Quantity {
 	pub fn set_unit(&mut self, u: Unit) { self.u = u; }
 
 
-
 	pub fn convert_to(self, other: Quantity) -> Option<Quantity> {
 		let fa = self.u.to_base_factor();
 		let fb = other.u.to_base_factor();
@@ -185,8 +184,13 @@ impl Add for Quantity {
 	fn add(self, other: Self) -> Self::Output {
 		if self.u != other.u { panic!() }
 
+		let mut o = other;
+		if !o.u.prefixes_match(&self.u) {
+			o = o.convert_to(self.clone()).unwrap();
+		}
+
 		Quantity {
-			v: self.v + other.v,
+			v: self.v + o.v,
 			u: self.u
 		}
 	}
@@ -195,7 +199,13 @@ impl Add for Quantity {
 impl AddAssign for Quantity where {
 	fn add_assign(&mut self, other: Self) {
 		if self.u != other.u { panic!() }
-		self.v += other.v
+
+		let mut o = other;
+		if !o.u.prefixes_match(&self.u) {
+			o = o.convert_to(self.clone()).unwrap();
+		}
+
+		self.v += o.v
 	}
 }
 
@@ -205,8 +215,13 @@ impl Sub for Quantity {
 	fn sub(self, other: Self) -> Self::Output {
 		if self.u != other.u { panic!() }
 
+		let mut o = other;
+		if !o.u.prefixes_match(&self.u) {
+			o = o.convert_to(self.clone()).unwrap();
+		}
+
 		Quantity {
-			v: self.v - other.v,
+			v: self.v - o.v,
 			u: self.u
 		}
 	}
@@ -215,7 +230,13 @@ impl Sub for Quantity {
 impl SubAssign for Quantity where {
 	fn sub_assign(&mut self, other: Self) {
 		if self.u != other.u { panic!() }
-		self.v -= other.v
+
+		let mut o = other;
+		if !o.u.prefixes_match(&self.u) {
+			o = o.convert_to(self.clone()).unwrap();
+		}
+
+		self.v -= o.v
 	}
 }
 
@@ -223,17 +244,22 @@ impl Mul for Quantity {
 	type Output = Self;
 
 	fn mul(self, other: Self) -> Self::Output {
+
+		let f = self.u.match_prefix_factor(&other.u);
+
 		Quantity {
-			v: self.v * other.v,
-			u: self.u * other.u
+			v: self.v * other.v * f.v,
+			u: self.u * other.u * f.u,
 		}
 	}
 }
 
 impl MulAssign for Quantity where {
 	fn mul_assign(&mut self, other: Self) {
-		self.v *= other.v;
-		self.u *= other.u;
+		let f = self.u.match_prefix_factor(&other.u);
+
+		self.v *= other.v * f.v;
+		self.u *= other.u * f.u;
 	}
 }
 

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::f32::consts::E;
+use std::hash::{Hash, Hasher};
 use std::ops::{
 	Mul, Div,
 	MulAssign, DivAssign
@@ -142,14 +142,26 @@ impl ToString for Prefix {
 }
 
 
-#[derive(Hash)]
 #[derive(Debug)]
 #[derive(Copy, Clone)]
-#[derive(Eq, PartialEq)]
 pub struct FreeUnit {
 	u: UnitBase,
 	p: Prefix
 }
+
+impl Hash for FreeUnit {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		self.u.hash(state);
+	}
+}
+
+impl Eq for FreeUnit {}
+impl PartialEq for FreeUnit {
+	fn eq(&self, other: &Self) -> bool {
+		self.u.eq(&other.u)
+	}
+}
+
 
 macro_rules! quick_base_factor {
 	(float, $u:expr, $s:expr, $( ($x:expr, $p:expr) ),* ) => {
@@ -180,19 +192,17 @@ macro_rules! quick_base_factor {
 
 impl FreeUnit {
 	pub fn from_base(u: UnitBase) -> FreeUnit {
-		return FreeUnit {
-			u,
-			p: Prefix::None
-		}
+		return FreeUnit { u, p: Prefix::None }
 	}
 
-	pub fn from_base_prefix(u: UnitBase, p: Prefix) -> FreeUnit {
-		return FreeUnit { u, p }
+	pub fn from_base_prefix(u: UnitBase, p: Prefix) -> FreeUnit { FreeUnit {u, p} }
+	pub fn set_prefix(&mut self, p: Prefix) { self.p = p; }
+	pub fn get_prefix(&self) -> Prefix { self.p }
+
+	pub fn same_with_prefix(&self, other: &FreeUnit) -> bool {
+		self.u.eq(&other.u) && self.p.eq(&other.p)
 	}
 
-	pub fn set_prefix(&mut self, p: Prefix) {
-		self.p = p;
-	}
 
 	pub fn to_base_factor(&self) -> Quantity {
 		let q = match self.u {
@@ -360,6 +370,46 @@ impl Unit {
 		return n;
 	}
 
+	pub fn prefixes_match(&self, other: &Unit) -> bool {
+		let v = self.get_val();
+		for (u, _) in other.get_val() {
+			let k = v.get_key_value(u);
+
+			if k.is_some() {
+				let k = k.unwrap().0;
+				if !u.same_with_prefix(k) { return false; }
+			}
+		}
+		return true;
+	}
+
+	pub fn match_prefix_factor(&self, other: &Unit) -> Quantity {
+		let mut f = Quantity::new_rational(1f64).unwrap();
+
+		let v = self.get_val();
+		for (ou, op) in other.get_val() {
+			let k = v.get_key_value(ou);
+
+			if k.is_some() {
+				let (su, _) = k.unwrap();
+
+				// Conversion factor ou -> basic
+				let mut p = ou.p.to_ratio();
+				p.insert_unit(FreeUnit::from_base(ou.u), Scalar::new_rational(1f64).unwrap());
+				p.insert_unit(FreeUnit::from_base_prefix(ou.u, ou.p), Scalar::new_rational(-1f64).unwrap());
+
+				// Conversion factor su -> basic
+				let mut q = su.p.to_ratio();
+				q.insert_unit(FreeUnit::from_base(su.u), Scalar::new_rational(1f64).unwrap());
+				q.insert_unit(FreeUnit::from_base_prefix(su.u, su.p), Scalar::new_rational(-1f64).unwrap());
+
+				f = f * (p / q).pow(Quantity::from_scalar(op.clone()));
+			}
+		}
+
+		return f;
+	}
+
 	pub fn unitless(&self) -> bool { self.get_val().len() == 0 }
 
 	pub fn insert(&mut self, u: FreeUnit, p: Scalar) {
@@ -419,8 +469,19 @@ impl Unit {
 		if b.is_none() {
 			if s == "kg" {
 				let mut u = Unit::new();
-				let mut b = FreeUnit::from_base(UnitBase::Gram);
-				b.set_prefix(Prefix::Kilo);
+				let b = FreeUnit::from_base_prefix(UnitBase::Gram, Prefix::Kilo);
+
+				u.insert(b, Scalar::new_rational(1f64).unwrap());
+
+				let mut q = Quantity::new_rational(1f64).unwrap();
+				q.set_unit(u);
+
+				return Some(q);
+			}
+
+			if s == "km" {
+				let mut u = Unit::new();
+				let b = FreeUnit::from_base_prefix(UnitBase::Meter, Prefix::Kilo);
 
 				u.insert(b, Scalar::new_rational(1f64).unwrap());
 
