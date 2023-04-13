@@ -6,14 +6,10 @@ Roadmap for fixes and features.
  - Commands (help, clear, reset, quit, list constants, list units)
  - Documentation (usage)
  - Documentation (comments)
- - Unit conversion, more units, better printing
+ - More units, better printing
  - Unit tests
- - Fix unit power
- - Better unit powers
+ - Plural unit names
  - Releases
- - Fix unit conversion
- - Minute + second
- - 2sec + day -> broken print
 
 ## General
  - CLI Options: version, help, evaluate
@@ -55,3 +51,4 @@ Roadmap for fixes and features.
  - Syntax highlight input and output
  - fish-style tab completion
  - Numbered expressions, history recall
+ - Better power printing
