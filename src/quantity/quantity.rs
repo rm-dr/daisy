@@ -15,18 +15,18 @@ use crate::quantity::Scalar;
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct Quantity {
-	pub v: Scalar,
-	pub u: Unit
+	pub scalar: Scalar,
+	pub unit: Unit
 }
 
 
 
 impl ToString for Quantity {
 	fn to_string(&self) -> String {
-		let n = self.v.to_string();
+		let n = self.scalar.to_string();
 		if self.unitless() { return n; }
 
-		let u = self.u.to_string();
+		let u = self.unit.to_string();
 		if self.is_one() { return u; };
 
 		return format!("{n} {u}");
@@ -35,10 +35,10 @@ impl ToString for Quantity {
 
 impl Quantity {
 	pub fn to_string_outer(&self) -> String {
-		let n = self.v.to_string();
+		let n = self.scalar.to_string();
 		if self.unitless() { return n; }
 
-		let u = self.u.to_string();
+		let u = self.unit.to_string();
 		return format!("{n} {u}");
 	}
 
@@ -47,8 +47,8 @@ impl Quantity {
 		if v.is_none() { return None; }
 
 		return Some(Quantity{
-			v: v.unwrap(),
-			u: Unit::new()
+			scalar: v.unwrap(),
+			unit: Unit::new()
 		});
 	}
 
@@ -57,8 +57,8 @@ impl Quantity {
 		if v.is_none() { return None; }
 
 		return Some(Quantity{
-			v: v.unwrap(),
-			u: Unit::new()
+			scalar: v.unwrap(),
+			unit: Unit::new()
 		});
 	}
 
@@ -67,8 +67,8 @@ impl Quantity {
 		if v.is_none() { return None; }
 
 		return Some(Quantity{
-			v: v.unwrap(),
-			u: Unit::new()
+			scalar: v.unwrap(),
+			unit: Unit::new()
 		});
 	}
 
@@ -77,29 +77,29 @@ impl Quantity {
 		if v.is_none() { return None; }
 
 		return Some(Quantity{
-			v: v.unwrap(),
-			u: Unit::new()
+			scalar: v.unwrap(),
+			unit: Unit::new()
 		});
 	}
 
 	pub fn from_scalar(s: Scalar) -> Quantity {
 		return Quantity{
-			v: s,
-			u: Unit::new()
+			scalar: s,
+			unit: Unit::new()
 		};
 	}
 
-	pub fn insert_unit(&mut self, ui: FreeUnit, pi: Scalar) { self.u.insert(ui, pi) }
-	pub fn set_unit(&mut self, u: Unit) { self.u = u; }
+	pub fn insert_unit(&mut self, ui: FreeUnit, pi: Scalar) { self.unit.insert(ui, pi) }
+	pub fn set_unit(&mut self, u: Unit) { self.unit = u; }
 
 
 	pub fn convert_to(self, other: Quantity) -> Option<Quantity> {
-		let fa = self.u.to_base_factor();
-		let fb = other.u.to_base_factor();
+		let fa = self.unit.to_base_factor();
+		let fb = other.unit.to_base_factor();
 		let r = self * fa / fb;
 
 		// If this didn't work, units are incompatible
-		if r.u != other.u { return None; };
+		if r.unit != other.unit { return None; };
 
 		return Some(r);
 	}
@@ -111,8 +111,8 @@ macro_rules! quant_foward {
 		pub fn $x(&self) -> Quantity {
 			if !self.unitless() { panic!() }
 			Quantity {
-				v: self.v.$x(),
-				u: self.u.clone()
+				scalar: self.scalar.$x(),
+				unit: self.unit.clone()
 			}
 		}
 	}
@@ -120,13 +120,13 @@ macro_rules! quant_foward {
 
 impl Quantity {
 
-	pub fn is_zero(&self) -> bool { self.v.is_zero() }
-	pub fn is_one(&self) -> bool { self.v.is_one() }
-	pub fn is_nan(&self) -> bool { self.v.is_nan() }
-	pub fn is_negative(&self) -> bool { self.v.is_negative() }
-	pub fn is_positive(&self) -> bool { self.v.is_positive() }
-	pub fn unitless(&self) -> bool { self.u.unitless() }
-	pub fn unit(&self) -> &Unit { &self.u }
+	pub fn is_zero(&self) -> bool { self.scalar.is_zero() }
+	pub fn is_one(&self) -> bool { self.scalar.is_one() }
+	pub fn is_nan(&self) -> bool { self.scalar.is_nan() }
+	pub fn is_negative(&self) -> bool { self.scalar.is_negative() }
+	pub fn is_positive(&self) -> bool { self.scalar.is_positive() }
+	pub fn unitless(&self) -> bool { self.unit.unitless() }
+	pub fn unit(&self) -> &Unit { &self.unit }
 
 	quant_foward!(fract);
 	quant_foward!(abs);
@@ -153,15 +153,15 @@ impl Quantity {
 	pub fn log(&self, base: Quantity) -> Quantity {
 		if !self.unitless() { panic!() }
 		Quantity {
-			v: self.v.log(base.v),
-			u: self.u.clone()
+			scalar: self.scalar.log(base.scalar),
+			unit: self.unit.clone()
 		}
 	}
 
 	pub fn pow(&self, pwr: Quantity) -> Quantity {
 		Quantity {
-			v: self.v.pow(pwr.v.clone()),
-			u: self.u.pow(pwr.v)
+			scalar: self.scalar.pow(pwr.scalar.clone()),
+			unit: self.unit.pow(pwr.scalar)
 		}
 	}
 }
@@ -172,8 +172,8 @@ impl Neg for Quantity where {
 
 	fn neg(self) -> Self::Output {
 		Quantity {
-			v: -self.v,
-			u: self.u
+			scalar: -self.scalar,
+			unit: self.unit
 		}
 	}
 }
@@ -182,30 +182,30 @@ impl Add for Quantity {
 	type Output = Self;
 
 	fn add(self, other: Self) -> Self::Output {
-		if self.u != other.u { panic!() }
+		if self.unit != other.unit { panic!() }
 
 		let mut o = other;
-		if !o.u.prefixes_match(&self.u) {
+		if !o.unit.prefixes_match(&self.unit) {
 			o = o.convert_to(self.clone()).unwrap();
 		}
 
 		Quantity {
-			v: self.v + o.v,
-			u: self.u
+			scalar: self.scalar + o.scalar,
+			unit: self.unit
 		}
 	}
 }
 
 impl AddAssign for Quantity where {
 	fn add_assign(&mut self, other: Self) {
-		if self.u != other.u { panic!() }
+		if self.unit != other.unit { panic!() }
 
 		let mut o = other;
-		if !o.u.prefixes_match(&self.u) {
+		if !o.unit.prefixes_match(&self.unit) {
 			o = o.convert_to(self.clone()).unwrap();
 		}
 
-		self.v += o.v
+		self.scalar += o.scalar
 	}
 }
 
@@ -213,30 +213,30 @@ impl Sub for Quantity {
 	type Output = Self;
 
 	fn sub(self, other: Self) -> Self::Output {
-		if self.u != other.u { panic!() }
+		if self.unit != other.unit { panic!() }
 
 		let mut o = other;
-		if !o.u.prefixes_match(&self.u) {
+		if !o.unit.prefixes_match(&self.unit) {
 			o = o.convert_to(self.clone()).unwrap();
 		}
 
 		Quantity {
-			v: self.v - o.v,
-			u: self.u
+			scalar: self.scalar - o.scalar,
+			unit: self.unit
 		}
 	}
 }
 
 impl SubAssign for Quantity where {
 	fn sub_assign(&mut self, other: Self) {
-		if self.u != other.u { panic!() }
+		if self.unit != other.unit { panic!() }
 
 		let mut o = other;
-		if !o.u.prefixes_match(&self.u) {
+		if !o.unit.prefixes_match(&self.unit) {
 			o = o.convert_to(self.clone()).unwrap();
 		}
 
-		self.v -= o.v
+		self.scalar -= o.scalar;
 	}
 }
 
@@ -245,21 +245,21 @@ impl Mul for Quantity {
 
 	fn mul(self, other: Self) -> Self::Output {
 
-		let f = self.u.match_prefix_factor(&other.u);
+		let f = self.unit.match_prefix_factor(&other.unit);
 
 		Quantity {
-			v: self.v * other.v * f.v,
-			u: self.u * other.u * f.u,
+			scalar: self.scalar * other.scalar * f.scalar,
+			unit: self.unit * other.unit * f.unit,
 		}
 	}
 }
 
 impl MulAssign for Quantity where {
 	fn mul_assign(&mut self, other: Self) {
-		let f = self.u.match_prefix_factor(&other.u);
+		let f = self.unit.match_prefix_factor(&other.unit);
 
-		self.v *= other.v * f.v;
-		self.u *= other.u * f.u;
+		self.scalar *= other.scalar * f.scalar;
+		self.unit *= other.unit * f.unit;
 	}
 }
 
@@ -268,16 +268,16 @@ impl Div for Quantity {
 
 	fn div(self, other: Self) -> Self::Output {
 		Quantity {
-			v: self.v / other.v,
-			u: self.u / other.u
+			scalar: self.scalar / other.scalar,
+			unit: self.unit / other.unit
 		}
 	}
 }
 
 impl DivAssign for Quantity where {
 	fn div_assign(&mut self, other: Self) {
-		self.v /= other.v;
-		self.u /= other.u;
+		self.scalar /= other.scalar;
+		self.unit /= other.unit;
 	}
 }
 
@@ -285,27 +285,27 @@ impl Rem<Quantity> for Quantity {
 	type Output = Self;
 
 	fn rem(self, other: Quantity) -> Self::Output {
-		if !self.u.unitless() { panic!() }
-		if !other.u.unitless() { panic!() }
+		if !self.unit.unitless() { panic!() }
+		if !other.unit.unitless() { panic!() }
 
 		Quantity {
-			v: self.v % other.v,
-			u: self.u
+			scalar: self.scalar % other.scalar,
+			unit: self.unit
 		}
 	}
 }
 
 impl PartialEq for Quantity {
 	fn eq(&self, other: &Self) -> bool {
-		if self.u != other.u {false} else {
-			self.v == other.v
+		if self.unit != other.unit {false} else {
+			self.scalar == other.scalar
 		}
 	}
 }
 
 impl PartialOrd for Quantity {
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-		if self.u != other.u { panic!() }
-		self.v.partial_cmp(&other.v)
+		if self.unit != other.unit { panic!() }
+		self.scalar.partial_cmp(&other.scalar)
 	}
 }

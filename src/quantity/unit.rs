@@ -145,20 +145,20 @@ impl ToString for Prefix {
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 pub struct FreeUnit {
-	u: UnitBase,
-	p: Prefix
+	base: UnitBase,
+	prefix: Prefix
 }
 
 impl Hash for FreeUnit {
 	fn hash<H: Hasher>(&self, state: &mut H) {
-		self.u.hash(state);
+		self.base.hash(state);
 	}
 }
 
 impl Eq for FreeUnit {}
 impl PartialEq for FreeUnit {
 	fn eq(&self, other: &Self) -> bool {
-		self.u.eq(&other.u)
+		self.base.eq(&other.base)
 	}
 }
 
@@ -166,8 +166,8 @@ impl PartialEq for FreeUnit {
 macro_rules! quick_base_factor {
 	(float, $u:expr, $s:expr, $( ($x:expr, $p:expr) ),* ) => {
 		Some(Quantity {
-			v: Scalar::new_float_from_string($s).unwrap(),
-			u: Unit::from_array(&[
+			scalar: Scalar::new_float_from_string($s).unwrap(),
+			unit: Unit::from_array(&[
 				$(
 					(FreeUnit::from_base($x), Scalar::new_rational($p).unwrap()),
 				)*
@@ -178,8 +178,8 @@ macro_rules! quick_base_factor {
 
 	(rational, $u:expr, $s:expr, $( ($x:expr, $p:expr) ),* ) => {
 		Some(Quantity {
-			v: Scalar::new_float_from_string($s).unwrap(),
-			u: Unit::from_array(&[
+			scalar: Scalar::new_float_from_string($s).unwrap(),
+			unit: Unit::from_array(&[
 				$(
 					(FreeUnit::from_base($x), Scalar::new_rational($p).unwrap()),
 				)*
@@ -191,21 +191,21 @@ macro_rules! quick_base_factor {
 
 
 impl FreeUnit {
-	pub fn from_base(u: UnitBase) -> FreeUnit {
-		return FreeUnit { u, p: Prefix::None }
+	pub fn from_base(base: UnitBase) -> FreeUnit {
+		return FreeUnit { base, prefix: Prefix::None }
 	}
 
-	pub fn from_base_prefix(u: UnitBase, p: Prefix) -> FreeUnit { FreeUnit {u, p} }
-	pub fn set_prefix(&mut self, p: Prefix) { self.p = p; }
-	pub fn get_prefix(&self) -> Prefix { self.p }
+	pub fn from_base_prefix(base: UnitBase, prefix: Prefix) -> FreeUnit { FreeUnit {base, prefix} }
+	pub fn set_prefix(&mut self, prefix: Prefix) { self.prefix = prefix; }
+	pub fn get_prefix(&self) -> Prefix { self.prefix }
 
 	pub fn same_with_prefix(&self, other: &FreeUnit) -> bool {
-		self.u.eq(&other.u) && self.p.eq(&other.p)
+		self.base.eq(&other.base) && self.prefix.eq(&other.prefix)
 	}
 
 
 	pub fn to_base_factor(&self) -> Quantity {
-		let q = match self.u {
+		let q = match self.base {
 			// Returns the unit we need to multiply by to get a base
 			// unit, or `None` if this is already a base unit.
 			//
@@ -258,9 +258,9 @@ impl FreeUnit {
 
 		let mut q = q.unwrap_or(Quantity::new_rational_from_string("1").unwrap());
 
-		let mut p = self.p.to_ratio();
-		p.insert_unit(FreeUnit::from_base(self.u), Scalar::new_rational(1f64).unwrap());
-		p.insert_unit(FreeUnit::from_base_prefix(self.u, self.p), Scalar::new_rational(-1f64).unwrap());
+		let mut p = self.prefix.to_ratio();
+		p.insert_unit(FreeUnit::from_base(self.base), Scalar::new_rational(1f64).unwrap());
+		p.insert_unit(FreeUnit::from_base_prefix(self.base, self.prefix), Scalar::new_rational(-1f64).unwrap());
 		q *= p;
 
 		return q;
@@ -270,7 +270,7 @@ impl FreeUnit {
 
 impl ToString for FreeUnit {
 	fn to_string(&self) -> String {
-		let s = match self.u {
+		let s = match self.base {
 			UnitBase::Second => "s",
 			UnitBase::Meter => "m",
 			UnitBase::Gram => "g",
@@ -288,7 +288,7 @@ impl ToString for FreeUnit {
 			UnitBase::Day => "day",
 		};
 
-		let p = self.p.to_string();
+		let p = self.prefix.to_string();
 
 		format!("{p}{s}")
 	}
@@ -361,6 +361,7 @@ impl Unit {
 
 	pub fn get_val(&self) -> &HashMap<FreeUnit, Scalar> { &self.val }
 	pub fn get_val_mut(&mut self) -> &mut HashMap<FreeUnit, Scalar> { &mut self.val }
+	pub fn unitless(&self) -> bool { self.get_val().len() == 0 }
 
 	pub fn from_array(a: &[(FreeUnit, Scalar)]) -> Unit {
 		let mut n = Unit::new();
@@ -394,14 +395,14 @@ impl Unit {
 				let (su, _) = k.unwrap();
 
 				// Conversion factor ou -> basic
-				let mut p = ou.p.to_ratio();
-				p.insert_unit(FreeUnit::from_base(ou.u), Scalar::new_rational(1f64).unwrap());
-				p.insert_unit(FreeUnit::from_base_prefix(ou.u, ou.p), Scalar::new_rational(-1f64).unwrap());
+				let mut p = ou.prefix.to_ratio();
+				p.insert_unit(FreeUnit::from_base(ou.base), Scalar::new_rational(1f64).unwrap());
+				p.insert_unit(FreeUnit::from_base_prefix(ou.base, ou.prefix), Scalar::new_rational(-1f64).unwrap());
 
 				// Conversion factor su -> basic
-				let mut q = su.p.to_ratio();
-				q.insert_unit(FreeUnit::from_base(su.u), Scalar::new_rational(1f64).unwrap());
-				q.insert_unit(FreeUnit::from_base_prefix(su.u, su.p), Scalar::new_rational(-1f64).unwrap());
+				let mut q = su.prefix.to_ratio();
+				q.insert_unit(FreeUnit::from_base(su.base), Scalar::new_rational(1f64).unwrap());
+				q.insert_unit(FreeUnit::from_base_prefix(su.base, su.prefix), Scalar::new_rational(-1f64).unwrap());
 
 				f = f * (p / q).pow(Quantity::from_scalar(op.clone()));
 			}
@@ -410,7 +411,6 @@ impl Unit {
 		return f;
 	}
 
-	pub fn unitless(&self) -> bool { self.get_val().len() == 0 }
 
 	pub fn insert(&mut self, u: FreeUnit, p: Scalar) {
 		let v = self.get_val_mut();
