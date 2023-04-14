@@ -1,3 +1,5 @@
+legal cup
+
   | Unit                                                                         | Syntax                                                                      |
   |------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
   | [Barn](https://en.wikipedia.org/wiki/Barn_(unit))                            | `barn`                                                                      |
@@ -9,7 +11,6 @@
   | [Byte](https://en.wikipedia.org/wiki/Byte)                                   | `Bytes`, `bytes`, `Byte`, `byte`, `B`, `Octets`, `octets`, `Octet`, `octet` |
   | [Calorie](https://en.wikipedia.org/wiki/Calorie)                             | `calories`, `calorie`, `cal`                                                |
   | [Coulomb](https://en.wikipedia.org/wiki/Coulomb)                             | `coulomb`, `C`                                                              |
-  | [Cup](https://en.wikipedia.org/wiki/Cup_(unit))                              | `cups`, `cup`                                                               |
   | [DPI](https://en.wikipedia.org/wiki/Dots_per_inch)                           | `dpi`                                                                       |
   | [Day](https://en.wikipedia.org/wiki/Day)                                     | `days`, `day`, `d`                                                          |
   | [Degree](https://en.wikipedia.org/wiki/Degree_(angle))                       | `degrees`, `degree`, `deg`, `°`                                             |
@@ -17,26 +18,21 @@
   | [Electronvolt](https://en.wikipedia.org/wiki/Electronvolt)                   | `electronvolt`, `eV`                                                        |
   | [Euro](https://en.wikipedia.org/wiki/Euro)                                   | `euros`, `euro`, `EUR`, `€`                                                 |
   | [Farad](https://en.wikipedia.org/wiki/Farad)                                 | `farad`, `F`                                                                |
-  | [Fluid ounce](https://en.wikipedia.org/wiki/Fluid_ounce)                     | `fluidounces`, `fluidounce`, `floz`                                         |
   | [Frame](https://en.wikipedia.org/wiki/Film_frame)                            | `frames`, `frame`                                                           |
   | [Frames per second](https://en.wikipedia.org/wiki/Frame_rate)                | `fps`                                                                       |
-  | [Gallon](https://en.wikipedia.org/wiki/Gallon)                               | `gallons`, `gallon`, `gal`                                                  |
   | [Gauss](https://en.wikipedia.org/wiki/Gauss_(unit))                          | `gauss`                                                                     |
   | [Gray](https://en.wikipedia.org/wiki/Gray_(unit))                            | `gray`, `Gy`                                                                |
   | [Hectare](https://en.wikipedia.org/wiki/Hectare)                             | `hectare`, `ha`                                                             |
   | [Henry](https://en.wikipedia.org/wiki/Henry_(unit))                          | `henrys`, `henries`, `henry`, `H`                                           |
   | [Hertz](https://en.wikipedia.org/wiki/Hertz)                                 | `hertz`, `Hz`                                                               |
-  | [Hogshead](https://en.wikipedia.org/wiki/Hogshead)                           | `hogsheads`, `hogshead`                                                     |
   | [Joule](https://en.wikipedia.org/wiki/Joule)                                 | `joules`, `joule`, `J`                                                      |
   | [Katal](https://en.wikipedia.org/wiki/Katal)                                 | `katal`, `kat`                                                              |
   | [Kelvin](https://en.wikipedia.org/wiki/Kelvin)                               | `kelvin`, `K`                                                               |
   | [Light-year](https://en.wikipedia.org/wiki/Light-year)                       | `lightyears`, `lightyear`, `ly`                                             |
-  | [Liter](https://en.wikipedia.org/wiki/Liter)                                 | `liters`, `liter`, `litres`, `litre`, `L`, `l`                              |
   | [Lumen](https://en.wikipedia.org/wiki/Lumen_(unit))                          | `lumen`, `lm`                                                               |
   | [Lux](https://en.wikipedia.org/wiki/Lux)                                     | `lux`, `lx`                                                                 |
   | [Miles per hour](https://en.wikipedia.org/wiki/Miles_per_hour)               | `mph`                                                                       |
   | [Millimeter of mercury](https://en.wikipedia.org/wiki/Millimeter_of_mercury) | `mmHg`                                                                      |
-  | [Mole](https://en.wikipedia.org/wiki/Mole_(unit))                            | `mole`, `mol`                                                               |
   | [Newton](https://en.wikipedia.org/wiki/Newton_(unit))                        | `newton`, `N`                                                               |
   | [Ohm](https://en.wikipedia.org/wiki/Ohm)                                     | `ohms`, `ohm`, `Ω`                                                          |
   | [Ounce](https://en.wikipedia.org/wiki/Ounce)                                 | `ounces`, `ounce`, `oz`                                                     |
@@ -49,7 +45,6 @@
   | [Percent](https://en.wikipedia.org/wiki/Parts-per_notation)                  | `percent`, `pct`                                                            |
   | [Person](https://en.wiktionary.org/wiki/person)                              | `persons`, `person`, `people`                                               |
   | [Piece](https://en.wiktionary.org/wiki/piece)                                | `pieces`, `piece`                                                           |
-  | [Pint](https://en.wikipedia.org/wiki/Pint)                                   | `pints`, `pint`                                                             |
   | [Pixel](https://en.wikipedia.org/wiki/Pixel)                                 | `pixels`, `pixel`, `px`                                                     |
   | [Pound-force](https://en.wikipedia.org/wiki/Pound_%28force%29)               | `pound_force`, `lbf`                                                        |
   | [Pound](https://en.wikipedia.org/wiki/Pound_(mass))                          | `pounds`, `pound`, `lb`                                                     |
@@ -58,8 +53,6 @@
   | [Rod](https://en.wikipedia.org/wiki/Rod_(unit))                              | `rods`, `rod`                                                               |
   | [Siemens](https://en.wikipedia.org/wiki/Siemens_(unit))                      | `siemens`, `S`                                                              |
   | [Sievert](https://en.wikipedia.org/wiki/Sievert)                             | `sievert`, `Sv`                                                             |
-  | [Tablespoon](https://en.wikipedia.org/wiki/Tablespoon)                       | `tablespoons`, `tablespoon`, `tbsp`                                         |
-  | [Teaspoon](https://en.wikipedia.org/wiki/Teaspoon)                           | `teaspoons`, `teaspoon`, `tsp`                                              |
   | [Tesla](https://en.wikipedia.org/wiki/Tesla_(unit))                          | `tesla`, `T`                                                                |
   | [Tonne](https://en.wikipedia.org/wiki/Tonne)                                 | `tonnes`, `tonne`, `tons`, `ton`, `t`                                       |
   | [US Dollar](https://en.wikipedia.org/wiki/USD)                               | `dollars`, `dollar`, `USD`, `$`                                             |

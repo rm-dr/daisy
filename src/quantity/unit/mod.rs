@@ -44,6 +44,18 @@ pub enum UnitBase {
 	GregorianYear,
 	JulianYear,
 
+	// Volume
+	Liter,
+	USGallon,
+	Quart,
+	ImperialGallon,
+	Hogshead,
+	Cup,
+	Floz,
+	Pint,
+	Tablespoon,
+	Teaspoon,
+
 	// Pressure
 	Pascal,
 	Atmosphere,
@@ -159,6 +171,50 @@ macro_rules! fromstring_db {
 			(UnitBase::GregorianYear, "years"),
 			(UnitBase::JulianYear, "julianYear"),
 			(UnitBase::JulianYear, "julianYears"),
+
+			// Volume
+			(UnitBase::Liter, "liter"),
+			(UnitBase::Liter, "liters"),
+			(UnitBase::Liter, "litre"),
+			(UnitBase::Liter, "litres"),
+			(UnitBase::USGallon, "usgal"),
+			(UnitBase::USGallon, "gal"),
+			(UnitBase::USGallon, "gallon"),
+			(UnitBase::USGallon, "gallons"),
+			(UnitBase::Quart, "quart"),
+			(UnitBase::Quart, "quarts"),
+			(UnitBase::Quart, "qt"),
+			(UnitBase::ImperialGallon, "impgal"),
+			(UnitBase::ImperialGallon, "imperialGallon"),
+			(UnitBase::ImperialGallon, "imperialGallons"),
+			(UnitBase::Cup, "cup"),
+			(UnitBase::Floz, "floz"),
+			(UnitBase::Pint, "pint"),
+			(UnitBase::Pint, "pints"),
+			(UnitBase::Tablespoon, "tablespoon"),
+			(UnitBase::Tablespoon, "tablespoons"),
+			(UnitBase::Tablespoon, "tbsp"),
+			(UnitBase::Tablespoon, "Tbsp"),
+			(UnitBase::Teaspoon, "teaspoon"),
+			(UnitBase::Teaspoon, "teaspoons"),
+			(UnitBase::Teaspoon, "tsp"),
+			(UnitBase::Teaspoon, "Tsp"),
+
+
+
+			(UnitBase::Hogshead, "hogshead"),
+			(UnitBase::Hogshead, "hogsheads"),
+
+
+			(UnitBase::Liter, "l",
+				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
+			),
+
+			(UnitBase::Liter, "L",
+				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
+			),
+
+
 
 			// Pressure
 			(UnitBase::Atmosphere, "atm"),
@@ -360,6 +416,67 @@ macro_rules! unit_db {
 				(UnitBase::Meter, 1f64)
 			),
 
+
+			// Volume
+			UnitBase::Liter => $X!(
+				UnitBase::Liter, "l",
+				rational, "0.001",
+				(UnitBase::Meter, 3f64)
+			),
+
+			UnitBase::Hogshead => $X!(
+				UnitBase::Hogshead, "hogshead",
+				rational, "0.2385", // 63 gallons
+				(UnitBase::Meter, 3f64)
+			),
+
+			UnitBase::USGallon => $X!(
+				UnitBase::USGallon, "gal",
+				rational, "0.003785411784",
+				(UnitBase::Meter, 3f64)
+			),
+
+			UnitBase::Quart => $X!(
+				UnitBase::Quart, "qt",
+				rational, "0.000946352946",
+				(UnitBase::Meter, 3f64)
+			),
+
+			UnitBase::ImperialGallon => $X!(
+				UnitBase::ImperialGallon, "impgal",
+				rational, "0.00454609",
+				(UnitBase::Meter, 3f64)
+			),
+
+			UnitBase::Cup => $X!(
+				UnitBase::Cup, "cup",
+				rational, "0.0002365882365",
+				(UnitBase::Meter, 3f64)
+			),
+
+			UnitBase::Floz => $X!(
+				UnitBase::Floz, "floz",
+				rational, "0.0000295735295625",
+				(UnitBase::Meter, 3f64)
+			),
+
+			UnitBase::Pint => $X!(
+				UnitBase::Pint, "pint",
+				rational, "0.00056826125",
+				(UnitBase::Meter, 3f64)
+			),
+
+			UnitBase::Tablespoon => $X!(
+				UnitBase::Tablespoon, "tbsp",
+				rational, "0.00001478676478125",
+				(UnitBase::Meter, 3f64)
+			),
+
+			UnitBase::Teaspoon => $X!(
+				UnitBase::Teaspoon, "tsp",
+				rational, "0.000005",
+				(UnitBase::Meter, 3f64)
+			),
 
 
 
