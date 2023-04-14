@@ -10,6 +10,7 @@ Roadmap for fixes and features.
  - Unit tests
  - Plural unit names
  - Releases
+ - Unit substitutions
 
 ## General
  - CLI Options: version, help, evaluate
