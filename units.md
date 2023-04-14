@@ -1,8 +1,3 @@
-legal cup
-
-  | Unit                                                                         | Syntax                                                                      |
-  |------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-  | [Barn](https://en.wikipedia.org/wiki/Barn_(unit))                            | `barn`                                                                      |
   | [Becquerel](https://en.wikipedia.org/wiki/Becquerel)                         | `becquerel`, `Bq`                                                           |
   | [Bel](https://en.wikipedia.org/wiki/Decibel)                                 | `bel`                                                                       |
   | [Bit](https://en.wikipedia.org/wiki/Bit)                                     | `bits`, `bit`                                                               |
@@ -12,7 +7,6 @@ legal cup
   | [Calorie](https://en.wikipedia.org/wiki/Calorie)                             | `calories`, `calorie`, `cal`                                                |
   | [Coulomb](https://en.wikipedia.org/wiki/Coulomb)                             | `coulomb`, `C`                                                              |
   | [DPI](https://en.wikipedia.org/wiki/Dots_per_inch)                           | `dpi`                                                                       |
-  | [Day](https://en.wikipedia.org/wiki/Day)                                     | `days`, `day`, `d`                                                          |
   | [Degree](https://en.wikipedia.org/wiki/Degree_(angle))                       | `degrees`, `degree`, `deg`, `°`                                             |
   | [Dot](https://en.wikipedia.org/wiki/Dots_per_inch)                           | `dots`, `dot`                                                               |
   | [Electronvolt](https://en.wikipedia.org/wiki/Electronvolt)                   | `electronvolt`, `eV`                                                        |
@@ -22,22 +16,16 @@ legal cup
   | [Frames per second](https://en.wikipedia.org/wiki/Frame_rate)                | `fps`                                                                       |
   | [Gauss](https://en.wikipedia.org/wiki/Gauss_(unit))                          | `gauss`                                                                     |
   | [Gray](https://en.wikipedia.org/wiki/Gray_(unit))                            | `gray`, `Gy`                                                                |
-  | [Hectare](https://en.wikipedia.org/wiki/Hectare)                             | `hectare`, `ha`                                                             |
   | [Henry](https://en.wikipedia.org/wiki/Henry_(unit))                          | `henrys`, `henries`, `henry`, `H`                                           |
   | [Hertz](https://en.wikipedia.org/wiki/Hertz)                                 | `hertz`, `Hz`                                                               |
   | [Joule](https://en.wikipedia.org/wiki/Joule)                                 | `joules`, `joule`, `J`                                                      |
   | [Katal](https://en.wikipedia.org/wiki/Katal)                                 | `katal`, `kat`                                                              |
-  | [Kelvin](https://en.wikipedia.org/wiki/Kelvin)                               | `kelvin`, `K`                                                               |
-  | [Light-year](https://en.wikipedia.org/wiki/Light-year)                       | `lightyears`, `lightyear`, `ly`                                             |
   | [Lumen](https://en.wikipedia.org/wiki/Lumen_(unit))                          | `lumen`, `lm`                                                               |
   | [Lux](https://en.wikipedia.org/wiki/Lux)                                     | `lux`, `lx`                                                                 |
-  | [Miles per hour](https://en.wikipedia.org/wiki/Miles_per_hour)               | `mph`                                                                       |
-  | [Millimeter of mercury](https://en.wikipedia.org/wiki/Millimeter_of_mercury) | `mmHg`                                                                      |
   | [Newton](https://en.wikipedia.org/wiki/Newton_(unit))                        | `newton`, `N`                                                               |
   | [Ohm](https://en.wikipedia.org/wiki/Ohm)                                     | `ohms`, `ohm`, `Ω`                                                          |
   | [Ounce](https://en.wikipedia.org/wiki/Ounce)                                 | `ounces`, `ounce`, `oz`                                                     |
   | [PPI](https://en.wikipedia.org/wiki/Pixels_per_inch)                         | `ppi`                                                                       |
-  | [Parsec](https://en.wikipedia.org/wiki/Parsec)                               | `parsecs`, `parsec`, `pc`                                                   |
   | [Parts-per-million](https://en.wikipedia.org/wiki/Parts-per_notation)        | `ppm`                                                                       |
   | [Parts-per-billion](https://en.wikipedia.org/wiki/Parts-per_notation)        | `ppb`                                                                       |
   | [Parts-per-trillion](https://en.wikipedia.org/wiki/Parts-per_notation)       | `ppt`                                                                       |

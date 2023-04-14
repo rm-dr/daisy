@@ -33,6 +33,16 @@ pub enum UnitBase {
 	Furlong,
 	Mile,
 	AstronomicalUnit,
+	Lightyear,
+	Parsec,
+
+	// Area
+	Barn,
+	Hectare,
+	MilesPerHour,
+	Acre,
+
+
 
 	// Time units
 	Minute,
@@ -146,6 +156,12 @@ macro_rules! fromstring_db {
 			(UnitBase::AstronomicalUnit, "AU"),
 			(UnitBase::AstronomicalUnit, "astronomicalUnit"),
 			(UnitBase::AstronomicalUnit, "astronomicalUnits"),
+			(UnitBase::Lightyear, "ly"),
+			(UnitBase::Lightyear, "lightyear"),
+			(UnitBase::Lightyear, "lightyears"),
+			(UnitBase::Parsec, "pc"),
+			(UnitBase::Parsec, "parsec"),
+			(UnitBase::Parsec, "parsecs"),
 
 			// Time
 			(UnitBase::Second, "sec"),
@@ -171,6 +187,17 @@ macro_rules! fromstring_db {
 			(UnitBase::GregorianYear, "years"),
 			(UnitBase::JulianYear, "julianYear"),
 			(UnitBase::JulianYear, "julianYears"),
+
+			// Misc
+			(UnitBase::MilesPerHour, "mph"),
+			(UnitBase::Barn, "b"),
+			(UnitBase::Barn, "barn"),
+			(UnitBase::Hectare, "ha"),
+			(UnitBase::Hectare, "hectare"),
+			(UnitBase::Hectare, "hectares"),
+			(UnitBase::Acre, "acre"),
+			(UnitBase::Acre, "acres"),
+
 
 			// Volume
 			(UnitBase::Liter, "liter"),
@@ -415,6 +442,46 @@ macro_rules! unit_db {
 				rational, "149597870700",
 				(UnitBase::Meter, 1f64)
 			),
+
+			UnitBase::Lightyear => $X!(
+				UnitBase::Lightyear, "ly",
+				rational, "9460730472580800",
+				(UnitBase::Meter, 1f64)
+			),
+
+			UnitBase::Parsec => $X!(
+				UnitBase::Parsec, "pc",
+				float, "3.085677581e16",
+				(UnitBase::Meter, 1f64)
+			),
+
+
+			// Misc
+			UnitBase::MilesPerHour => $X!(
+				UnitBase::MilesPerHour, "mph",
+				rational, "1609.344",
+				(UnitBase::Meter, 1f64),
+				(UnitBase::Second, -1f64)
+			),
+
+			UnitBase::Barn => $X!(
+				UnitBase::Barn, "b",
+				rational, "1e-28",
+				(UnitBase::Meter, 2f64)
+			),
+
+			UnitBase::Hectare => $X!(
+				UnitBase::Hectare, "ha",
+				rational, "10000",
+				(UnitBase::Meter, 2f64)
+			),
+
+			UnitBase::Acre => $X!( // 66 x 660 feet
+				UnitBase::Acre, "acre",
+				rational, "4046.8564224",
+				(UnitBase::Meter, 2f64)
+			),
+
 
 
 			// Volume
