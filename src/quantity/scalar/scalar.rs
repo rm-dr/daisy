@@ -116,6 +116,12 @@ impl Scalar {
 		return Some(wrap_rational!(r.unwrap()));
 	}
 
+	pub fn new_rational_from_frac(t: i64, b: i64) -> Option<Self> {
+		let r = RationalBase::from_frac(t, b);
+		if r.is_none() { return None; }
+		return Some(wrap_rational!(r.unwrap()));
+	}
+
 	pub fn new_float_from_string(s: &str) -> Option<Self> {
 		let v = FloatBase::from_string(s);
 		if v.is_none() { return None; }

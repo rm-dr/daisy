@@ -25,25 +25,20 @@ pub struct RationalBase where {
 	pub val: Rational
 }
 
-/*
-fn to_string_radix(&self, radix: i32, num_digits: Option<usize>) -> String {
-	self.to_float().to_string_radix(radix, num_digits)
-}
-
-fn to_sign_string_exp(&self, radix: i32, num_digits: Option<usize>) -> (bool, String, Option<i32>) {
-	self.to_float().to_sign_string_exp(radix, num_digits)
-}
-*/
-
 impl ToString for RationalBase{
 	fn to_string(&self) -> String {
 		return self.val.to_string();
 	}
 }
 
+impl RationalBase {
+	pub fn from_frac(t: i64, b: i64) -> Option<RationalBase> {
+		let v = Rational::from((t, b));
+		return Some(RationalBase{ val: v });
+	}
+}
+
 impl ScalarBase for RationalBase {
-
-
 	fn from_f64(f: f64) -> Option<RationalBase> {
 		let v = Rational::from_f64(f);
 		if v.is_none() { return None }

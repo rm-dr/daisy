@@ -64,7 +64,7 @@ pub(in crate::parser) fn find_subs(
 					//"upsilon" => {Some("υ")},
 					"phi"     => {Some("φ")},
 					"chi"     => {Some("χ")},
-					"psi"     => {Some("ψ")},
+					//"psi"     => {Some("ψ")},  Conflict with pound / square inch
 					"omega"   => {Some("ω")},
 					_ => {None}
 				};

@@ -60,6 +60,24 @@ macro_rules! unpack_base_factor {
 			])
 		})
 	};
+
+	(
+		$unit:expr,
+		$display_string:expr,
+		rational_frac,
+		($t:expr, $b:expr),
+		$( ($u:expr, $p:expr) ),*
+	) => {
+		Some(Quantity {
+			scalar: Scalar::new_rational_from_frac($t, $b).unwrap(),
+			unit: Unit::from_array(&[
+				$(
+					(FreeUnit::from_base($u), Scalar::new_rational($p).unwrap()),
+				)*
+				(FreeUnit::from_base($unit), Scalar::new_rational(-1f64).unwrap())
+			])
+		})
+	};
 }
 
 

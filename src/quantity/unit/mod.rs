@@ -29,8 +29,10 @@ pub enum UnitBase {
 	Point, // pt, typesetting unit
 	Inch,
 	Foot,
-	Mile,
+	Yard,
 	Furlong,
+	Mile,
+	AstronomicalUnit,
 
 	// Time units
 	Minute,
@@ -39,6 +41,19 @@ pub enum UnitBase {
 	Week,
 	Month,
 	Fortnight,
+	GregorianYear,
+	JulianYear,
+
+	// Pressure
+	Pascal,
+	Atmosphere,
+	Bar,
+	Barye,
+	Psi,
+	MillimeterMercury,
+	Torr,
+	MeterSeaWater,
+	FootSeaWater
 }
 
 
@@ -64,45 +79,11 @@ macro_rules! fromstring_db {
 			(UnitBase::Ampere, "amperes"),
 			(UnitBase::Gram, "gram"),
 			(UnitBase::Gram, "grams"),
+			(UnitBase::Gram, "gramme"),
+			(UnitBase::Gram, "grammes"),
 			(UnitBase::Kelvin, "kelvin"),
 			(UnitBase::Mole, "mole"),
 			(UnitBase::Candela, "candela"),
-
-			// Length
-			(UnitBase::Angstrom, "angstrom"),
-			(UnitBase::Angstrom, "Å"),
-			(UnitBase::Thou, "thou"),
-			(UnitBase::Point, "pt"),
-			(UnitBase::Point, "point"),
-			(UnitBase::Inch, "in"),
-			(UnitBase::Inch, "inch"),
-			(UnitBase::Foot, "ft"),
-			(UnitBase::Foot, "foot"),
-			(UnitBase::Foot, "feet"),
-			(UnitBase::Mile, "mi"),
-			(UnitBase::Mile, "mile"),
-			(UnitBase::Mile, "miles"),
-
-			// Time
-			(UnitBase::Second, "sec"),
-			(UnitBase::Second, "second"),
-			(UnitBase::Second, "seconds"),
-			(UnitBase::Minute, "min"),
-			(UnitBase::Minute, "minute"),
-			(UnitBase::Minute, "minutes"),
-			(UnitBase::Hour, "h"),
-			(UnitBase::Hour, "hour"),
-			(UnitBase::Hour, "hours"),
-			(UnitBase::Day, "d"),
-			(UnitBase::Day, "day"),
-			(UnitBase::Day, "days"),
-			(UnitBase::Week, "w"),
-			(UnitBase::Week, "week"),
-			(UnitBase::Week, "weeks"),
-			(UnitBase::Month, "month"),
-			(UnitBase::Month, "months"),
-			(UnitBase::Fortnight, "fortnight"),
-			(UnitBase::Fortnight, "fortnights"),
 
 			(UnitBase::Meter, "m",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
@@ -130,6 +111,77 @@ macro_rules! fromstring_db {
 
 			(UnitBase::Candela, "cd",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
+			),
+
+			// Length
+			(UnitBase::Angstrom, "angstrom"),
+			(UnitBase::Angstrom, "Å"),
+			(UnitBase::Thou, "thou"),
+			(UnitBase::Point, "pt"),
+			(UnitBase::Point, "point"),
+			(UnitBase::Inch, "in"),
+			(UnitBase::Inch, "inch"),
+			(UnitBase::Foot, "ft"),
+			(UnitBase::Foot, "foot"),
+			(UnitBase::Foot, "feet"),
+			(UnitBase::Yard, "yard"),
+			(UnitBase::Yard, "yd"),
+			(UnitBase::Yard, "yards"),
+			(UnitBase::Mile, "mi"),
+			(UnitBase::Mile, "mile"),
+			(UnitBase::Mile, "miles"),
+			(UnitBase::AstronomicalUnit, "au"),
+			(UnitBase::AstronomicalUnit, "AU"),
+			(UnitBase::AstronomicalUnit, "astronomicalUnit"),
+			(UnitBase::AstronomicalUnit, "astronomicalUnits"),
+
+			// Time
+			(UnitBase::Second, "sec"),
+			(UnitBase::Second, "second"),
+			(UnitBase::Second, "seconds"),
+			(UnitBase::Minute, "min"),
+			(UnitBase::Minute, "minute"),
+			(UnitBase::Minute, "minutes"),
+			(UnitBase::Hour, "h"),
+			(UnitBase::Hour, "hour"),
+			(UnitBase::Hour, "hours"),
+			(UnitBase::Day, "d"),
+			(UnitBase::Day, "day"),
+			(UnitBase::Day, "days"),
+			(UnitBase::Week, "w"),
+			(UnitBase::Week, "week"),
+			(UnitBase::Week, "weeks"),
+			(UnitBase::Month, "month"),
+			(UnitBase::Month, "months"),
+			(UnitBase::Fortnight, "fortnight"),
+			(UnitBase::Fortnight, "fortnights"),
+			(UnitBase::GregorianYear, "year"),
+			(UnitBase::GregorianYear, "years"),
+			(UnitBase::JulianYear, "julianYear"),
+			(UnitBase::JulianYear, "julianYears"),
+
+			// Pressure
+			(UnitBase::Atmosphere, "atm"),
+			(UnitBase::Atmosphere, "atmosphere"),
+			(UnitBase::Atmosphere, "atmospheres"),
+			(UnitBase::Pascal, "pascal"),
+			(UnitBase::Barye, "Ba"),
+			(UnitBase::Psi, "psi"),
+			(UnitBase::MillimeterMercury, "mmhg"),
+			(UnitBase::MillimeterMercury, "mmHg"),
+			(UnitBase::Torr, "torr"),
+			(UnitBase::Torr, "Torr"),
+			(UnitBase::MeterSeaWater, "msw"),
+			(UnitBase::FootSeaWater, "fsw"),
+			(UnitBase::MeterSeaWater, "MSW"),
+			(UnitBase::FootSeaWater, "FSW"),
+
+			(UnitBase::Pascal, "Pa",
+				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
+			),
+
+			(UnitBase::Bar, "bar",
+				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			)
 		)
 	}
@@ -145,6 +197,9 @@ pub (self) use fromstring_db;
 macro_rules! unit_db {
 	($a:expr, $X:ident) => {
 		match $a {
+
+
+			// Base
 
 			UnitBase::Second => $X!(
 
@@ -181,6 +236,10 @@ macro_rules! unit_db {
 				base
 			),
 
+
+
+
+			// Time
 
 			UnitBase::Minute => $X!(
 				UnitBase::Minute, "min",
@@ -231,6 +290,22 @@ macro_rules! unit_db {
 				(UnitBase::Second, 1f64)
 			),
 
+			UnitBase::GregorianYear => $X!(
+				UnitBase::GregorianYear, "year",
+				rational, "31557000",
+				(UnitBase::Second, 1f64)
+			),
+
+			UnitBase::JulianYear => $X!(
+				UnitBase::JulianYear, "julianYear",
+				rational, "31557600",
+				(UnitBase::Second, 1f64)
+			),
+
+
+
+			// Length
+
 			UnitBase::Angstrom => $X!(
 				UnitBase::Angstrom, "Å",
 				rational, "1e-10",
@@ -239,39 +314,129 @@ macro_rules! unit_db {
 
 			UnitBase::Thou => $X!(
 				UnitBase::Thou, "thou",
-				float, "0.0000254",
+				rational, "0.0000254",
 				(UnitBase::Meter, 1f64)
 			),
 
 			UnitBase::Point => $X!(
 				UnitBase::Point, "pt",
-				float, "0.000352778",
+				rational, "0.0003514598",
 				(UnitBase::Meter, 1f64)
 			),
 
 			UnitBase::Inch => $X!(
 				UnitBase::Inch, "in",
-				float, "0.0254",
+				rational, "0.0254",
 				(UnitBase::Meter, 1f64)
 			),
 
 			UnitBase::Foot => $X!(
 				UnitBase::Foot, "ft",
-				float, "0.3048",
+				rational, "0.3048",
 				(UnitBase::Meter, 1f64)
 			),
 
-			UnitBase::Mile => $X!(
-				UnitBase::Mile, "mi",
-				float, "1609",
+			UnitBase::Yard => $X!(
+				UnitBase::Yard, "yd",
+				rational, "0.9144",
 				(UnitBase::Meter, 1f64)
 			),
 
 			UnitBase::Furlong => $X!(
 				UnitBase::Furlong, "furlong",
-				float, "201.168",
+				rational, "201.17",
 				(UnitBase::Meter, 1f64)
 			),
+
+			UnitBase::Mile => $X!(
+				UnitBase::Mile, "mi",
+				rational, "1609.344",
+				(UnitBase::Meter, 1f64)
+			),
+
+			UnitBase::AstronomicalUnit => $X!(
+				UnitBase::AstronomicalUnit, "AU",
+				rational, "149597870700",
+				(UnitBase::Meter, 1f64)
+			),
+
+
+
+
+			// Pressure
+
+			UnitBase::Pascal => $X!(
+				UnitBase::Pascal, "Pa",
+				rational, "1000",
+				(UnitBase::Gram, 1f64),
+				(UnitBase::Meter, -1f64),
+				(UnitBase::Second, -2f64)
+			),
+
+			UnitBase::Bar => $X!(
+				UnitBase::Bar, "bar",
+				rational, "100000000",
+				(UnitBase::Gram, 1f64),
+				(UnitBase::Meter, -1f64),
+				(UnitBase::Second, -2f64)
+			),
+
+			UnitBase::Barye => $X!(
+				UnitBase::Barye, "Ba",
+				rational, "100",
+				(UnitBase::Gram, 1f64),
+				(UnitBase::Meter, -1f64),
+				(UnitBase::Second, -2f64)
+			),
+
+			UnitBase::Atmosphere => $X!(
+				UnitBase::Atmosphere, "atm",
+				rational, "101325000",
+				(UnitBase::Gram, 1f64),
+				(UnitBase::Meter, -1f64),
+				(UnitBase::Second, -2f64)
+			),
+
+			UnitBase::Psi => $X!(
+				UnitBase::Psi, "psi",
+				rational, "6894757.2931783",
+				(UnitBase::Gram, 1f64),
+				(UnitBase::Meter, -1f64),
+				(UnitBase::Second, -2f64)
+			),
+
+			UnitBase::MillimeterMercury => $X!(
+				UnitBase::MillimeterMercury, "mmHg",
+				rational, "133322.387415",
+				(UnitBase::Gram, 1f64),
+				(UnitBase::Meter, -1f64),
+				(UnitBase::Second, -2f64)
+			),
+
+			UnitBase::Torr => $X!(
+				UnitBase::Torr, "torr",
+				rational_frac, (101325000, 760),
+				(UnitBase::Gram, 1f64),
+				(UnitBase::Meter, -1f64),
+				(UnitBase::Second, -2f64)
+			),
+
+			UnitBase::MeterSeaWater => $X!(
+				UnitBase::MeterSeaWater, "MSW",
+				rational, "10000000",
+				(UnitBase::Gram, 1f64),
+				(UnitBase::Meter, -1f64),
+				(UnitBase::Second, -2f64)
+			),
+
+			UnitBase::FootSeaWater => $X!(
+				UnitBase::FootSeaWater, "FSW",
+				rational, "3064330",
+				(UnitBase::Gram, 1f64),
+				(UnitBase::Meter, -1f64),
+				(UnitBase::Second, -2f64)
+			),
+
 		}
 
 
