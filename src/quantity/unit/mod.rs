@@ -40,6 +40,7 @@ pub enum UnitBase {
 	Barn,
 	Hectare,
 	MilesPerHour,
+	MilesPerGallon,
 	Acre,
 
 
@@ -190,6 +191,7 @@ macro_rules! fromstring_db {
 
 			// Misc
 			(UnitBase::MilesPerHour, "mph"),
+			(UnitBase::MilesPerGallon, "mpg"),
 			(UnitBase::Barn, "b"),
 			(UnitBase::Barn, "barn"),
 			(UnitBase::Hectare, "ha"),
@@ -459,9 +461,15 @@ macro_rules! unit_db {
 			// Misc
 			UnitBase::MilesPerHour => $X!(
 				UnitBase::MilesPerHour, "mph",
-				rational, "1609.344",
+				float, "0.44704",
 				(UnitBase::Meter, 1f64),
 				(UnitBase::Second, -1f64)
+			),
+
+			UnitBase::MilesPerGallon => $X!(
+				UnitBase::MilesPerGallon, "mpg",
+				float, "425144",
+				(UnitBase::Meter, -2f64)
 			),
 
 			UnitBase::Barn => $X!(

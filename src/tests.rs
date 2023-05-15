@@ -175,7 +175,7 @@ fn operators() {
 }
 
 #[test]
-fn units() {
+fn basic_units() {
 	//good_expr("4 m*s", "2 m * 2s");
 	good_expr("1 s⁻¹", "1/s");
 	good_expr("6 kg", "2 * 3kg");
@@ -194,4 +194,11 @@ fn units() {
 	bad_expr("m + s");
 	bad_expr("m ^ s");
 	//bad_expr("m ^ pi");
+}
+
+#[test]
+fn complex_units() {
+	good_expr("0.62137 mi", "1km to mi");
+	good_expr("3.2808 ft", "1km to ft");
+	good_expr("62.137 mph", "100 km/h to mph");
 }

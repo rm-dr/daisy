@@ -11,6 +11,7 @@ Roadmap for fixes and features.
  - Plural unit names
  - Releases
  - Unit substitutions
+ - mpg and gal replacement
 
 ## General
  - CLI Options: version, help, evaluate
