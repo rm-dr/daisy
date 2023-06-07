@@ -1,9 +1,5 @@
-# TODO
-
-Roadmap for fixes and features.
-
 ## Pre-release
- - Commands (help, clear, reset, quit, list constants, list units)
+ - Commands to list constants, units, and substitutions
  - Documentation (usage)
  - Documentation (comments)
  - More units, better printing
@@ -11,11 +7,11 @@ Roadmap for fixes and features.
  - Plural unit names
  - Releases
  - Unit substitutions
- - mpg and gal replacement
+ - mpg and gal replacement (10 mpg * 3 gal)
 
 ## General
- - CLI Options: version, help, evaluate
  - Compile to WASM, publish a webapp
+ - CLI Options: evaluate, disable replacement
  - Trigonometry & function tests
  - Manpage
 
@@ -31,7 +27,7 @@ Roadmap for fixes and features.
  - Config file
  - History to file
  - Reference previous results
- - Variable definitions
+ - Variable definitions (list and delete commands)
  - Function definitions
  - Dice
  - Mean, Median, Min, Max: arrays and multi-argument functions
@@ -46,6 +42,7 @@ Roadmap for fixes and features.
  - "per" as division?
  - -> as "to"
  - strip_unit function
+ - Unit info command
 
 
 ## Prompt
@@ -54,3 +51,4 @@ Roadmap for fixes and features.
  - fish-style tab completion
  - Numbered expressions, history recall
  - Better power printing
+ - Color configuration?
