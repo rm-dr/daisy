@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::io::stdout;
 use std::io::stdin;
+use std::env;
 
 use termion::{
 	event::Key,
@@ -119,6 +120,18 @@ fn do_expression(
 #[inline(always)]
 pub fn main() -> Result<(), std::io::Error> {
 	let mut stdout = stdout().into_raw_mode().unwrap();
+
+	let args: Vec<String> = env::args().collect();
+
+	// Handle command-line arguments
+	if args.iter().any(|s| s == "--help") {
+		command::do_command(&mut stdout, &String::from("help"))?;
+		return Ok(());
+	} else if args.iter().any(|s| s == "--version") {
+		write!(stdout, "Daisy v{}\r\n", env!("CARGO_PKG_VERSION"))?;
+		return Ok(());
+	}
+
 
 	//let size = termion::terminal_size().unwrap();
 	//write!(stdout, "{:?}", size).unwrap();
