@@ -25,15 +25,17 @@ pub fn is_command(
 fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
 	write!(
 		stdout,
-	"\n \
-	{a} ###### {b} @@@@@@\r\n \
-	{a}#     ##{b}@@     @\r\n \
-	{a}##     #{b}@     @@\r\n \
-	{a}  {b}@@@@@@@@@@@@@{a}\r\n \
-	{b}@@     @{a}#     ##\r\n \
-	{b}@     @@{a}##     #\r\n \
-	{b} @@@@@@ {a} ###### {r}\r\n \
-	\n  {t}Daisy{r}  {v}v{ver}{r}\r\n\n",
+		concat!(
+			"{a}           ###### {b} @@@@@@\r\n",
+			"{a}          #     ##{b}@@     @\r\n",
+			"{a}          ##     #{b}@     @@\r\n",
+			"{a}            {b}@@@@@@@@@@@@@{a}\r\n",
+			"{b}          @@     @{a}#     ##\r\n",
+			"{b}          @     @@{a}##     #\r\n",
+			"{b}           @@@@@@ {a} ###### {r}\r\n",
+			"            {t}Daisy{r}  {v}v{ver}{r}\r\n",
+			"\n"
+		),
 		r = format!("{}{}", color::Fg(color::Reset), style::Reset),
 		a = color::Fg(color::Magenta),
 		b = color::Fg(color::White),
@@ -65,7 +67,8 @@ pub fn do_command(
 					//"    {c}units{r}  List available units\r\n",
 					//"    {c}const{r}  List available constants\r\n",
 					"    {c}ops{r}    List built-in operators\r\n",
-					"    {c}fns{r}    List built-in functions\r\n"
+					"    {c}fns{r}    List built-in functions\r\n",
+					"\n"
 				),
 
 				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
