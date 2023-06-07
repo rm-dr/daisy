@@ -170,7 +170,11 @@ fn operators() {
 
 	good_expr("7", "3!+1");
 	good_expr("18", "3!3");
+	good_expr("9.3326e157", "1e2!");
+
 	bad_expr("3.1!");
+	bad_expr("1e10!");
+	bad_expr("1e5!");
 	bad_expr("0^(-1)");
 	bad_expr("pi!");
 }
