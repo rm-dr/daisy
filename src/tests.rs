@@ -189,7 +189,7 @@ fn basic_units() {
 	good_expr("2 m^2", "2m * m");
 	good_expr("1 m^2", "m m");
 
-	//good_expr("2 m", "rt (4m^2)");
+	good_expr("2 m", "rt (4m^2)");
 
 	bad_expr("m + s");
 	bad_expr("m ^ s");
@@ -199,6 +199,6 @@ fn basic_units() {
 #[test]
 fn complex_units() {
 	good_expr("0.62137 mi", "1km to mi");
-	good_expr("3.2808 ft", "1km to ft");
+	good_expr("3280.8 ft", "1km to ft");
 	good_expr("62.137 mph", "100 km/h to mph");
 }
