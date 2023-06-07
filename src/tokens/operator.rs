@@ -460,6 +460,10 @@ impl Operator{
 							return Err(EvalError::IncompatibleUnit);
 						}
 
+						if va.is_zero() && vb.is_negative() {
+							return Err(EvalError::ZeroDivision);
+						}
+
 						let p = va.pow(vb);
 						if p.is_nan() {return Err(EvalError::BadMath);}
 						return Ok(Token::Number(p));
