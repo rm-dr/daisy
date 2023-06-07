@@ -57,6 +57,26 @@ fn do_expression(
 					)?;
 				},
 
+				Err(EvalError::TooBig) => {
+					write!(
+						stdout, "\n  {}{}Mathematical Error: {}Number too big{}\r\n\n",
+						style::Bold,
+						color::Fg(color::Red),
+						style::Reset,
+						color::Fg(color::Reset),
+					)?;
+				},
+
+				Err(EvalError::ZeroDivision) => {
+					write!(
+						stdout, "\n  {}{}Mathematical Error: {}Division by zero{}\r\n\n",
+						style::Bold,
+						color::Fg(color::Red),
+						style::Reset,
+						color::Fg(color::Reset),
+					)?;
+				},
+
 				Err(EvalError::BadMath) => {
 					write!(
 						stdout, "\n  {}{}Mathematical Error: {}Failed to evaluate expression{}\r\n\n",

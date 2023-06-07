@@ -365,7 +365,7 @@ impl Operator{
 				let args = args[0].as_number();
 
 				if let Token::Number(v) = args {
-					if v.is_zero() { return Err(EvalError::BadMath); }
+					if v.is_zero() { return Err(EvalError::ZeroDivision); }
 					return Ok(Token::Number(
 						Quantity::new_rational(1f64).unwrap()/v
 					));
@@ -478,7 +478,7 @@ impl Operator{
 					}
 
 					if !v.fract().is_zero() { return Err(EvalError::BadMath); }
-					if v > Quantity::new_rational(50_000f64).unwrap() { return Err(EvalError::IncompatibleUnit); }
+					if v > Quantity::new_rational(50_000f64).unwrap() { return Err(EvalError::TooBig); }
 
 					let mut prod = Quantity::new_rational(1f64).unwrap();
 					let mut u = v.clone();

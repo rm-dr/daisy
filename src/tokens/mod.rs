@@ -8,5 +8,7 @@ pub use crate::tokens::operator::Operator;
 
 pub enum EvalError {
 	BadMath,
+	TooBig,
+	ZeroDivision,
 	IncompatibleUnit
 }
