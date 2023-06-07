@@ -60,6 +60,12 @@ pub fn do_command(
 
 			write!(stdout,
 				concat!(
+					"Daisy is a high-precision, general-purpose\r\n",
+					"scientific calculator.\r\n",
+					"\n",
+					" - Use Up/Down arrows to navigate history.\r\n",
+					" - Use Ctrl-C or Ctrl-D to quit.\r\n",
+					"\n",
 					"╞═════════════ {t}Commands{r} ═════════════╡\r\n",
 					"    {c}help{r}   Show this help\r\n",
 					"    {c}clear{r}  Clear the terminal\r\n",
@@ -68,7 +74,7 @@ pub fn do_command(
 					//"    {c}const{r}  List available constants\r\n",
 					"    {c}ops{r}    List built-in operators\r\n",
 					"    {c}fns{r}    List built-in functions\r\n",
-					"\n"
+					"\n",
 				),
 
 				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
