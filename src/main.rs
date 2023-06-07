@@ -1,25 +1,11 @@
 pub mod tokens;
 pub mod parser;
+pub mod command;
 pub mod quantity;
 
 //use crate::tokens::Token;
 //use crate::parser::ParserError;
 //use crate::parser::LineLocation;
-
-
-/*
- Greeter ascii art:
-
-  ######  @@@@@@
- #     ##@@     @
- ##     #@     @@
-   @@@@@@@@@@@@@
- @@     @#     ##
- @     @@##     #
-  @@@@@@  ######
-
-   Daisy 0.0.0
-*/
 
 mod entry;
 use crate::entry::main_e;
