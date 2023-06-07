@@ -8,12 +8,12 @@ use crate::tokens::Operator;
 // Called whenever a token is finished.
 #[inline(always)]
 fn push_token(g: &mut VecDeque<PreToken>, t: Option<PreToken>, stop_i: usize) {
-	
+
 	if t.is_none() { return }
 	let mut t = t.unwrap();
 
 	match t {
-		PreToken::PreGroupStart(ref mut l) 
+		PreToken::PreGroupStart(ref mut l)
 		| PreToken::PreGroupEnd(ref mut l)
 		| PreToken::PreOperator(ref mut l, _)
 		| PreToken::PreNumber(ref mut l, _)
@@ -62,7 +62,7 @@ fn push_token(g: &mut VecDeque<PreToken>, t: Option<PreToken>, stop_i: usize) {
 /// Turns a string into Tokens. First stage of parsing.
 pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 	let mut t: Option<PreToken> = None; // The current token we're reading
-	let mut g: VecDeque<PreToken> = VecDeque::with_capacity(32); 
+	let mut g: VecDeque<PreToken> = VecDeque::with_capacity(32);
 
 
 	for (i, c) in input.chars().enumerate() {
@@ -145,7 +145,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 					}
 				};
 			},
-			
+
 			// Group
 			'(' => {
 				push_token(&mut g, t, i);
