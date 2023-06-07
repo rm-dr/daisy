@@ -2,19 +2,25 @@ use std::io::Write;
 use std::io::stdout;
 use std::io::stdin;
 
+
+// We only need this for debug
+#[cfg(debug_assertions)]
+use termion::raw::RawTerminal;
+
 use termion::{
 	event::Key,
 	input::TermRead,
 	raw::IntoRawMode,
-	raw::RawTerminal,
 	color,
 	style,
 };
 
 use crate::tokens::EvalError;
+
 use super::promptbuffer::PromptBuffer;
 use crate::parser;
 
+/*
 #[inline(always)]
 fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
 	write!(
@@ -44,13 +50,14 @@ fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io
 
 	return Ok(());
 }
+*/
 
 
 #[inline(always)]
 pub fn main() -> Result<(), std::io::Error> {
 	let mut stdout = stdout().into_raw_mode().unwrap();
 
-	draw_greeter(&mut stdout)?;
+	//draw_greeter(&mut stdout)?;
 
 	//let size = termion::terminal_size().unwrap();
 	//write!(stdout, "{:?}", size).unwrap();
