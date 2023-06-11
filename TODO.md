@@ -1,3 +1,7 @@
+- Cleanup eval
+- Better constant parsing
+- Fix units
+
 ## Pre-release
  - Commands to list constants, units, and substitutions
  - Documentation (usage)
@@ -43,6 +47,7 @@
  - -> as "to"
  - strip_unit function
  - Unit info command
+ - Constant info command
 
 
 ## Prompt
