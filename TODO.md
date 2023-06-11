@@ -1,23 +1,25 @@
  - Prettyprint mi/h, mi/g
- - Better constant definitions
- - Fix unit conversion (km/s * mile)
+ - Base unit/baseunit naming
+ - Minimize parenthesis
+ - Sane autoconversion (mi + km)
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
  - Documentation (usage)
  - Documentation (comments)
- - More units, better printing
+ - More units (build.rs for constants and units)
+ - Print with highlighting
  - Cleanup tests, test commands
  - Unit tests
- - Plural unit names
  - Releases
  - Unit substitutions
 
 ## General
  - Compile to WASM, publish a webapp
- - CLI Options: evaluate, disable replacement
+ - CLI Options: evaluate, disable replacement, disable special characters
  - Trigonometry & function tests
- - Manpage
+ - vhs demo
+
 
 
 ## Internals
@@ -57,3 +59,7 @@
  - Numbered expressions, history recall
  - Better power printing
  - Color configuration?
+
+## Bonus
+ - Plural unit names
+ - Manpage
