@@ -13,7 +13,7 @@ pub use freeunit::FreeUnit;
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 #[derive(Eq, PartialEq)]
-pub enum UnitBase {
+pub enum WholeUnit {
 	// Base Units
 	Second,
 	Meter,
@@ -94,174 +94,174 @@ macro_rules! fromstring_db {
 	($X:ident) => {
 		$X!(
 			// Base units
-			(UnitBase::Meter, "meter"),
-			(UnitBase::Meter, "meters"),
-			(UnitBase::Ampere, "ampere"),
-			(UnitBase::Ampere, "amperes"),
-			(UnitBase::Gram, "gram"),
-			(UnitBase::Gram, "grams"),
-			(UnitBase::Gram, "gramme"),
-			(UnitBase::Gram, "grammes"),
-			(UnitBase::Kelvin, "kelvin"),
-			(UnitBase::Mole, "mole"),
-			(UnitBase::Candela, "candela"),
+			(WholeUnit::Meter, "meter"),
+			(WholeUnit::Meter, "meters"),
+			(WholeUnit::Ampere, "ampere"),
+			(WholeUnit::Ampere, "amperes"),
+			(WholeUnit::Gram, "gram"),
+			(WholeUnit::Gram, "grams"),
+			(WholeUnit::Gram, "gramme"),
+			(WholeUnit::Gram, "grammes"),
+			(WholeUnit::Kelvin, "kelvin"),
+			(WholeUnit::Mole, "mole"),
+			(WholeUnit::Candela, "candela"),
 
-			(UnitBase::Meter, "m",
+			(WholeUnit::Meter, "m",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Second, "s",
+			(WholeUnit::Second, "s",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Gram, "g",
+			(WholeUnit::Gram, "g",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Ampere, "A",
+			(WholeUnit::Ampere, "A",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Kelvin, "K",
+			(WholeUnit::Kelvin, "K",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Mole, "mol",
+			(WholeUnit::Mole, "mol",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Candela, "cd",
+			(WholeUnit::Candela, "cd",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
 			// Length
-			(UnitBase::Angstrom, "angstrom"),
-			(UnitBase::Angstrom, "Å"),
-			(UnitBase::Thou, "thou"),
-			(UnitBase::Point, "pt"),
-			(UnitBase::Point, "point"),
-			(UnitBase::Inch, "in"),
-			(UnitBase::Inch, "inch"),
-			(UnitBase::Foot, "ft"),
-			(UnitBase::Foot, "foot"),
-			(UnitBase::Foot, "feet"),
-			(UnitBase::Yard, "yard"),
-			(UnitBase::Yard, "yd"),
-			(UnitBase::Yard, "yards"),
-			(UnitBase::Mile, "mi"),
-			(UnitBase::Mile, "mile"),
-			(UnitBase::Mile, "miles"),
-			(UnitBase::AstronomicalUnit, "au"),
-			(UnitBase::AstronomicalUnit, "AU"),
-			(UnitBase::AstronomicalUnit, "astronomicalUnit"),
-			(UnitBase::AstronomicalUnit, "astronomicalUnits"),
-			(UnitBase::Lightyear, "ly"),
-			(UnitBase::Lightyear, "lightyear"),
-			(UnitBase::Lightyear, "lightyears"),
-			(UnitBase::Parsec, "pc"),
-			(UnitBase::Parsec, "parsec"),
-			(UnitBase::Parsec, "parsecs"),
+			(WholeUnit::Angstrom, "angstrom"),
+			(WholeUnit::Angstrom, "Å"),
+			(WholeUnit::Thou, "thou"),
+			(WholeUnit::Point, "pt"),
+			(WholeUnit::Point, "point"),
+			(WholeUnit::Inch, "in"),
+			(WholeUnit::Inch, "inch"),
+			(WholeUnit::Foot, "ft"),
+			(WholeUnit::Foot, "foot"),
+			(WholeUnit::Foot, "feet"),
+			(WholeUnit::Yard, "yard"),
+			(WholeUnit::Yard, "yd"),
+			(WholeUnit::Yard, "yards"),
+			(WholeUnit::Mile, "mi"),
+			(WholeUnit::Mile, "mile"),
+			(WholeUnit::Mile, "miles"),
+			(WholeUnit::AstronomicalUnit, "au"),
+			(WholeUnit::AstronomicalUnit, "AU"),
+			(WholeUnit::AstronomicalUnit, "astronomicalUnit"),
+			(WholeUnit::AstronomicalUnit, "astronomicalUnits"),
+			(WholeUnit::Lightyear, "ly"),
+			(WholeUnit::Lightyear, "lightyear"),
+			(WholeUnit::Lightyear, "lightyears"),
+			(WholeUnit::Parsec, "pc"),
+			(WholeUnit::Parsec, "parsec"),
+			(WholeUnit::Parsec, "parsecs"),
 
 			// Time
-			(UnitBase::Second, "sec"),
-			(UnitBase::Second, "second"),
-			(UnitBase::Second, "seconds"),
-			(UnitBase::Minute, "min"),
-			(UnitBase::Minute, "minute"),
-			(UnitBase::Minute, "minutes"),
-			(UnitBase::Hour, "h"),
-			(UnitBase::Hour, "hour"),
-			(UnitBase::Hour, "hours"),
-			(UnitBase::Day, "d"),
-			(UnitBase::Day, "day"),
-			(UnitBase::Day, "days"),
-			(UnitBase::Week, "w"),
-			(UnitBase::Week, "week"),
-			(UnitBase::Week, "weeks"),
-			(UnitBase::Month, "month"),
-			(UnitBase::Month, "months"),
-			(UnitBase::Fortnight, "fortnight"),
-			(UnitBase::Fortnight, "fortnights"),
-			(UnitBase::GregorianYear, "year"),
-			(UnitBase::GregorianYear, "years"),
-			(UnitBase::JulianYear, "julianYear"),
-			(UnitBase::JulianYear, "julianYears"),
+			(WholeUnit::Second, "sec"),
+			(WholeUnit::Second, "second"),
+			(WholeUnit::Second, "seconds"),
+			(WholeUnit::Minute, "min"),
+			(WholeUnit::Minute, "minute"),
+			(WholeUnit::Minute, "minutes"),
+			(WholeUnit::Hour, "h"),
+			(WholeUnit::Hour, "hour"),
+			(WholeUnit::Hour, "hours"),
+			(WholeUnit::Day, "d"),
+			(WholeUnit::Day, "day"),
+			(WholeUnit::Day, "days"),
+			(WholeUnit::Week, "w"),
+			(WholeUnit::Week, "week"),
+			(WholeUnit::Week, "weeks"),
+			(WholeUnit::Month, "month"),
+			(WholeUnit::Month, "months"),
+			(WholeUnit::Fortnight, "fortnight"),
+			(WholeUnit::Fortnight, "fortnights"),
+			(WholeUnit::GregorianYear, "year"),
+			(WholeUnit::GregorianYear, "years"),
+			(WholeUnit::JulianYear, "julianYear"),
+			(WholeUnit::JulianYear, "julianYears"),
 
 			// Misc
-			(UnitBase::Barn, "b"),
-			(UnitBase::Barn, "barn"),
-			(UnitBase::Hectare, "ha"),
-			(UnitBase::Hectare, "hectare"),
-			(UnitBase::Hectare, "hectares"),
-			(UnitBase::Acre, "acre"),
-			(UnitBase::Acre, "acres"),
+			(WholeUnit::Barn, "b"),
+			(WholeUnit::Barn, "barn"),
+			(WholeUnit::Hectare, "ha"),
+			(WholeUnit::Hectare, "hectare"),
+			(WholeUnit::Hectare, "hectares"),
+			(WholeUnit::Acre, "acre"),
+			(WholeUnit::Acre, "acres"),
 
 
 			// Volume
-			(UnitBase::Liter, "liter"),
-			(UnitBase::Liter, "liters"),
-			(UnitBase::Liter, "litre"),
-			(UnitBase::Liter, "litres"),
-			(UnitBase::USGallon, "usgal"),
-			(UnitBase::USGallon, "gal"),
-			(UnitBase::USGallon, "gallon"),
-			(UnitBase::USGallon, "gallons"),
-			(UnitBase::Quart, "quart"),
-			(UnitBase::Quart, "quarts"),
-			(UnitBase::Quart, "qt"),
-			(UnitBase::ImperialGallon, "impgal"),
-			(UnitBase::ImperialGallon, "imperialGallon"),
-			(UnitBase::ImperialGallon, "imperialGallons"),
-			(UnitBase::Cup, "cup"),
-			(UnitBase::Floz, "floz"),
-			(UnitBase::Pint, "pint"),
-			(UnitBase::Pint, "pints"),
-			(UnitBase::Tablespoon, "tablespoon"),
-			(UnitBase::Tablespoon, "tablespoons"),
-			(UnitBase::Tablespoon, "tbsp"),
-			(UnitBase::Tablespoon, "Tbsp"),
-			(UnitBase::Teaspoon, "teaspoon"),
-			(UnitBase::Teaspoon, "teaspoons"),
-			(UnitBase::Teaspoon, "tsp"),
-			(UnitBase::Teaspoon, "Tsp"),
+			(WholeUnit::Liter, "liter"),
+			(WholeUnit::Liter, "liters"),
+			(WholeUnit::Liter, "litre"),
+			(WholeUnit::Liter, "litres"),
+			(WholeUnit::USGallon, "usgal"),
+			(WholeUnit::USGallon, "gal"),
+			(WholeUnit::USGallon, "gallon"),
+			(WholeUnit::USGallon, "gallons"),
+			(WholeUnit::Quart, "quart"),
+			(WholeUnit::Quart, "quarts"),
+			(WholeUnit::Quart, "qt"),
+			(WholeUnit::ImperialGallon, "impgal"),
+			(WholeUnit::ImperialGallon, "imperialGallon"),
+			(WholeUnit::ImperialGallon, "imperialGallons"),
+			(WholeUnit::Cup, "cup"),
+			(WholeUnit::Floz, "floz"),
+			(WholeUnit::Pint, "pint"),
+			(WholeUnit::Pint, "pints"),
+			(WholeUnit::Tablespoon, "tablespoon"),
+			(WholeUnit::Tablespoon, "tablespoons"),
+			(WholeUnit::Tablespoon, "tbsp"),
+			(WholeUnit::Tablespoon, "Tbsp"),
+			(WholeUnit::Teaspoon, "teaspoon"),
+			(WholeUnit::Teaspoon, "teaspoons"),
+			(WholeUnit::Teaspoon, "tsp"),
+			(WholeUnit::Teaspoon, "Tsp"),
 
 
 
-			(UnitBase::Hogshead, "hogshead"),
-			(UnitBase::Hogshead, "hogsheads"),
+			(WholeUnit::Hogshead, "hogshead"),
+			(WholeUnit::Hogshead, "hogsheads"),
 
 
-			(UnitBase::Liter, "l",
+			(WholeUnit::Liter, "l",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Liter, "L",
+			(WholeUnit::Liter, "L",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
 
 
 			// Pressure
-			(UnitBase::Atmosphere, "atm"),
-			(UnitBase::Atmosphere, "atmosphere"),
-			(UnitBase::Atmosphere, "atmospheres"),
-			(UnitBase::Pascal, "pascal"),
-			(UnitBase::Barye, "Ba"),
-			(UnitBase::Psi, "psi"),
-			(UnitBase::MillimeterMercury, "mmhg"),
-			(UnitBase::MillimeterMercury, "mmHg"),
-			(UnitBase::Torr, "torr"),
-			(UnitBase::Torr, "Torr"),
-			(UnitBase::MeterSeaWater, "msw"),
-			(UnitBase::FootSeaWater, "fsw"),
-			(UnitBase::MeterSeaWater, "MSW"),
-			(UnitBase::FootSeaWater, "FSW"),
+			(WholeUnit::Atmosphere, "atm"),
+			(WholeUnit::Atmosphere, "atmosphere"),
+			(WholeUnit::Atmosphere, "atmospheres"),
+			(WholeUnit::Pascal, "pascal"),
+			(WholeUnit::Barye, "Ba"),
+			(WholeUnit::Psi, "psi"),
+			(WholeUnit::MillimeterMercury, "mmhg"),
+			(WholeUnit::MillimeterMercury, "mmHg"),
+			(WholeUnit::Torr, "torr"),
+			(WholeUnit::Torr, "Torr"),
+			(WholeUnit::MeterSeaWater, "msw"),
+			(WholeUnit::FootSeaWater, "fsw"),
+			(WholeUnit::MeterSeaWater, "MSW"),
+			(WholeUnit::FootSeaWater, "FSW"),
 
-			(UnitBase::Pascal, "Pa",
+			(WholeUnit::Pascal, "Pa",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			),
 
-			(UnitBase::Bar, "bar",
+			(WholeUnit::Bar, "bar",
 				("Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q")
 			)
 		)
@@ -282,9 +282,9 @@ macro_rules! unit_db {
 
 			// Base
 
-			UnitBase::Second => $X!(
+			WholeUnit::Second => $X!(
 
-				UnitBase::Second,  // Repeat the name of this base unit
+				WholeUnit::Second,  // Repeat the name of this base unit
 				"s",               // String to display for this unit
 
 				// "base", "float", or "rational."
@@ -292,28 +292,28 @@ macro_rules! unit_db {
 				// if float or rational, this is not a base unit. See below.
 				base
 			),
-			UnitBase::Meter => $X!(
-				UnitBase::Meter, "m",
+			WholeUnit::Meter => $X!(
+				WholeUnit::Meter, "m",
 				base
 			),
-			UnitBase::Gram => $X!(
-				UnitBase::Gram, "g",
+			WholeUnit::Gram => $X!(
+				WholeUnit::Gram, "g",
 				base
 			),
-			UnitBase::Ampere => $X!(
-				UnitBase::Ampere, "A",
+			WholeUnit::Ampere => $X!(
+				WholeUnit::Ampere, "A",
 				base
 			),
-			UnitBase::Kelvin => $X!(
-				UnitBase::Kelvin, "K",
+			WholeUnit::Kelvin => $X!(
+				WholeUnit::Kelvin, "K",
 				base
 			),
-			UnitBase::Mole => $X!(
-				UnitBase::Mole, "mol",
+			WholeUnit::Mole => $X!(
+				WholeUnit::Mole, "mol",
 				base
 			),
-			UnitBase::Candela => $X!(
-				UnitBase::Candela, "cd",
+			WholeUnit::Candela => $X!(
+				WholeUnit::Candela, "cd",
 				base
 			),
 
@@ -322,8 +322,8 @@ macro_rules! unit_db {
 
 			// Time
 
-			UnitBase::Minute => $X!(
-				UnitBase::Minute, "min",
+			WholeUnit::Minute => $X!(
+				WholeUnit::Minute, "min",
 
 				// "rational" and "float" determine what kind of Quantity
 				// this unit's conversion factor will be. Use "rational"
@@ -338,276 +338,276 @@ macro_rules! unit_db {
 				"60",
 				// The unit. Can be repeated for compound units.
 				// MUST BE BASE UNITS.
-				(UnitBase::Second, 1f64)
+				(WholeUnit::Second, 1f64)
 			),
 
-			UnitBase::Hour => $X!(
-				UnitBase::Hour, "h",
+			WholeUnit::Hour => $X!(
+				WholeUnit::Hour, "h",
 				rational, "3600",
-				(UnitBase::Second, 1f64)
+				(WholeUnit::Second, 1f64)
 			),
 
-			UnitBase::Day => $X!(
-				UnitBase::Day, "day",
+			WholeUnit::Day => $X!(
+				WholeUnit::Day, "day",
 				rational, "86400",
-				(UnitBase::Second, 1f64)
+				(WholeUnit::Second, 1f64)
 			),
 
-			UnitBase::Week => $X!(
-				UnitBase::Week, "week",
+			WholeUnit::Week => $X!(
+				WholeUnit::Week, "week",
 				rational, "604800",
-				(UnitBase::Second, 1f64)
+				(WholeUnit::Second, 1f64)
 			),
 
-			UnitBase::Month => $X!(
-				UnitBase::Month, "month",
+			WholeUnit::Month => $X!(
+				WholeUnit::Month, "month",
 				rational, "2629746",
-				(UnitBase::Second, 1f64)
+				(WholeUnit::Second, 1f64)
 			),
 
-			UnitBase::Fortnight => $X!(
-				UnitBase::Fortnight, "fortnight",
+			WholeUnit::Fortnight => $X!(
+				WholeUnit::Fortnight, "fortnight",
 				rational, "1209600",
-				(UnitBase::Second, 1f64)
+				(WholeUnit::Second, 1f64)
 			),
 
-			UnitBase::GregorianYear => $X!(
-				UnitBase::GregorianYear, "year",
+			WholeUnit::GregorianYear => $X!(
+				WholeUnit::GregorianYear, "year",
 				rational, "31557000",
-				(UnitBase::Second, 1f64)
+				(WholeUnit::Second, 1f64)
 			),
 
-			UnitBase::JulianYear => $X!(
-				UnitBase::JulianYear, "julianYear",
+			WholeUnit::JulianYear => $X!(
+				WholeUnit::JulianYear, "julianYear",
 				rational, "31557600",
-				(UnitBase::Second, 1f64)
+				(WholeUnit::Second, 1f64)
 			),
 
 
 
 			// Length
 
-			UnitBase::Angstrom => $X!(
-				UnitBase::Angstrom, "Å",
+			WholeUnit::Angstrom => $X!(
+				WholeUnit::Angstrom, "Å",
 				rational, "1e-10",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Thou => $X!(
-				UnitBase::Thou, "thou",
+			WholeUnit::Thou => $X!(
+				WholeUnit::Thou, "thou",
 				rational, "0.0000254",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Point => $X!(
-				UnitBase::Point, "pt",
+			WholeUnit::Point => $X!(
+				WholeUnit::Point, "pt",
 				rational, "0.0003514598",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Inch => $X!(
-				UnitBase::Inch, "in",
+			WholeUnit::Inch => $X!(
+				WholeUnit::Inch, "in",
 				rational, "0.0254",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Foot => $X!(
-				UnitBase::Foot, "ft",
+			WholeUnit::Foot => $X!(
+				WholeUnit::Foot, "ft",
 				rational, "0.3048",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Yard => $X!(
-				UnitBase::Yard, "yd",
+			WholeUnit::Yard => $X!(
+				WholeUnit::Yard, "yd",
 				rational, "0.9144",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Furlong => $X!(
-				UnitBase::Furlong, "furlong",
+			WholeUnit::Furlong => $X!(
+				WholeUnit::Furlong, "furlong",
 				rational, "201.17",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Mile => $X!(
-				UnitBase::Mile, "mi",
+			WholeUnit::Mile => $X!(
+				WholeUnit::Mile, "mi",
 				rational, "1609.344",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::AstronomicalUnit => $X!(
-				UnitBase::AstronomicalUnit, "AU",
+			WholeUnit::AstronomicalUnit => $X!(
+				WholeUnit::AstronomicalUnit, "AU",
 				rational, "149597870700",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Lightyear => $X!(
-				UnitBase::Lightyear, "ly",
+			WholeUnit::Lightyear => $X!(
+				WholeUnit::Lightyear, "ly",
 				rational, "9460730472580800",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Parsec => $X!(
-				UnitBase::Parsec, "pc",
+			WholeUnit::Parsec => $X!(
+				WholeUnit::Parsec, "pc",
 				float, "3.085677581e16",
-				(UnitBase::Meter, 1f64)
+				(WholeUnit::Meter, 1f64)
 			),
 
-			UnitBase::Barn => $X!(
-				UnitBase::Barn, "b",
+			WholeUnit::Barn => $X!(
+				WholeUnit::Barn, "b",
 				rational, "1e-28",
-				(UnitBase::Meter, 2f64)
+				(WholeUnit::Meter, 2f64)
 			),
 
-			UnitBase::Hectare => $X!(
-				UnitBase::Hectare, "ha",
+			WholeUnit::Hectare => $X!(
+				WholeUnit::Hectare, "ha",
 				rational, "10000",
-				(UnitBase::Meter, 2f64)
+				(WholeUnit::Meter, 2f64)
 			),
 
-			UnitBase::Acre => $X!( // 66 x 660 feet
-				UnitBase::Acre, "acre",
+			WholeUnit::Acre => $X!( // 66 x 660 feet
+				WholeUnit::Acre, "acre",
 				rational, "4046.8564224",
-				(UnitBase::Meter, 2f64)
+				(WholeUnit::Meter, 2f64)
 			),
 
 
 
 			// Volume
-			UnitBase::Liter => $X!(
-				UnitBase::Liter, "l",
+			WholeUnit::Liter => $X!(
+				WholeUnit::Liter, "l",
 				rational, "0.001",
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
-			UnitBase::Hogshead => $X!(
-				UnitBase::Hogshead, "hogshead",
+			WholeUnit::Hogshead => $X!(
+				WholeUnit::Hogshead, "hogshead",
 				rational, "0.2385", // 63 gallons
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
-			UnitBase::USGallon => $X!(
-				UnitBase::USGallon, "gal",
+			WholeUnit::USGallon => $X!(
+				WholeUnit::USGallon, "gal",
 				rational, "0.003785411784",
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
-			UnitBase::Quart => $X!(
-				UnitBase::Quart, "qt",
+			WholeUnit::Quart => $X!(
+				WholeUnit::Quart, "qt",
 				rational, "0.000946352946",
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
-			UnitBase::ImperialGallon => $X!(
-				UnitBase::ImperialGallon, "impgal",
+			WholeUnit::ImperialGallon => $X!(
+				WholeUnit::ImperialGallon, "impgal",
 				rational, "0.00454609",
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
-			UnitBase::Cup => $X!(
-				UnitBase::Cup, "cup",
+			WholeUnit::Cup => $X!(
+				WholeUnit::Cup, "cup",
 				rational, "0.0002365882365",
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
-			UnitBase::Floz => $X!(
-				UnitBase::Floz, "floz",
+			WholeUnit::Floz => $X!(
+				WholeUnit::Floz, "floz",
 				rational, "0.0000295735295625",
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
-			UnitBase::Pint => $X!(
-				UnitBase::Pint, "pint",
+			WholeUnit::Pint => $X!(
+				WholeUnit::Pint, "pint",
 				rational, "0.00056826125",
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
-			UnitBase::Tablespoon => $X!(
-				UnitBase::Tablespoon, "tbsp",
+			WholeUnit::Tablespoon => $X!(
+				WholeUnit::Tablespoon, "tbsp",
 				rational, "0.00001478676478125",
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
-			UnitBase::Teaspoon => $X!(
-				UnitBase::Teaspoon, "tsp",
+			WholeUnit::Teaspoon => $X!(
+				WholeUnit::Teaspoon, "tsp",
 				rational, "0.000005",
-				(UnitBase::Meter, 3f64)
+				(WholeUnit::Meter, 3f64)
 			),
 
 
 
 			// Pressure
 
-			UnitBase::Pascal => $X!(
-				UnitBase::Pascal, "Pa",
+			WholeUnit::Pascal => $X!(
+				WholeUnit::Pascal, "Pa",
 				rational, "1000",
-				(UnitBase::Gram, 1f64),
-				(UnitBase::Meter, -1f64),
-				(UnitBase::Second, -2f64)
+				(WholeUnit::Gram, 1f64),
+				(WholeUnit::Meter, -1f64),
+				(WholeUnit::Second, -2f64)
 			),
 
-			UnitBase::Bar => $X!(
-				UnitBase::Bar, "bar",
+			WholeUnit::Bar => $X!(
+				WholeUnit::Bar, "bar",
 				rational, "100000000",
-				(UnitBase::Gram, 1f64),
-				(UnitBase::Meter, -1f64),
-				(UnitBase::Second, -2f64)
+				(WholeUnit::Gram, 1f64),
+				(WholeUnit::Meter, -1f64),
+				(WholeUnit::Second, -2f64)
 			),
 
-			UnitBase::Barye => $X!(
-				UnitBase::Barye, "Ba",
+			WholeUnit::Barye => $X!(
+				WholeUnit::Barye, "Ba",
 				rational, "100",
-				(UnitBase::Gram, 1f64),
-				(UnitBase::Meter, -1f64),
-				(UnitBase::Second, -2f64)
+				(WholeUnit::Gram, 1f64),
+				(WholeUnit::Meter, -1f64),
+				(WholeUnit::Second, -2f64)
 			),
 
-			UnitBase::Atmosphere => $X!(
-				UnitBase::Atmosphere, "atm",
+			WholeUnit::Atmosphere => $X!(
+				WholeUnit::Atmosphere, "atm",
 				rational, "101325000",
-				(UnitBase::Gram, 1f64),
-				(UnitBase::Meter, -1f64),
-				(UnitBase::Second, -2f64)
+				(WholeUnit::Gram, 1f64),
+				(WholeUnit::Meter, -1f64),
+				(WholeUnit::Second, -2f64)
 			),
 
-			UnitBase::Psi => $X!(
-				UnitBase::Psi, "psi",
+			WholeUnit::Psi => $X!(
+				WholeUnit::Psi, "psi",
 				rational, "6894757.2931783",
-				(UnitBase::Gram, 1f64),
-				(UnitBase::Meter, -1f64),
-				(UnitBase::Second, -2f64)
+				(WholeUnit::Gram, 1f64),
+				(WholeUnit::Meter, -1f64),
+				(WholeUnit::Second, -2f64)
 			),
 
-			UnitBase::MillimeterMercury => $X!(
-				UnitBase::MillimeterMercury, "mmHg",
+			WholeUnit::MillimeterMercury => $X!(
+				WholeUnit::MillimeterMercury, "mmHg",
 				rational, "133322.387415",
-				(UnitBase::Gram, 1f64),
-				(UnitBase::Meter, -1f64),
-				(UnitBase::Second, -2f64)
+				(WholeUnit::Gram, 1f64),
+				(WholeUnit::Meter, -1f64),
+				(WholeUnit::Second, -2f64)
 			),
 
-			UnitBase::Torr => $X!(
-				UnitBase::Torr, "torr",
+			WholeUnit::Torr => $X!(
+				WholeUnit::Torr, "torr",
 				rational_frac, (101325000, 760),
-				(UnitBase::Gram, 1f64),
-				(UnitBase::Meter, -1f64),
-				(UnitBase::Second, -2f64)
+				(WholeUnit::Gram, 1f64),
+				(WholeUnit::Meter, -1f64),
+				(WholeUnit::Second, -2f64)
 			),
 
-			UnitBase::MeterSeaWater => $X!(
-				UnitBase::MeterSeaWater, "MSW",
+			WholeUnit::MeterSeaWater => $X!(
+				WholeUnit::MeterSeaWater, "MSW",
 				rational, "10000000",
-				(UnitBase::Gram, 1f64),
-				(UnitBase::Meter, -1f64),
-				(UnitBase::Second, -2f64)
+				(WholeUnit::Gram, 1f64),
+				(WholeUnit::Meter, -1f64),
+				(WholeUnit::Second, -2f64)
 			),
 
-			UnitBase::FootSeaWater => $X!(
-				UnitBase::FootSeaWater, "FSW",
+			WholeUnit::FootSeaWater => $X!(
+				WholeUnit::FootSeaWater, "FSW",
 				rational, "3064330",
-				(UnitBase::Gram, 1f64),
-				(UnitBase::Meter, -1f64),
-				(UnitBase::Second, -2f64)
+				(WholeUnit::Gram, 1f64),
+				(WholeUnit::Meter, -1f64),
+				(WholeUnit::Second, -2f64)
 			),
 
 		}

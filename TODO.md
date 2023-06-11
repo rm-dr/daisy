@@ -1,5 +1,4 @@
  - Prettyprint mi/h, mi/g
- - Base unit/baseunit naming
  - Minimize parenthesis
  - Sane autoconversion (mi + km)
 
@@ -59,6 +58,7 @@
  - Numbered expressions, history recall
  - Better power printing
  - Color configuration?
+ - Show base units on error
 
 ## Bonus
  - Plural unit names

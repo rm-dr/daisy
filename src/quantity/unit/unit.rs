@@ -7,7 +7,7 @@ use std::ops::{
 use crate::quantity::Scalar;
 use crate::quantity::Quantity;
 use super::FreeUnit;
-use super::UnitBase;
+use super::WholeUnit;
 use super::Prefix;
 use super::fromstring_db;
 use super::str_to_prefix;
@@ -203,14 +203,14 @@ impl Unit {
 				match s {
 					$(
 						// No prefix--every unit has this
-						$string => Some(FreeUnit::from_base($unit)),
+						$string => Some(FreeUnit::from_whole($unit)),
 
 						// Arms for prefixes
 						$($(
 							concat!(
 								$prefix,
 								$string
-							) => Some(FreeUnit::from_base_prefix($unit, str_to_prefix!($prefix))),
+							) => Some(FreeUnit::from_whole_prefix($unit, str_to_prefix!($prefix))),
 						)*)*
 					)*
 					_ => None
