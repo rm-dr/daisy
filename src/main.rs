@@ -1,11 +1,8 @@
-pub mod tokens;
 pub mod parser;
 pub mod command;
 pub mod quantity;
+pub mod evaluate;
 
-//use crate::tokens::Token;
-//use crate::parser::ParserError;
-//use crate::parser::LineLocation;
 
 mod entry;
 use crate::entry::main_e;

@@ -13,9 +13,11 @@ use termion::{
 };
 
 use super::promptbuffer::PromptBuffer;
-use crate::tokens::EvalError;
+//use crate::tokens::EvalError;
 use crate::parser;
 use crate::command;
+use crate::evaluate::evaluate;
+use crate::evaluate::EvalError;
 
 
 
@@ -37,7 +39,7 @@ fn do_expression(
 			color::Fg(color::Red),
 			" ".repeat(l.pos + 4),
 			"^".repeat(l.len),
-			e.to_message(),
+			e.to_string(),
 			color::Fg(color::Reset),
 		)?;
 		return Ok(());
@@ -54,10 +56,11 @@ fn do_expression(
 		g.to_string()
 	)?;
 
+
 	// Evaluate expression
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout)?;
-	let g = g.evaluate();
+	let g = evaluate(&g);
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout)?;
 
@@ -116,6 +119,7 @@ fn do_expression(
 			}
 		}
 	}
+
 
 
 	return Ok(());

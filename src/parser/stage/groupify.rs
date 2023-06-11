@@ -1,10 +1,11 @@
 use std::collections::VecDeque;
 
-use crate::parser::PreToken;
-use crate::parser::LineLocation;
-use crate::parser::ParserError;
-
-use crate::tokens::Operator;
+use super::super::{
+	PreToken,
+	LineLocation,
+	ParserError,
+	Operator
+};
 
 
 fn lookback_signs(
@@ -99,7 +100,6 @@ fn lookback(
 
 	lookback_signs(g)?;
 
-
 	let mut i: usize = 0;
 	while i < g.len() {
 		if i >= 1 {
@@ -109,12 +109,12 @@ fn lookback(
 			match (&a, &b) {
 				// Insert ImplicitMultiply
 				(PreToken::PreGroup(_,_), PreToken::PreGroup(l ,_))
-				| (PreToken::PreGroup(_,_), PreToken::PreNumber(l,_))
-				| (PreToken::PreNumber(_,_), PreToken::PreGroup(l,_))
+				| (PreToken::PreGroup(_,_), PreToken::PreQuantity(l,_))
+				| (PreToken::PreQuantity(_,_), PreToken::PreGroup(l,_))
 				| (PreToken::PreGroup(_,_), PreToken::PreWord(l,_))
 				| (PreToken::PreWord(_,_), PreToken::PreGroup(l,_))
-				| (PreToken::PreNumber(_,_), PreToken::PreWord(l,_))
-				| (PreToken::PreWord(_,_), PreToken::PreNumber(l,_))
+				| (PreToken::PreQuantity(_,_), PreToken::PreWord(l,_))
+				| (PreToken::PreWord(_,_), PreToken::PreQuantity(l,_))
 				| (PreToken::PreWord(_,_), PreToken::PreWord(l,_))
 				=> {
 					let loc = LineLocation{pos: l.pos-1, len: 0};
@@ -128,7 +128,7 @@ fn lookback(
 				},
 
 				// Insert implicit multiplications for right-unary operators
-				(PreToken::PreNumber(_,_), PreToken::PreOperator(l,s))
+				(PreToken::PreQuantity(_,_), PreToken::PreOperator(l,s))
 				| (PreToken::PreGroup(_,_), PreToken::PreOperator(l,s))
 				| (PreToken::PreWord(_,_), PreToken::PreOperator(l,s))
 				=> {
@@ -149,7 +149,7 @@ fn lookback(
 				},
 
 				// Insert implicit multiplications for left-unary operators.
-				(PreToken::PreOperator(_,s), PreToken::PreNumber(l,_))
+				(PreToken::PreOperator(_,s), PreToken::PreQuantity(l,_))
 				| (PreToken::PreOperator(_,s), PreToken::PreGroup(l,_))
 				| (PreToken::PreOperator(_,s), PreToken::PreWord(l,_))
 				=> {
@@ -170,7 +170,7 @@ fn lookback(
 				},
 
 				// The following are syntax errors
-				(PreToken::PreNumber(la,_), PreToken::PreNumber(lb,_))
+				(PreToken::PreQuantity(la,_), PreToken::PreQuantity(lb,_))
 				=> {
 					return Err((
 						LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
@@ -188,7 +188,7 @@ fn lookback(
 }
 
 
-pub(in crate::parser) fn groupify(
+pub fn groupify(
 	mut g: VecDeque<PreToken>
 ) -> Result<
 	PreToken,

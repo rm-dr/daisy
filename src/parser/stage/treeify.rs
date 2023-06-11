@@ -1,11 +1,12 @@
 use std::collections::VecDeque;
 
-use crate::parser::PreToken;
-use crate::parser::ParserError;
-use crate::parser::LineLocation;
-
-use crate::tokens::Token;
-use crate::tokens::Operator;
+use super::super::{
+	PreToken,
+	ParserError,
+	LineLocation,
+	Token,
+	Operator
+};
 
 fn treeify_binary(
 	i: usize,
@@ -269,7 +270,7 @@ fn treeify_unary(
 }
 
 
-pub(in crate::parser) fn treeify(
+pub fn treeify(
 	mut g: PreToken,
 ) -> Result<Token, (LineLocation, ParserError)> {
 

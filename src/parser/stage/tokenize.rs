@@ -1,9 +1,10 @@
 use std::collections::VecDeque;
 
-use crate::parser::PreToken;
-use crate::parser::LineLocation;
-
-use crate::tokens::Operator;
+use super::super::{
+	PreToken,
+	LineLocation,
+	Operator
+};
 
 // Called whenever a token is finished.
 #[inline(always)]
@@ -16,7 +17,7 @@ fn push_token(g: &mut VecDeque<PreToken>, t: Option<PreToken>, stop_i: usize) {
 		PreToken::PreGroupStart(ref mut l)
 		| PreToken::PreGroupEnd(ref mut l)
 		| PreToken::PreOperator(ref mut l, _)
-		| PreToken::PreNumber(ref mut l, _)
+		| PreToken::PreQuantity(ref mut l, _)
 		| PreToken::PreWord(ref mut l, _)
 		=> {
 			*l = LineLocation{
@@ -33,10 +34,10 @@ fn push_token(g: &mut VecDeque<PreToken>, t: Option<PreToken>, stop_i: usize) {
 
 	// `2e` isn't exponential notation, it's 2*e.
 	// If a number ends in `e`, disconnect the `e` and make it a word.
-	if let PreToken::PreNumber(l, s) = &t {
+	if let PreToken::PreQuantity(l, s) = &t {
 		let last = &s[s.len()-1..];
 		if last == "e" {
-			g.push_back(PreToken::PreNumber(
+			g.push_back(PreToken::PreQuantity(
 				LineLocation { pos: l.pos, len: l.len-1 },
 				String::from(&s[0..s.len()-1])
 			));
@@ -60,7 +61,7 @@ fn push_token(g: &mut VecDeque<PreToken>, t: Option<PreToken>, stop_i: usize) {
 }
 
 /// Turns a string into Tokens. First stage of parsing.
-pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
+pub fn tokenize(input: &String) -> VecDeque<PreToken> {
 	let mut t: Option<PreToken> = None; // The current token we're reading
 	let mut g: VecDeque<PreToken> = VecDeque::with_capacity(32);
 
@@ -73,7 +74,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 				match &mut t {
 					// If we're already building a number,
 					// append.
-					Some(PreToken::PreNumber(_, val)) => {
+					Some(PreToken::PreQuantity(_, val)) => {
 						val.push(if c == ',' {'.'} else {c});
 					},
 
@@ -81,7 +82,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 					// previous token and start one.
 					_ => {
 						push_token(&mut g, t, i);
-						t = Some(PreToken::PreNumber(LineLocation{pos: i, len: 0}, String::from(c)));
+						t = Some(PreToken::PreQuantity(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
 			},
@@ -91,7 +92,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 			'e' => {
 				match &mut t {
 					Some(PreToken::PreWord(_, val)) => { val.push(c); },
-					Some(PreToken::PreNumber(_, val)) => { val.push(c); },
+					Some(PreToken::PreQuantity(_, val)) => { val.push(c); },
 
 					_ => {
 						push_token(&mut g, t, i);
@@ -105,7 +106,7 @@ pub(in crate::parser) fn tokenize(input: &String) -> VecDeque<PreToken> {
 			// or it can specify a negative exponent.
 			'-' | '+' => {
 				match &mut t {
-					Some(PreToken::PreNumber(_, val)) => {
+					Some(PreToken::PreQuantity(_, val)) => {
 						if &val[val.len()-1..] == "e" {
 							// If the current number ends in an `e`,
 							// this negative specifies a negative exponent

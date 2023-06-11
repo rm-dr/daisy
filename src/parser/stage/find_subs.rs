@@ -1,10 +1,12 @@
 use std::collections::VecDeque;
 
-use crate::parser::PreToken;
-use crate::parser::LineLocation;
+use super::super::{
+	PreToken,
+	LineLocation
+};
 
 
-pub(in crate::parser) fn find_subs(
+pub fn find_subs(
 	mut g: VecDeque<PreToken>,
 ) -> (
 	Vec<(LineLocation, String)>,
