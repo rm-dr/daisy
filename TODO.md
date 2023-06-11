@@ -1,4 +1,7 @@
-- Fix units
+ - Prettyprint mi/h, mi/g
+ - Better constant definitions
+ - No times when number * unit
+ - Fix unit conversion (km/s * mile)
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
@@ -10,7 +13,6 @@
  - Plural unit names
  - Releases
  - Unit substitutions
- - mpg and gal replacement (10 mpg * 3 gal)
 
 ## General
  - Compile to WASM, publish a webapp
