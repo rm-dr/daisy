@@ -1,6 +1,5 @@
  - Prettyprint mi/h, mi/g
  - Better constant definitions
- - No times when number * unit
  - Fix unit conversion (km/s * mile)
 
 ## Pre-release

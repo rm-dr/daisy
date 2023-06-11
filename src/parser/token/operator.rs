@@ -264,7 +264,7 @@ impl Operator {
 				let a = &args[0];
 
 				let b; let sub;
-				if let Token::Operator(o,ar) = &args[1] {
+				if let Token::Operator(o, ar) = &args[1] {
 					if let Operator::Negative = o {
 						sub = true;
 						b = &ar[0];
@@ -290,15 +290,35 @@ impl Operator {
 				let a = &args[0];
 
 				let b; let div;
-				if let Token::Operator(o,ar) = &args[1] {
+				if let Token::Operator(o, ar) = &args[1] {
 					if let Operator::Flip = o {
 						div = true;
 						b = &ar[0];
 					} else { div = false; b = &args[1]; }
 				} else { div = false; b = &args[1]; }
 
+				// Division symbol case
 				if div {
 					return format!("{} ÷ {}",
+						self.add_parens_to_arg_strict(a),
+						self.add_parens_to_arg_strict(b)
+					);
+				}
+
+
+				// Omit times sign when we have a number
+				// multiplied by a unit (like 10 m)
+				// Times sign should stay in all other cases.
+				let no_times = {
+					if let Token::Quantity(p) = a {
+						if let Token::Quantity(q) = b {
+							p.unitless() && !q.unitless()
+						} else {false}
+					} else {false}
+				};
+
+				if no_times {
+					return format!("{} {}",
 						self.add_parens_to_arg_strict(a),
 						self.add_parens_to_arg_strict(b)
 					);
