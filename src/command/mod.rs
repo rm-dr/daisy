@@ -90,7 +90,7 @@ pub fn do_command(
 				stdout,
 				"{}{}",
 				clear::All,
-				cursor::Goto(0, 0)
+				cursor::Goto(1, 1)
 			)?;
 		},
 
