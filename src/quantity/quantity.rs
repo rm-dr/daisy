@@ -99,7 +99,7 @@ impl Quantity {
 		let fa = self.unit.to_base_factor();
 		let fb = other.unit.to_base_factor();
 
-		return Some(self * fa / fb)
+		return Some(self.mul_no_convert(fa).div_no_convert(fb))
 	}
 }
 
@@ -271,10 +271,16 @@ impl Mul for Quantity {
 
 	fn mul(self, other: Self) -> Self::Output {
 
+
 		let mut o = other;
 		if self.unit != o.unit {
-			if self.unit.compatible_with(&o.unit) {
+			if o.unit.compatible_with(&self.unit) {
 				o = o.convert_to(self.clone()).unwrap()
+			} else {
+				let cf = self.unit.common_factor(&o.unit);
+				if let Some(f) = cf {
+					o = o.convert_to(f).unwrap();
+				}
 			}
 		}
 
@@ -288,10 +294,16 @@ impl Mul for Quantity {
 impl MulAssign for Quantity where {
 	fn mul_assign(&mut self, other: Self) {
 
+
 		let mut o = other;
 		if self.unit != o.unit {
 			if o.unit.compatible_with(&self.unit) {
 				o = o.convert_to(self.clone()).unwrap()
+			} else {
+				let cf = self.unit.common_factor(&o.unit);
+				if let Some(f) = cf {
+					o = o.convert_to(f).unwrap();
+				}
 			}
 		}
 
@@ -307,8 +319,13 @@ impl Div for Quantity {
 
 		let mut o = other;
 		if self.unit != o.unit {
-			if self.unit.compatible_with(&o.unit) {
+			if o.unit.compatible_with(&self.unit) {
 				o = o.convert_to(self.clone()).unwrap()
+			} else {
+				let cf = self.unit.common_factor(&o.unit);
+				if let Some(f) = cf {
+					o = o.convert_to(f).unwrap();
+				}
 			}
 		}
 
@@ -324,8 +341,13 @@ impl DivAssign for Quantity where {
 
 		let mut o = other;
 		if self.unit != o.unit {
-			if self.unit.compatible_with(&o.unit) {
+			if o.unit.compatible_with(&self.unit) {
 				o = o.convert_to(self.clone()).unwrap()
+			} else {
+				let cf = self.unit.common_factor(&o.unit);
+				if let Some(f) = cf {
+					o = o.convert_to(f).unwrap();
+				}
 			}
 		}
 

@@ -8,14 +8,33 @@ use super::Unit;
 use super::unit_db;
 
 
-#[derive(Hash)]
 #[derive(Debug)]
+#[derive(Hash)]
 #[derive(Copy, Clone)]
 #[derive(PartialEq, Eq)]
 pub struct FreeUnit {
 	pub (in super) base: UnitBase,
 	pub (in super) prefix: Prefix
 }
+
+
+macro_rules! unpack_string {
+	(
+		$u:expr, $s:expr,
+		$( $_:expr ),*
+	) => { $s };
+}
+
+impl ToString for FreeUnit {
+	fn to_string(&self) -> String {
+
+		let s = unit_db!(self.base, unpack_string);
+		let p = self.prefix.to_string();
+
+		format!("{p}{s}")
+	}
+}
+
 
 
 macro_rules! unpack_base_factor {
@@ -90,6 +109,8 @@ impl FreeUnit {
 	pub fn set_prefix(&mut self, prefix: Prefix) { self.prefix = prefix; }
 	pub fn get_prefix(&self) -> Prefix { self.prefix }
 
+	/// Returns a quantity q, so that self * q
+	/// gives a quantity in base units.
 	pub fn to_base_factor(&self) -> Quantity {
 
 		let q = unit_db!(self.base, unpack_base_factor);
@@ -102,23 +123,17 @@ impl FreeUnit {
 
 		return q;
 	}
-}
 
+	// Get this unit in terms of base units
+	pub fn get_base(&self) -> Quantity {
+		let q = unit_db!(self.base, unpack_base_factor);
+		let mut q = q.unwrap_or(Quantity::new_rational_from_string("1").unwrap());
 
+		// Don't divide by self
+		q.insert_unit(FreeUnit::from_base(self.base), Scalar::new_rational(1f64).unwrap());
 
-macro_rules! unpack_string {
-	(
-		$u:expr, $s:expr,
-		$( $_:expr ),*
-	) => { $s };
-}
-
-impl ToString for FreeUnit {
-	fn to_string(&self) -> String {
-
-		let s = unit_db!(self.base, unpack_string);
-		let p = self.prefix.to_string();
-
-		format!("{p}{s}")
+		return q;
 	}
 }
+
+

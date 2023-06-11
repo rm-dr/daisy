@@ -208,4 +208,5 @@ fn complex_units() {
 	good_expr("3280.8 ft", "1km to ft");
 	good_expr("62.137 mi/h", "100 km/h to mph");
 	good_expr("20 mi", "10 mph * 2 hours");
+	good_expr("120 m", "1 (m/s) * 2 min");
 }
