@@ -30,88 +30,93 @@ fn do_expression(
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout)?;
 
-	match g {
-		Ok(g) => {
-			#[cfg(debug_assertions)]
-			RawTerminal::suspend_raw_mode(&stdout)?;
-			let out_str = g.to_string();
-			let g = g.evaluate();
-			#[cfg(debug_assertions)]
-			RawTerminal::activate_raw_mode(&stdout)?;
+	// Check for parse errors
+	if let Err((l, e)) = g {
+		write!(
+			stdout, "{}{}{} {}{}\r\n",
+			color::Fg(color::Red),
+			" ".repeat(l.pos + 4),
+			"^".repeat(l.len),
+			e.to_message(),
+			color::Fg(color::Reset),
+		)?;
+		return Ok(());
+	}
 
-			write!(
-				stdout, " {}{}=>{}{} {}\r\n",
-				style::Bold, color::Fg(color::Magenta),
-				style::Reset, color::Fg(color::Reset),
-				out_str
-			)?;
+	let Ok(g) = g else {panic!()};
 
-			match g {
-				Ok(q) => {
-					write!(
-						stdout, "\n  {}{}={} {}{}\r\n\n",
-						style::Bold,
-						color::Fg(color::Green),
-						style::Reset,
-						q.to_string_outer(),
-						color::Fg(color::Reset)
-					)?;
-				},
 
-				Err(EvalError::TooBig) => {
-					write!(
-						stdout, "\n  {}{}Mathematical Error: {}Number too big{}\r\n\n",
-						style::Bold,
-						color::Fg(color::Red),
-						style::Reset,
-						color::Fg(color::Reset),
-					)?;
-				},
+	// Display parsed string
+	write!(
+		stdout, " {}{}=>{}{} {}\r\n",
+		style::Bold, color::Fg(color::Magenta),
+		style::Reset, color::Fg(color::Reset),
+		g.to_string()
+	)?;
 
-				Err(EvalError::ZeroDivision) => {
-					write!(
-						stdout, "\n  {}{}Mathematical Error: {}Division by zero{}\r\n\n",
-						style::Bold,
-						color::Fg(color::Red),
-						style::Reset,
-						color::Fg(color::Reset),
-					)?;
-				},
+	// Evaluate expression
+	#[cfg(debug_assertions)]
+	RawTerminal::suspend_raw_mode(&stdout)?;
+	let g = g.evaluate();
+	#[cfg(debug_assertions)]
+	RawTerminal::activate_raw_mode(&stdout)?;
 
-				Err(EvalError::BadMath) => {
-					write!(
-						stdout, "\n  {}{}Mathematical Error: {}Failed to evaluate expression{}\r\n\n",
-						style::Bold,
-						color::Fg(color::Red),
-						style::Reset,
-						color::Fg(color::Reset),
-					)?;
-				},
+	// Show output
+	if let Ok(q) = g {
+		write!(
+			stdout, "\n  {}{}={} {}{}\r\n\n",
+			style::Bold,
+			color::Fg(color::Green),
+			style::Reset,
+			q.to_string_outer(),
+			color::Fg(color::Reset)
+		)?;
+	} else {
+		match g {
+			Ok(_) => panic!(),
 
-				Err(EvalError::IncompatibleUnit) => {
-					write!(
-						stdout, "\n  {}{}Evaluation Error: {}Incompatible units{}\r\n\n",
-						style::Bold,
-						color::Fg(color::Red),
-						style::Reset,
-						color::Fg(color::Reset),
-					)?;
-				}
+			Err(EvalError::TooBig) => {
+				write!(
+					stdout, "\n  {}{}Mathematical Error: {}Number too big{}\r\n\n",
+					style::Bold,
+					color::Fg(color::Red),
+					style::Reset,
+					color::Fg(color::Reset),
+				)?;
+			},
+
+			Err(EvalError::ZeroDivision) => {
+				write!(
+					stdout, "\n  {}{}Mathematical Error: {}Division by zero{}\r\n\n",
+					style::Bold,
+					color::Fg(color::Red),
+					style::Reset,
+					color::Fg(color::Reset),
+				)?;
+			},
+
+			Err(EvalError::BadMath) => {
+				write!(
+					stdout, "\n  {}{}Mathematical Error: {}Failed to evaluate expression{}\r\n\n",
+					style::Bold,
+					color::Fg(color::Red),
+					style::Reset,
+					color::Fg(color::Reset),
+				)?;
+			},
+
+			Err(EvalError::IncompatibleUnit) => {
+				write!(
+					stdout, "\n  {}{}Evaluation Error: {}Incompatible units{}\r\n\n",
+					style::Bold,
+					color::Fg(color::Red),
+					style::Reset,
+					color::Fg(color::Reset),
+				)?;
 			}
-		},
-
-		// Show parse error
-		Err((l, e)) => {
-			write!(
-				stdout, "{}{}{} {}{}\r\n",
-				color::Fg(color::Red),
-				" ".repeat(l.pos + 4),
-				"^".repeat(l.len),
-				e.to_message(),
-				color::Fg(color::Reset),
-			)?;
 		}
-	};
+	}
+
 
 	return Ok(());
 }
