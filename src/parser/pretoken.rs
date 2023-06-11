@@ -78,6 +78,8 @@ impl PreToken {
 					"π"|"pi" => { Some(Constant::Pi)},
 					"e" => { Some(Constant::E) },
 					"phi"|"φ" => { Some(Constant::Phi) },
+					"mpg" => { Some(Constant::MPG) },
+					"mph" => { Some(Constant::MPH) },
 					_ => { None }
 				};
 

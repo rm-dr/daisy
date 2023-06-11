@@ -39,8 +39,6 @@ pub enum UnitBase {
 	// Area
 	Barn,
 	Hectare,
-	MilesPerHour,
-	MilesPerGallon,
 	Acre,
 
 
@@ -190,8 +188,6 @@ macro_rules! fromstring_db {
 			(UnitBase::JulianYear, "julianYears"),
 
 			// Misc
-			(UnitBase::MilesPerHour, "mph"),
-			(UnitBase::MilesPerGallon, "mpg"),
 			(UnitBase::Barn, "b"),
 			(UnitBase::Barn, "barn"),
 			(UnitBase::Hectare, "ha"),
@@ -346,7 +342,7 @@ macro_rules! unit_db {
 			),
 
 			UnitBase::Hour => $X!(
-				UnitBase::Hour, "hour",
+				UnitBase::Hour, "h",
 				rational, "3600",
 				(UnitBase::Second, 1f64)
 			),
@@ -455,21 +451,6 @@ macro_rules! unit_db {
 				UnitBase::Parsec, "pc",
 				float, "3.085677581e16",
 				(UnitBase::Meter, 1f64)
-			),
-
-
-			// Misc
-			UnitBase::MilesPerHour => $X!(
-				UnitBase::MilesPerHour, "mph",
-				float, "0.44704",
-				(UnitBase::Meter, 1f64),
-				(UnitBase::Second, -1f64)
-			),
-
-			UnitBase::MilesPerGallon => $X!(
-				UnitBase::MilesPerGallon, "mpg",
-				float, "425144",
-				(UnitBase::Meter, -2f64)
 			),
 
 			UnitBase::Barn => $X!(

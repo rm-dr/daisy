@@ -1,6 +1,7 @@
 use crate::parser::Token;
 use crate::parser::Constant;
 use crate::quantity::Quantity;
+use crate::quantity::Unit;
 
 use super::EvalError;
 
@@ -19,5 +20,27 @@ pub fn eval_constant(c: &Constant) -> Result<Token, EvalError> {
 		Constant::Phi => { Token::Quantity(Quantity::new_float_from_string(
 			"1.618033988749894848204586834365638117720309179805762862135448622705260462818902449707207204189391137"
 		).unwrap()) },
+
+		Constant::MPG => {
+			let mut q = Quantity::new_float_from_string("1").unwrap();
+			q.set_unit(
+				(
+					Unit::from_string("mile").unwrap() /
+					Unit::from_string("gallon").unwrap()
+				).unit
+			);
+			Token::Quantity(q)
+		},
+
+		Constant::MPH => {
+			let mut q = Quantity::new_float_from_string("1").unwrap();
+			q.set_unit(
+				(
+					Unit::from_string("mile").unwrap() /
+					Unit::from_string("hour").unwrap()
+				).unit
+			);
+			Token::Quantity(q)
+		},
 	})
 }

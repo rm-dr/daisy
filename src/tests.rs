@@ -206,5 +206,6 @@ fn basic_units() {
 fn complex_units() {
 	good_expr("0.62137 mi", "1km to mi");
 	good_expr("3280.8 ft", "1km to ft");
-	good_expr("62.137 mph", "100 km/h to mph");
+	good_expr("62.137 mi/h", "100 km/h to mph");
+	good_expr("20 mi", "10 mph * 2 hours");
 }
