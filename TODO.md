@@ -1,5 +1,3 @@
-- Cleanup eval
-- Better constant parsing
 - Fix units
 
 ## Pre-release
@@ -7,6 +5,7 @@
  - Documentation (usage)
  - Documentation (comments)
  - More units, better printing
+ - Cleanup tests, test commands
  - Unit tests
  - Plural unit names
  - Releases
