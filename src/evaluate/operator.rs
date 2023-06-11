@@ -4,11 +4,15 @@ use crate::quantity::Quantity;
 use crate::parser::Operator;
 use crate::parser::Token;
 use super::EvalError;
-use super::function::func_apply;
 
-
-pub fn op_apply(op: &mut Operator, args: &VecDeque<Token>) -> Result<Token, EvalError> {
+pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, EvalError> {
 	match op {
+
+		// Handled seperately in evaluate.rs
+		Operator::Function(_) |
+
+		// These are never evaluated,
+		// but are converted to one of the following instead.
 		Operator::ImplicitMultiply |
 		Operator::Sqrt |
 		Operator::Divide |
@@ -156,10 +160,6 @@ pub fn op_apply(op: &mut Operator, args: &VecDeque<Token>) -> Result<Token, Eval
 
 				return Ok(Token::Quantity(prod));
 			} else { panic!(); }
-		},
-
-		Operator::Function(f) => {
-			return func_apply(f, args);
 		}
 	};
 }

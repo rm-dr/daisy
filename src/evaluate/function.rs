@@ -4,18 +4,9 @@ use crate::parser::Token;
 use crate::parser::Function;
 use crate::parser::Operator;
 use super::EvalError;
-use super::operator::op_apply;
-use crate::quantity::Quantity;
 
-fn eval(t: Token) -> Result<Token, EvalError> {
-	Ok(match t {
-		Token::Quantity(_) => { t },
-		Token::Constant(_) => { Token::Quantity( Quantity::new_rational_from_string("1").unwrap() ) },
-		Token::Operator(mut o, v) => { op_apply(&mut o, &v)? }
-	})
-}
 
-pub fn func_apply(f: &Function, args: &VecDeque<Token>) -> Result<Token, EvalError> {
+pub fn eval_function(f: &Function, args: &VecDeque<Token>) -> Result<Token, EvalError> {
 	if args.len() != 1 {panic!()};
 	let a = &args[0];
 	let Token::Quantity(q) = a else {panic!()};
@@ -42,26 +33,26 @@ pub fn func_apply(f: &Function, args: &VecDeque<Token>) -> Result<Token, EvalErr
 
 		Function::Csc => {
 			return Ok(
-				eval(Token::Operator(
+				Token::Operator(
 					Operator::Flip,
 					VecDeque::from(vec!(Token::Quantity(q.sin())))
-				))?
+				)
 			);
 		},
 		Function::Sec => {
 			return Ok(
-				eval(Token::Operator(
+				Token::Operator(
 					Operator::Flip,
 					VecDeque::from(vec!(Token::Quantity(q.cos())))
-				))?
+				)
 			);
 		},
 		Function::Cot => {
 			return Ok(
-				eval(Token::Operator(
+				Token::Operator(
 					Operator::Flip,
 					VecDeque::from(vec!(Token::Quantity(q.tan())))
-				))?
+				)
 			);
 		},
 
@@ -75,26 +66,26 @@ pub fn func_apply(f: &Function, args: &VecDeque<Token>) -> Result<Token, EvalErr
 
 		Function::Csch => {
 			return Ok(
-				eval(Token::Operator(
+				Token::Operator(
 					Operator::Flip,
 					VecDeque::from(vec!(Token::Quantity(q.sinh())))
-				))?
+				)
 			);
 		},
 		Function::Sech => {
 			return Ok(
-				eval(Token::Operator(
+				Token::Operator(
 					Operator::Flip,
 					VecDeque::from(vec!(Token::Quantity(q.cosh())))
-				))?
+				)
 			);
 		},
 		Function::Coth => {
 			return Ok(
-				eval(Token::Operator(
+				Token::Operator(
 					Operator::Flip,
 					VecDeque::from(vec!(Token::Quantity(q.tanh())))
-				))?
+				)
 			);
 		},
 

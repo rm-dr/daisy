@@ -1,9 +1,11 @@
 use crate::parser::Token;
-use crate::parser::Constant;
-use crate::quantity::Quantity;
+use crate::parser::Operator;
 
-use super::operator::op_apply;
+use super::operator::eval_operator;
+use super::constant::eval_constant;
+use super::function::eval_function;
 use super::EvalError;
+
 
 pub fn evaluate(t: &Token) -> Result<Token, EvalError> {
 	let mut g = t.clone();
@@ -21,30 +23,21 @@ pub fn evaluate(t: &Token) -> Result<Token, EvalError> {
 
 
 				let p = Token::get_at_coords(&mut g, &coords);
+				let mut e = p.clone();
 
-				let e: Token = match p {
-					Token::Quantity(_) => { p.clone() },
-					Token::Constant(c) => {
-						match c {
-							// Mathematical constants
-							// 100 digits of each.
-							Constant::Pi => { Token::Quantity(Quantity::new_float_from_string(
-								"3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067"
-							).unwrap())},
+				// Evaluate until we get a single number.
+				// This loop is necessary because some eval_* functions
+				// May return an incomplete result.
+				// ( For example, csc(x) is treated as 1/sin(x) )
+				loop {
+					e = match e {
+						Token::Quantity(_) => { break; },
+						Token::Constant(c) => { eval_constant(&c)? }
+						Token::Operator(Operator::Function(f), v) => { eval_function(&f, &v)? }
+						Token::Operator(o, v) => { eval_operator(&o, &v)? }
+					};
+				}
 
-							Constant::E => { Token::Quantity(Quantity::new_float_from_string(
-								"2.718281828459045235360287471352662497757247093699959574966967627724076630353547594571382178525166427"
-							).unwrap()) },
-
-							Constant::Phi => { Token::Quantity(Quantity::new_float_from_string(
-								"1.618033988749894848204586834365638117720309179805762862135448622705260462818902449707207204189391137"
-							).unwrap()) },
-						}
-					},
-					Token::Operator(o,v) => { op_apply(o, &v)? }
-				};
-
-				//let e = p.eval()?;
 				*p = e;
 
 				if coords.len() == 0 { break 'outer; }
