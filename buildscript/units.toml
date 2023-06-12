@@ -1,0 +1,530 @@
+[[unit]]
+enum_name = "Second"
+print = "s"
+
+parse_with_prefix = "s"
+parse = ["sec", "second", "seconds"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Gram"
+print = "g"
+
+parse_with_prefix = "g"
+parse = ["gram", "grams", "gramme", "grammes"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Meter"
+print = "m"
+
+parse_with_prefix = "m"
+parse = ["meter", "meters"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Ampere"
+print = "A"
+
+parse_with_prefix = "A"
+parse = ["ampere", "amperes"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Kelvin"
+print = "K"
+
+parse_with_prefix = "K"
+parse = ["kelvin"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Mole"
+print = "mol"
+
+parse_with_prefix = "mol"
+parse = ["mole"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Candela"
+print = "cd"
+
+parse_with_prefix = "cd"
+parse = ["candela"]
+base = true
+
+
+
+# Time Units
+
+
+
+[[unit]]
+enum_name = "Minute"
+print = "min"
+parse = ["min", "minute", "minutes"]
+
+# fract, exact, or approx
+base_value_type = "exact"
+base_value = "60"
+base_units = [ { u = "Second", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Hour"
+print = "h"
+parse = ["h", "hour", "hours"]
+
+base_value_type = "exact"
+base_value = "3600"
+base_units = [ { u = "Second", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Day"
+print = "d"
+parse = ["d", "day", "days"]
+
+base_value_type = "exact"
+base_value = "86400"
+base_units = [ { u = "Second", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Week"
+print = "w"
+parse = ["w", "week", "weeks"]
+
+base_value_type = "exact"
+base_value = "604800"
+base_units = [ { u = "Second", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Month"
+print = "month"
+parse = ["month", "months"]
+
+base_value_type = "exact"
+base_value = "2629746"
+base_units = [ { u = "Second", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Fortnight"
+print = "fortnight"
+parse = ["fortnight", "fortnights"]
+
+base_value_type = "exact"
+base_value = "1209600"
+base_units = [ { u = "Second", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "GregorianYear"
+print = "year"
+parse = ["year", "years"]
+
+base_value_type = "exact"
+base_value = "31557000"
+base_units = [ { u = "Second", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "JulianYear"
+print = "julianYear"
+parse = ["julianYear", "julianYears"]
+
+base_value_type = "exact"
+base_value = "31557600"
+base_units = [ { u = "Second", p = 1} ]
+
+
+
+
+# Length Units
+
+
+[[unit]]
+enum_name = "Angstrom"
+print = "Å"
+parse = ["Å", "angstrom"]
+
+base_value_type = "exact"
+base_value = "1e-10"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Thou"
+print = "thou"
+parse = ["thou"]
+
+base_value_type = "exact"
+base_value = "0.0000254"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Point"
+print = "pt"
+parse = ["pt", "point"]
+
+base_value_type = "exact"
+base_value = "0.0003514598"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Inch"
+print = "in"
+parse = ["in", "inch", "inches"]
+
+base_value_type = "exact"
+base_value = "0.0254"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Foot"
+print = "ft"
+parse = ["ft", "foot", "feet"]
+
+base_value_type = "exact"
+base_value = "0.3048"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Yard"
+print = "yd"
+parse = ["yd", "yard", "yards"]
+
+base_value_type = "exact"
+base_value = "0.9144"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Furlong"
+print = "furlong"
+parse = ["furlong", "furlongs"]
+
+base_value_type = "exact"
+base_value = "201.17"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Mile"
+print = "mi"
+parse = ["mi", "mile", "miles"]
+
+base_value_type = "exact"
+base_value = "1609.344"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "AstronomicalUnit"
+print = "au"
+parse = ["au", "AU", "astronomicalUnit", "astronomicalUnits"]
+
+base_value_type = "exact"
+base_value = "149597870700"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Lightyear"
+print = "ly"
+parse = ["ly", "lightyear", "lightyears"]
+
+base_value_type = "exact"
+base_value = "9460730472580800"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Parsec"
+print = "pc"
+parse = ["pc", "parsec", "parsecs"]
+
+base_value_type = "exact"
+base_value = "3.085677581e16"
+base_units = [ { u = "Meter", p = 1} ]
+
+
+
+# Area units
+
+
+[[unit]]
+enum_name = "Barn"
+print = "b"
+parse = ["b", "barn"]
+
+base_value_type = "exact"
+base_value = "1e-28"
+base_units = [ { u = "Meter", p = 2} ]
+
+
+
+[[unit]]
+enum_name = "Hectare"
+print = "ha"
+parse = ["hectare", "hectares"]
+
+base_value_type = "exact"
+base_value = "10000"
+base_units = [ { u = "Meter", p = 2} ]
+
+
+
+[[unit]]
+enum_name = "Acre"
+print = "acre"
+parse = ["acres"]
+
+base_value_type = "exact"
+base_value = "4046.8564224"
+base_units = [ { u = "Meter", p = 2} ]
+
+
+
+# Volume units
+
+
+[[unit]]
+enum_name = "Liter"
+print = "l"
+parse_with_prefix = ["l", "L"]
+parse = ["liter", "liters", "litre", "litres"]
+
+base_value_type = "exact"
+base_value = "0.001"
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "USGallon"
+print = "gal"
+parse = ["gal", "usgal", "gallon", "gallons"]
+
+base_value_type = "exact"
+base_value = "0.003785411784"
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "Quart"
+print = "qt"
+parse = ["quart", "quarts"]
+
+base_value_type = "exact"
+base_value = "0.000946352946"
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "ImperialGallon"
+print = "impgal"
+parse = ["imperialGallon", "imperialGallons"]
+
+base_value_type = "exact"
+base_value = "0.00454609"
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "Hogshead"
+print = "hogshead"
+parse = ["hogshead", "hogsheads"]
+
+base_value_type = "exact"
+base_value = "0.2385" # 63 gallons
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "Cup"
+print = "cup"
+parse = ["cup"]
+
+base_value_type = "exact"
+base_value = "0.0002365882365"
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "Floz"
+print = "floz"
+parse = ["floz"]
+
+base_value_type = "exact"
+base_value = "0.0000295735295625"
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "Pint"
+print = "pint"
+parse = ["pint", "pints"]
+
+base_value_type = "exact"
+base_value = "0.00056826125"
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "Tablespoon"
+print = "tbsp"
+parse = ["tbsp", "Tbsp", "tablespoon", "Tablespoon"]
+
+base_value_type = "exact"
+base_value = "0.00001478676478125"
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "Teaspoon"
+print = "tsp"
+parse = ["tsp", "Tsp", "teaspoon", "teaspoons"]
+
+base_value_type = "exact"
+base_value = "0.000005"
+base_units = [ { u = "Meter", p = 3} ]
+
+
+
+# Pressure units
+
+
+[[unit]]
+enum_name = "Pascal"
+print = "Pa"
+parse_with_prefix = "Pa"
+parse = ["pascal"]
+
+base_value_type = "exact"
+base_value = "1000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]
+
+
+[[unit]]
+enum_name = "Atmosphere"
+print = "atm"
+parse = ["atm", "atmosphere", "atmospheres"]
+
+base_value_type = "exact"
+base_value = "101325000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]
+
+
+[[unit]]
+enum_name = "Bar"
+print = "bar"
+parse_with_prefix = "bar"
+
+base_value_type = "exact"
+base_value = "100000000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]
+
+
+[[unit]]
+enum_name = "Barye"
+print = "Ba"
+parse = ["Ba", "Barye"]
+
+base_value_type = "exact"
+base_value = "100"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]
+
+
+[[unit]]
+enum_name = "Psi"
+print = "psi"
+parse = ["psi"]
+
+base_value_type = "exact"
+base_value = "6894757.2931783"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]
+
+
+[[unit]]
+enum_name = "MillimeterMercury"
+print = "mmHg"
+parse = ["mmhg", "mmHg"]
+
+base_value_type = "exact"
+base_value = "133322.387415"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]
+
+
+[[unit]]
+enum_name = "Torr"
+print = "torr"
+parse = ["torr", "Torr"]
+
+base_value_type = "fract"
+base_value = [101325000, 760]
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]
+
+
+[[unit]]
+enum_name = "MeterSeaWater"
+print = "MSW"
+parse = ["MSW", "msw"]
+
+base_value_type = "exact"
+base_value = "10000000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]
+
+
+[[unit]]
+enum_name = "FootSeaWater"
+print = "FSW"
+parse = ["FSW", "fsw"]
+
+base_value_type = "exact"
+base_value = "3064330"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]

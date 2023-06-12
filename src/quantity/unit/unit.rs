@@ -7,10 +7,7 @@ use std::ops::{
 use crate::quantity::Scalar;
 use crate::quantity::Quantity;
 use super::FreeUnit;
-use super::WholeUnit;
-use super::Prefix;
-use super::fromstring_db;
-use super::str_to_prefix;
+use super::freeunit_from_string;
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -187,40 +184,8 @@ impl Unit {
 
 impl Unit {
 	pub fn from_string(s: &str) -> Option<Quantity> {
-		macro_rules! unpack_fromstring {
-			(
-				$(
-					(
-						$unit:expr,
-						$string:literal
-						$(, (
-							$( $prefix:tt ),*
-						))?
-					)
-				),*
-			) => {
-				// Build match statement for each unit and prefix
-				match s {
-					$(
-						// No prefix--every unit has this
-						$string => Some(FreeUnit::from_whole($unit)),
 
-						// Arms for prefixes
-						$($(
-							concat!(
-								$prefix,
-								$string
-							) => Some(FreeUnit::from_whole_prefix($unit, str_to_prefix!($prefix))),
-						)*)*
-					)*
-					_ => None
-				}
-			};
-		}
-
-		// Big match statement
-		let b = fromstring_db!(unpack_fromstring);
-
+		let b = freeunit_from_string(s);
 		if b.is_none() { return None; }
 		let b = Unit::from_free(b.unwrap());
 		let mut q = Quantity::new_rational(1f64).unwrap();

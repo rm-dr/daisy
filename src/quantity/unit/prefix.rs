@@ -1,7 +1,6 @@
 use crate::quantity::Quantity;
 
 
-
 #[derive(Hash)]
 #[derive(Debug)]
 #[derive(Copy, Clone)]
@@ -73,37 +72,6 @@ impl Prefix {
 
 	}
 }
-
-
-
-macro_rules! str_to_prefix {
-	("") => {Prefix::None};
-	("Q") => {Prefix::Quetta};
-	("R") => {Prefix::Ronna};
-	("Y") => {Prefix::Yotta};
-	("Z") => {Prefix::Zetta};
-	("E") => {Prefix::Exa};
-	("P") => {Prefix::Peta};
-	("T") => {Prefix::Tera};
-	("G") => {Prefix::Giga};
-	("M") => {Prefix::Mega};
-	("k") => {Prefix::Kilo};
-	("h") => {Prefix::Hecto};
-	("da") => {Prefix::Deka};
-	("d") => {Prefix::Deci};
-	("c") => {Prefix::Centi};
-	("m") => {Prefix::Milli};
-	("u") => {Prefix::Micro};
-	("n") => {Prefix::Nano};
-	("p") => {Prefix::Pico};
-	("f") => {Prefix::Femto};
-	("a") => {Prefix::Atto};
-	("z") => {Prefix::Zepto};
-	("y") => {Prefix::Yocto};
-	("r") => {Prefix::Ronto};
-	("q") => {Prefix::Quecto};
-}
-pub (super) use str_to_prefix;
 
 
 impl ToString for Prefix {
