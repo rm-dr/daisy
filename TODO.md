@@ -1,12 +1,13 @@
  - Prettyprint mi/h, mi/g
- - Minimize parenthesis
+ - Minimize parenthesis when printing expressions
  - Sane autoconversion (mi + km)
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
  - Documentation (usage)
  - Documentation (comments)
- - More units (build.rs for constants and units)
+ - More units (Multiple files?)
+ - Build.rs for constants
  - Print with highlighting
  - Cleanup tests, test commands
  - Unit tests
@@ -49,7 +50,7 @@
  - strip_unit function
  - Unit info command
  - Constant info command
-
+ - Convert to base unit
 
 ## Prompt
  - Live syntax/output (like firefox js terminal)
