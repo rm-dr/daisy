@@ -1,3 +1,38 @@
+# This file defines all units daisy knows about.
+# Each unit is an entry in the `unit` array.
+#
+#
+# Basic properties:
+#	enum_name: unique capitalized string. The name of this unit's enum element.
+#	print: string. What this unit will print as. This string will NOT be parsed into this unit.
+#	base: if true, this is a base unit. Optional, false if omitted.
+#	no_space: if true, don't put a space between this unit and its number. Optional, false if omitted.
+#
+#
+# Base units (only apply if base = false):
+#	base_value_type: one of "exact", "approx", "fract"
+#	base_value: Depends on value type.
+#		if exact or approx: string representing a number
+#		if fract: two-element array that looks like [1, 7].
+#			both entries must be integers. The above array is interpreted as 1/7.
+#
+#	"exact" implies that this is an exact decimal conversion factor
+#	"approx" implies that this is an approximate decimal conversion factor
+#	"fract" implies that this is an exact fractional conversion factor.
+#
+#
+#	base_units: Array of tables, looks like {u = "Second", p = 1}
+#		u = base unit enum name
+#		p = base unit power
+#		Any unit included here MUST have `base = true`. THIS IS NOT CHECKED, THINGS WILL BREAK!
+#
+#
+# Parsing:
+#	parse: array of strings. These strings will be parsed into this unit.
+#	parse_with_prefix: string or string array. Prefixes will be generated for this string, including the null prefix.
+#		Strings in `parse_with_prefix` MUST NOT be in `parse`.
+
+
 [[unit]]
 enum_name = "Second"
 print = "s"
@@ -77,7 +112,6 @@ enum_name = "Minute"
 print = "min"
 parse = ["min", "minute", "minutes"]
 
-# fract, exact, or approx
 base_value_type = "exact"
 base_value = "60"
 base_units = [ { u = "Second", p = 1} ]
@@ -796,6 +830,36 @@ base_units = [ { u = "Mole", p = 1}, { u = "Second", p = -1} ]
 
 
 
+[[unit]]
+enum_name = "Degree"
+print = "°"
+parse = ["°", "deg", "degree", "degrees"]
+base = true
+no_space = true
+
+
+
+[[unit]]
+enum_name = "Radian"
+print = "r"
+parse = ["r", "radian", "radians"]
+
+base_value_type = "approx"
+base_value = "57.295779513"
+base_units = [ { u = "Degree", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "RPM"
+print = "rpm"
+parse = ["rpm"]
+
+base_value_type = "exact"
+base_value = "360"
+base_units = [ { u = "Degree", p = 1}, { u = "Second", p = -1} ]
+
+
 
 # Radioactivity
 
@@ -810,6 +874,7 @@ base_value = "1"
 base_units = [ { u = "Second", p = -1} ]
 
 
+
 [[unit]]
 enum_name = "Gray"
 print = "Gy"
@@ -821,6 +886,7 @@ base_value = "1"
 base_units = [ { u = "Meter", p = 2}, { u = "Second", p = -2} ]
 
 
+
 [[unit]] # Not radian, radioactivity unit
 enum_name = "Rad"
 print = "rad"
@@ -829,3 +895,51 @@ parse_with_prefix = "rad"
 base_value_type = "exact"
 base_value = "0.01"
 base_units = [ { u = "Meter", p = 2}, { u = "Second", p = -2} ]
+
+
+
+
+# Computing, Information
+
+
+[[unit]]
+enum_name = "Bit"
+print = "bit"
+parse = ["bit", "bits"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Frame"
+print = "frame"
+parse = ["frame", "frames"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Pixel"
+print = "px"
+parse = ["px", "pixel", "pixels", "Pixel", "Pixels"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Dot"
+print = "dot"
+parse = ["dot", "dots"]
+base = true
+
+
+
+[[unit]]
+enum_name = "Byte"
+print = "B"
+parse = ["Bytes", "bytes", "Byte", "byte", "Octet", "Octets", "octets", "octet"]
+parse_with_prefix = "B"
+
+base_value_type = "exact"
+base_value = "8"
+base_units = [ { u = "Bit", p = 1} ]
