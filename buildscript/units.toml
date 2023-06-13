@@ -241,6 +241,16 @@ base_value = "201.17"
 base_units = [ { u = "Meter", p = 1} ]
 
 
+[[unit]]
+enum_name = "Rod"
+print = "rod"
+parse = ["rod", "rods"]
+
+base_value_type = "exact"
+base_value = "5.0292"
+base_units = [ { u = "Meter", p = 1} ]
+
+
 
 [[unit]]
 enum_name = "Mile"
@@ -569,6 +579,29 @@ base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p =
 
 
 [[unit]]
+enum_name = "Calorie"
+print = "cal"
+parse = ["calorie", "calories"]
+parse_with_prefix = "cal"
+
+base_value_type = "exact"
+base_value = "4184"
+base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p = 2} ]
+
+
+
+[[unit]]
+enum_name = "BTU"
+print = "BTU"
+parse = ["btu", "BTU"]
+
+base_value_type = "exact"
+base_value = "1055100"
+base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p = 2} ]
+
+
+
+[[unit]]
 enum_name = "Hertz"
 print = "Hz"
 parse = ["hertz"]
@@ -685,3 +718,114 @@ parse_with_prefix = "Wb"
 base_value_type = "exact"
 base_value = "1000"
 base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = -2}, { u = "Ampere", p = -1} ]
+
+
+
+
+# Mass and Force
+
+
+[[unit]]
+enum_name = "Tonne"
+print = "t"
+parse = ["t", "tonne", "tonnes", "ton", "tons"]
+
+base_value_type = "exact"
+base_value = "1000000"
+base_units = [ { u = "Gram", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Ounce"
+print = "oz"
+parse = ["oz", "ounce", "ounces"]
+
+base_value_type = "exact"
+base_value = "28.349523125"
+base_units = [ { u = "Gram", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Pound"
+print = "lb"
+parse = ["lb", "lbs", "pound", "pounds"]
+
+base_value_type = "exact"
+base_value = "453.59237"
+base_units = [ { u = "Gram", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "PoundForce"
+print = "lbf"
+parse = ["lbf", "poundforce"]
+
+base_value_type = "exact"
+base_value = "4448.2216152605"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 1}, { u = "Second", p = -2} ]
+
+
+
+[[unit]]
+enum_name = "Newton"
+print = "N"
+parse = ["newton", "newtons"]
+parse_with_prefix = "N"
+
+base_value_type = "exact"
+base_value = "1000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 1}, { u = "Second", p = -2} ]
+
+
+
+
+# Misc Units
+
+[[unit]]
+enum_name = "Katal"
+print = "kat"
+parse = ["katal"]
+parse_with_prefix = "kat"
+
+base_value_type = "exact"
+base_value = "1"
+base_units = [ { u = "Mole", p = 1}, { u = "Second", p = -1} ]
+
+
+
+
+# Radioactivity
+
+[[unit]]
+enum_name = "Becquerel"
+print = "Bq"
+parse = ["becquerel"]
+parse_with_prefix = "Bq"
+
+base_value_type = "exact"
+base_value = "1"
+base_units = [ { u = "Second", p = -1} ]
+
+
+[[unit]]
+enum_name = "Gray"
+print = "Gy"
+parse = ["gray"]
+parse_with_prefix = "Gy"
+
+base_value_type = "exact"
+base_value = "1"
+base_units = [ { u = "Meter", p = 2}, { u = "Second", p = -2} ]
+
+
+[[unit]] # Not radian, radioactivity unit
+enum_name = "Rad"
+print = "rad"
+parse_with_prefix = "rad"
+
+base_value_type = "exact"
+base_value = "0.01"
+base_units = [ { u = "Meter", p = 2}, { u = "Second", p = -2} ]
