@@ -230,8 +230,8 @@ fn main() -> Result<(), ()>{
 
 	let out_dir = env::var_os("OUT_DIR").unwrap();
 	let dest_path = Path::new(&out_dir).join("units.rs");
-	println!("cargo:rerun-if-changed=build.rs");
-	println!("cargo:rerun-if-changed=units.toml");
+	println!("cargo:rerun-if-changed=buildscript/build.rs");
+	println!("cargo:rerun-if-changed=buildscript/units.toml");
 
 	let units = include_str!("units.toml").parse::<Table>().unwrap();
 	let toml::Value::Array(units) = &units["unit"] else {panic!()};
