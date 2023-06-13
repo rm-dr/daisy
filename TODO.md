@@ -1,25 +1,29 @@
- - Prettyprint mi/h, mi/g
+ - Constant definitions
+ - Reference previous results
  - Minimize parenthesis when printing expressions
  - Sane autoconversion (mi + km)
+ - "per" as division?
+ - -> as "to"
+ - strip_unit function
+
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
  - Documentation (usage)
  - Documentation (comments)
- - More units (Multiple files?)
  - Build.rs for constants
  - Print with highlighting
- - Cleanup tests, test commands
- - Unit tests
+ - Cleanup tests, test commands, test units, trig/function tests
  - Releases
- - Unit substitutions
+
 
 ## General
+ - Optional config file
+ - Optional history file
  - Compile to WASM, publish a webapp
  - CLI Options: evaluate, disable replacement, disable special characters
  - Trigonometry & function tests
  - vhs demo
-
 
 
 ## Internals
@@ -30,9 +34,6 @@
  - Backend-independent colorful printing
 
 ## Math Features
- - Config file
- - History to file
- - Reference previous results
  - Variable definitions (list and delete commands)
  - Function definitions
  - Dice
@@ -45,9 +46,6 @@
  - Binary, hex, octal numbers
  - Extra roots? (for convenience)
  - Sums and products
- - "per" as division?
- - -> as "to"
- - strip_unit function
  - Unit info command
  - Constant info command
  - Convert to base unit
@@ -58,7 +56,7 @@
  - fish-style tab completion
  - Numbered expressions, history recall
  - Better power printing
- - Color configuration?
+ - Color configuration
  - Show base units on error
 
 ## Units
