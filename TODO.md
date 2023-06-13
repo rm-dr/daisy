@@ -61,6 +61,15 @@
  - Color configuration?
  - Show base units on error
 
+## Units
+ - Abbreviations: kWh, bps, fps, dot/in, px/in, parts-per-x(ppm, ppb, ppt, ppq), percent(pct)
+ - Selective prefixes: tonne (k M G), Byte (TiB, etc), calorie (kcal)
+ - Print units with powers instead of /
+ - HMS for degrees
+ - Exact radians, using pi constant?
+ - Constant toml file (update doc in units.toml)
+ - Weird units: flops, lumen, lux, bel
+
 ## Bonus
  - Plural unit names
  - Manpage
