@@ -528,3 +528,160 @@ parse = ["FSW", "fsw"]
 base_value_type = "exact"
 base_value = "3064330"
 base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p = -2} ]
+
+
+
+# Electrical, Power, Etc
+
+[[unit]]
+enum_name = "Gauss"
+print = "G"
+parse = ["G", "gauss"]
+
+base_value_type = "exact"
+base_value = "0.1"
+base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Ampere", p = -1} ]
+
+
+
+[[unit]]
+enum_name = "Tesla"
+print = "T"
+parse = ["tesla"]
+parse_with_prefix = "T"
+
+base_value_type = "exact"
+base_value = "1000"
+base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Ampere", p = -1} ]
+
+
+
+[[unit]]
+enum_name = "Joule"
+print = "J"
+parse = ["joule", "joules"]
+parse_with_prefix = "J"
+
+base_value_type = "exact"
+base_value = "1000"
+base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p = 2} ]
+
+
+
+[[unit]]
+enum_name = "Hertz"
+print = "Hz"
+parse = ["hertz"]
+parse_with_prefix = "Hz"
+
+base_value_type = "exact"
+base_value = "1"
+base_units = [ { u = "Second", p = -1} ]
+
+
+
+[[unit]]
+enum_name = "Ohm"
+print = "Ω"
+parse = ["ohms"]
+parse_with_prefix = ["ohm", "Ω"]
+
+base_value_type = "exact"
+base_value = "1000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Ampere", p = -2}, { u = "Second", p = -3} ]
+
+
+
+[[unit]]
+enum_name = "Siemens"
+print = "S"
+parse = ["℧", "mho", "mhos", "siemens"]
+parse_with_prefix = "S"
+
+base_value_type = "exact"
+base_value = "0.001"
+base_units = [ { u = "Gram", p = -1}, { u = "Meter", p = -2}, { u = "Ampere", p = 2}, { u = "Second", p = 3} ]
+
+
+
+[[unit]]
+enum_name = "Coulomb"
+print = "C"
+parse = ["coulomb", "coulombs"]
+parse_with_prefix = "C"
+
+base_value_type = "exact"
+base_value = "0.001"
+base_units = [ { u = "Ampere", p = 1}, { u = "Second", p = 1} ]
+
+
+
+[[unit]]
+enum_name = "Watt"
+print = "W"
+parse = ["watt", "Watt", "Watts", "watts"]
+parse_with_prefix = "W"
+
+base_value_type = "exact"
+base_value = "1000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = -3} ]
+
+
+
+[[unit]]
+enum_name = "Volt"
+print = "V"
+parse = ["volt", "volts"]
+parse_with_prefix = "V"
+
+base_value_type = "exact"
+base_value = "1000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = -3}, { u = "Ampere", p = -1} ]
+
+
+
+[[unit]]
+enum_name = "Henry"
+print = "H"
+parse = ["henry", "henries", "henrys", "Henry", "Henries", "Henrys"]
+parse_with_prefix = "H"
+
+base_value_type = "exact"
+base_value = "1000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = -2}, { u = "Ampere", p = -2} ]
+
+
+
+[[unit]]
+enum_name = "Farad"
+print = "F"
+parse = ["farad", "Farad", "farads", "Farads"]
+parse_with_prefix = "F"
+
+base_value_type = "exact"
+base_value = "0.001"
+base_units = [ { u = "Gram", p = -1}, { u = "Meter", p = -2}, { u = "Second", p = 4}, { u = "Ampere", p = 2} ]
+
+
+
+[[unit]]
+enum_name = "ElectronVolt"
+print = "eV"
+parse = ["electronvolt"]
+parse_with_prefix = "eV"
+
+base_value_type = "exact"
+base_value = "1.602176634e-16"
+base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p = 2} ]
+
+
+
+[[unit]]
+enum_name = "Weber"
+print = "Wb"
+parse = ["weber"]
+parse_with_prefix = "Wb"
+
+base_value_type = "exact"
+base_value = "1000"
+base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = -2}, { u = "Ampere", p = -1} ]
