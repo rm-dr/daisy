@@ -29,7 +29,11 @@ impl ToString for Quantity {
 		let u = self.unit.to_string();
 		if self.is_one() { return u; };
 
-		return format!("{n} {u}");
+		if self.unit.no_space() {
+			return format!("{n}{u}");
+		} else {
+			return format!("{n} {u}");
+		}
 	}
 }
 
@@ -39,7 +43,11 @@ impl Quantity {
 		if self.unitless() { return n; }
 
 		let u = self.unit.to_string();
-		return format!("{n} {u}");
+		if self.unit.no_space() {
+			return format!("{n}{u}");
+		} else {
+			return format!("{n} {u}");
+		}
 	}
 
 	pub fn new_float(f: f64) -> Option<Quantity> {

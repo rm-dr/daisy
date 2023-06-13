@@ -318,10 +318,18 @@ impl Operator {
 				};
 
 				if no_times {
-					return format!("{} {}",
-						self.add_parens_to_arg_strict(a),
-						self.add_parens_to_arg_strict(b)
-					);
+					let Token::Quantity(u) = b else {panic!()};
+					if u.unit.no_space() {
+						return format!("{}{}",
+							self.add_parens_to_arg_strict(a),
+							self.add_parens_to_arg_strict(b)
+						);
+					} else {
+						return format!("{} {}",
+							self.add_parens_to_arg_strict(a),
+							self.add_parens_to_arg_strict(b)
+						);
+					}
 				} else {
 					return format!("{} × {}",
 						self.add_parens_to_arg_strict(a),

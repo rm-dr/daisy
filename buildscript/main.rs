@@ -31,6 +31,7 @@ fn write_wholeunit_main(mut file: &File, units: &Vec<Value>) {
 
 	writeln!(file, "}}\n").unwrap();
 
+	// ToString
 	writeln!(file,
 		concat!(
 			"impl ToString for WholeUnit {{\n",
@@ -47,7 +48,30 @@ fn write_wholeunit_main(mut file: &File, units: &Vec<Value>) {
 		).unwrap();
 	}
 
-	writeln!(file, "\t\t}})\n\t}}\n}}").unwrap();
+	writeln!(file, "\t\t}})\n\t}}\n}}\n").unwrap();
+
+
+	// Properties
+	writeln!(file,
+		concat!(
+			"impl WholeUnit {{\n",
+			"\tfn no_space(&self) -> bool {{\n",
+			"\t\tmatch self {{"
+		)
+	).unwrap();
+
+	for u in units {
+		if u.as_table().unwrap().contains_key("no_space") {
+			if u.as_table().unwrap()["no_space"].as_bool().unwrap() {
+				writeln!(file,
+					"\t\t\tWholeUnit::{} => true,",
+					u["enum_name"].as_str().unwrap()
+				).unwrap();
+			}
+		}
+	}
+
+	writeln!(file, "\t\t\t_ => false\n\t\t}}\n\t}}\n}}").unwrap();
 }
 
 
@@ -219,9 +243,6 @@ fn write_freeunit_from_string(mut file: &File, units: &Vec<Value>) {
 
 	writeln!(file, "\t\t_ => None\n\t}}\n}}").unwrap();
 }
-
-
-
 
 
 

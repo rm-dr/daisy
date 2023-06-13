@@ -86,6 +86,12 @@ impl Unit {
 	pub fn get_val_mut(&mut self) -> &mut HashMap<FreeUnit, Scalar> { &mut self.val }
 	pub fn unitless(&self) -> bool { self.get_val().len() == 0 }
 
+	pub fn no_space(&self) -> bool {
+		if self.get_val().len() == 1 {
+			return self.get_val().keys().next().unwrap().whole.no_space();
+		} else { return false; }
+	}
+
 	pub fn from_array(a: &[(FreeUnit, Scalar)]) -> Unit {
 		let mut n = Unit::new();
 		for (u, p) in a.iter() {
