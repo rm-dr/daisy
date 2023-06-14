@@ -18,51 +18,104 @@ pub struct Unit {
 
 impl ToString for Unit {
 	fn to_string(&self) -> String {
+
 		if self.unitless() { return String::new(); };
 
-		let mut top_empty = true;
-		let mut bottom_empty = true;
 
-		for (_, p) in self.get_val() {
-			if p.is_positive() {
-				top_empty = false;
-			} else {
-				bottom_empty = false;
-			}
-		};
+		// Sort units by power
+		let mut v: Vec<(&FreeUnit, &Scalar)> = self.get_val().iter().collect();
+		v.sort_by(|a, b| b.1.partial_cmp(a.1).unwrap());
 
+		let mut i = v.iter();
+		let Some((mut u, mut p)) = i.next() else { panic!() };
+		let mut done = false;
+
+		// Positive powers
 		let mut t = String::new();
-		let mut b = String::new();
-
-		for (u, p) in self.get_val() {
+		while p.is_positive() && !done {
 			let c = u.to_string();
 
 			if *p == Scalar::new_rational(1f64).unwrap() {
 				t.push_str(&format!("{c}·"));
-			} else if *p == Scalar::new_rational(-1f64).unwrap() {
-				if top_empty {
-					b.push_str(&format!("{c}⁻¹·"));
-				} else {
-					b.push_str(&format!("{c}·"));
+			} else if p.is_int() {
+				t.push_str(&c);
+				for c in p.to_string().chars() {
+					t.push( match c {
+						//'-' => '⁻',
+						'0' => '⁰',
+						'1' => '¹',
+						'2' => '²',
+						'3' => '³',
+						'4' => '⁴',
+						'5' => '⁵',
+						'6' => '⁶',
+						'7' => '⁷',
+						'8' => '⁸',
+						'9' => '⁹',
+						_ => panic!()
+					});
 				}
-			} else if p.is_positive() {
-				t.push_str(&format!("{c}^{}·", p.to_string()));
+				t.push('·');
 			} else {
-				if top_empty {
-					b.push_str(&format!("{c}^{}·", p.to_string()));
-				} else {
-					b.push_str(&format!("{c}^{}·", (-p.clone()).to_string()));
-				}
+				t.push_str(&format!("{c}^{}·", p.to_string()));
 			}
+
+			if let Some((a, b)) = i.next() {
+				u = a; p = b;
+			} else {done = true}
 		};
 
-		if top_empty {
-			format!("{}", &b[..b.len()-2]) // Slice cuts off the last `·` (2 bytes)
-		} else if bottom_empty {
-			format!("{}", &t[..t.len()-2])
+		// Negative powers
+		let mut b = String::new();
+		let mut bottom_count = 0;
+		while !done {
+			let c = u.to_string();
+
+			bottom_count += 1;
+			if t.len() != 0 && *p == Scalar::new_rational(-1f64).unwrap() {
+				b.push_str(&format!("{c}·"));
+			} else if p.is_int() {
+				b.push_str(&c);
+				for c in p.to_string().chars() {
+					if c == '-' && t.len() != 0 { continue; }
+					b.push( match c {
+						'-' => '⁻',
+						'0' => '⁰',
+						'1' => '¹',
+						'2' => '²',
+						'3' => '³',
+						'4' => '⁴',
+						'5' => '⁵',
+						'6' => '⁶',
+						'7' => '⁷',
+						'8' => '⁸',
+						'9' => '⁹',
+						_ => panic!()
+					});
+				}
+				b.push('·');
+			} else {
+				b.push_str(&format!("{c}^{}·", p.to_string()));
+			}
+
+			if let Some((a, b)) = i.next() {
+				u = a; p = b;
+			} else {done = true}
+		};
+
+		// Slice cuts off the last `·` (2 bytes)
+		if t.len() == 0 {
+			return format!("{}", &b[..b.len() - 2]);
+		} else if b.len() == 0 {
+			return String::from(&t[..t.len() - 2]);
 		} else {
-			format!("{}/{}", &t[..t.len()-2], &b[..b.len()-2])
+			if bottom_count > 1 {
+				return format!("{}/({})", &t[..t.len() - 2], &b[..b.len() - 2] );
+			} else {
+				return format!("{}/{}", &t[..t.len() - 2], &b[..b.len() - 2] );
+			}
 		}
+
 	}
 }
 
