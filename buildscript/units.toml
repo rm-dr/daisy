@@ -661,7 +661,8 @@ base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p =
 [[unit]]
 enum_name = "Calorie"
 strings = [
-	["cal"], ["calorie"], ["calories"]
+	["cal", "","k"],
+	["calorie"], ["calories"]
 ]
 
 base_value_type = "exact"
@@ -820,7 +821,8 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = 
 [[unit]]
 enum_name = "Tonne"
 strings = [
-	["t"], ["tonne"], ["tonnes"], ["ton"], ["tons"]
+	["t", "","k","M","G"],
+	["tonne"], ["tonnes"], ["ton"], ["tons"]
 ]
 
 base_value_type = "exact"
