@@ -1,4 +1,4 @@
- - Constant definitions
+ - Fix unit autoconversion (Hz * s)
  - Reference previous results
  - Minimize parenthesis when printing expressions
  - Sane autoconversion (mi + km)
@@ -21,7 +21,6 @@
  - Compile to WASM, publish a webapp
  - CLI Options: evaluate, disable replacement, disable special characters
  - Trigonometry & function tests
- - vhs demo
 
 
 ## Internals
@@ -58,8 +57,6 @@
 
 ## Units
  - long prefixes (megatonne, etc)
- - Unit order h\*kW vs kW\*h
- - Print units with powers instead of /
  - HMS for degrees
  - Exact radians, using pi constant?
  - Weird units: flops, lumen, lux, bel
