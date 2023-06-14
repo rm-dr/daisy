@@ -2,7 +2,6 @@
  - Reference previous results
  - Minimize parenthesis when printing expressions
  - Sane autoconversion (mi + km)
- - "per" as division?
  - -> as "to"
  - strip_unit function
 

@@ -12,6 +12,7 @@ use super::Function;
 #[repr(usize)]
 pub enum Operator {
 	ModuloLong = 0, // Mod invoked with "mod"
+	DivideLong,
 	UnitConvert,
 	Subtract,
 	Add,
@@ -69,6 +70,7 @@ impl Operator {
 			"i*"     => {Some( Operator::ImplicitMultiply )},
 			"%"      => {Some( Operator::Modulo )},
 			"mod"    => {Some( Operator::ModuloLong )},
+			"per"    => {Some( Operator::DivideLong )},
 			"to"    => {Some( Operator::UnitConvert )},
 			"^"|"**" => {Some( Operator::Power )},
 			"!"      => {Some( Operator::Factorial )},
@@ -146,6 +148,7 @@ impl Operator {
 				)
 			},
 
+			Operator::DivideLong |
 			Operator::Divide => {
 				if args.len() != 2 { panic!() }
 				let a = args.pop_front().unwrap();
@@ -227,6 +230,14 @@ impl Operator {
 			Operator::ModuloLong => {
 				return format!(
 					"{} mod {}",
+					self.add_parens_to_arg(&args[0]),
+					self.add_parens_to_arg(&args[1])
+				);
+			},
+
+			Operator::DivideLong => {
+				return format!(
+					"{} per {}",
 					self.add_parens_to_arg(&args[0]),
 					self.add_parens_to_arg(&args[1])
 				);

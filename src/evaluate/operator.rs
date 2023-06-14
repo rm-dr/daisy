@@ -16,6 +16,7 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, Eva
 		Operator::ImplicitMultiply |
 		Operator::Sqrt |
 		Operator::Divide |
+		Operator::DivideLong |
 		Operator::Subtract => { panic!() }
 
 		Operator::Negative => {
