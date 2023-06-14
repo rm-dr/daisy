@@ -16,14 +16,14 @@ impl Context {
 	pub fn push_var(&mut self, s: String, t: Token) { self.variables.insert(s, t); }
 	pub fn del_var(&mut self, s: &String) { self.variables.remove(s); }
 
-	pub fn get_variable(&self, s: String) -> Option<Token> {
+	pub fn get_variable(&self, s: &String) -> Option<Token> {
 
 		let v: Option<&Token>;
 
 		if s == "ans" {
 			v = self.history.last();
 		} else {
-			v = self.variables.get(&s);
+			v = self.variables.get(s);
 		}
 
 		if v.is_some() { Some(v.unwrap().clone()) } else { None }

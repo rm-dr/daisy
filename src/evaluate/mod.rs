@@ -9,6 +9,5 @@ pub enum EvalError {
 	BadMath,
 	TooBig,
 	ZeroDivision,
-	IncompatibleUnit,
-	NoHistory
+	IncompatibleUnit
 }

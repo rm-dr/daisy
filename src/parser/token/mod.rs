@@ -7,5 +7,5 @@ pub use self::function::Function;
 pub use self::token::Token;
 
 
-use super::parse;
+use super::parse_no_context;
 include!(concat!(env!("OUT_DIR"), "/constants.rs"));

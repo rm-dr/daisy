@@ -17,20 +17,24 @@ pub use self::{
 	token::Function,
 };
 
+use crate::context::Context;
+
 
 pub fn parse(
-	s: &String
-) -> Result<
-	Token,
-	(LineLocation, ParserError)
-> {
+	s: &String, context: &Context
+) -> Result<Token, (LineLocation, ParserError)> {
 
 	let tokens = stage::tokenize(s);
 	let (_, tokens) = stage::find_subs(tokens);
 	let g = stage::groupify(tokens)?;
-	let g = stage::treeify(g)?;
+
+	let g = stage::treeify(g, context)?;
 
 	return Ok(g);
+}
+
+pub fn parse_no_context(s: &String) -> Result<Token, (LineLocation, ParserError)> {
+	parse(s, &Context::new())
 }
 
 

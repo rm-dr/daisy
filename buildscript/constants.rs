@@ -100,7 +100,7 @@ pub fn write(target: &Path) {
 
 	for c in constants {
 		writeln!(file,
-			"\t\t\tConstant::{e} => parse(&String::from(\"{s}\")).unwrap(),",
+			"\t\t\tConstant::{e} => parse_no_context(&String::from(\"{s}\")).unwrap(),",
 			e = c["enum_name"].as_str().unwrap(),
 			s = c["value"].as_str().unwrap()
 		).unwrap();

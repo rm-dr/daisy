@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 use crate::quantity::Unit;
 use crate::quantity::Quantity;
+use crate::context::Context;
 
 use super::{
 	LineLocation,
@@ -55,7 +56,7 @@ impl PreToken {
 	}
 
 	#[inline(always)]
-	pub fn to_token(self) -> Result<Token, (LineLocation, ParserError)>{
+	pub fn to_token(self, context: &Context) -> Result<Token, (LineLocation, ParserError)>{
 		match self {
 			PreToken::PreQuantity(l, mut s) => {
 
@@ -74,17 +75,15 @@ impl PreToken {
 			},
 
 			PreToken::PreWord(l, s) => {
-				let c = Constant::from_string(&s);
 
-				if c.is_some() {
-					return Ok(Token::Constant(c.unwrap()));
-				}
+				let c = Constant::from_string(&s);
+				if c.is_some() { return Ok(Token::Constant(c.unwrap())); }
 
 				let c = Unit::from_string(&s);
 				if c.is_some() { return Ok(Token::Quantity(c.unwrap())); }
 
-
-				if s == "ans" { return Ok(Token::Variable(String::from("ans"))); }
+				let c = context.get_variable(&s);
+				if c.is_some() { return Ok(Token::Variable(s)); }
 
 				return Err((l, ParserError::Undefined(s)));
 			}

@@ -4,7 +4,7 @@ use crate::evaluate::evaluate;
 use crate::context::Context;
 
 fn eval_to_str(s: &str) -> Result<String, ()> {
-	let g = match parser::parse(&String::from(s)) {
+	let g = match parser::parse_no_context(&String::from(s)) {
 		Ok(x) => x,
 		Err(_) => return Err(())
 	};

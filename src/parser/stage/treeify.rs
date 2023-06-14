@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use crate::context::Context;
 
 use super::super::{
 	PreToken,
@@ -10,7 +11,8 @@ use super::super::{
 
 fn treeify_binary(
 	i: usize,
-	g_inner: &mut VecDeque<PreToken>
+	g_inner: &mut VecDeque<PreToken>,
+	context: &Context
 ) -> Result<bool, (LineLocation, ParserError)> {
 
 	let this: &PreToken = &g_inner[i];
@@ -125,8 +127,8 @@ fn treeify_binary(
 		let this_pre = g_inner.remove(i-1).unwrap();
 		let right_pre = g_inner.remove(i-1).unwrap();
 		let left: Token; let right: Token;
-		if let PreToken::PreGroup(_, _) = right_pre { right = treeify(right_pre)?; } else {right = right_pre.to_token()?;}
-		if let PreToken::PreGroup(_, _) = left_pre { left = treeify(left_pre)?; } else {left = left_pre.to_token()?;}
+		if let PreToken::PreGroup(_, _) = right_pre { right = treeify(right_pre, context)?; } else {right = right_pre.to_token(context)?;}
+		if let PreToken::PreGroup(_, _) = left_pre { left = treeify(left_pre, context)?; } else {left = left_pre.to_token(context)?;}
 
 		let o = {
 			let PreToken::PreOperator(_, s) = this_pre else {panic!()};
@@ -150,7 +152,8 @@ fn treeify_binary(
 fn treeify_unary(
 	i: usize,
 	g_inner: &mut VecDeque<PreToken>,
-	left_associative: bool
+	left_associative: bool,
+	context: &Context
 ) -> Result<bool, (LineLocation, ParserError)> {
 
 	let this: &PreToken = &g_inner[i];
@@ -242,7 +245,7 @@ fn treeify_unary(
 			} else {
 				next_pre = g_inner.remove(i).unwrap();
 			}
-			if let PreToken::PreGroup(_, _) = next_pre { next = treeify(next_pre)?; } else { next = next_pre.to_token()? }
+			if let PreToken::PreGroup(_, _) = next_pre { next = treeify(next_pre, context)?; } else { next = next_pre.to_token(context)? }
 
 			let o = {
 				let PreToken::PreOperator(_, s) = this_pre else {panic!()};
@@ -272,6 +275,7 @@ fn treeify_unary(
 
 pub fn treeify(
 	mut g: PreToken,
+	context: &Context
 ) -> Result<Token, (LineLocation, ParserError)> {
 
 	let g_inner: &mut VecDeque<PreToken> = match g {
@@ -311,9 +315,9 @@ pub fn treeify(
 			let mut changed = false;
 			if this_op.is_left_associative() {
 				if this_op.is_binary() {
-					changed = treeify_binary(i, g_inner)?;
+					changed = treeify_binary(i, g_inner, context)?;
 				} else {
-					changed = treeify_unary(i, g_inner, left_associative)?;
+					changed = treeify_unary(i, g_inner, left_associative, context)?;
 				}
 			}
 
@@ -325,9 +329,9 @@ pub fn treeify(
 		} else {
 			if !this_op.is_left_associative() {
 				if this_op.is_binary() {
-					treeify_binary(i, g_inner)?;
+					treeify_binary(i, g_inner, context)?;
 				} else {
-					treeify_unary(i, g_inner, left_associative)?;
+					treeify_unary(i, g_inner, left_associative, context)?;
 				}
 			}
 			j -= 1
@@ -342,9 +346,9 @@ pub fn treeify(
 			Err((l, ParserError::Syntax))
 		},
 		PreToken::PreGroup(_,_) => {
-			treeify(g)
+			treeify(g, context)
 		},
 
-		_ => { Ok(g.to_token()?) }
+		_ => { Ok(g.to_token(context)?) }
 	};
 }

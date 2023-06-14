@@ -28,7 +28,7 @@ fn do_expression(
 ) -> Result<parser::Token, ()> {
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g = parser::parse(&s);
+	let g = parser::parse(&s, context);
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
@@ -113,16 +113,6 @@ fn do_expression(
 			Err(EvalError::IncompatibleUnit) => {
 				write!(
 					stdout, "\n  {}{}Evaluation Error: {}Incompatible units{}\r\n\n",
-					style::Bold,
-					color::Fg(color::Red),
-					style::Reset,
-					color::Fg(color::Reset),
-				).unwrap();
-			},
-
-			Err(EvalError::NoHistory) => {
-				write!(
-					stdout, "\n  {}{}Evaluation Error: {}There is no previous answer to reference{}\r\n\n",
 					style::Bold,
 					color::Fg(color::Red),
 					style::Reset,

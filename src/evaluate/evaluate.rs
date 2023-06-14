@@ -35,11 +35,7 @@ pub fn evaluate(t: &Token, context: &Context) -> Result<Token, EvalError> {
 						Token::Constant(c) => { evaluate(&c.value(), context).unwrap() },
 						Token::Operator(Operator::Function(f), v) => { eval_function(&f, &v)? },
 						Token::Operator(o, v) => { eval_operator(&o, &v)? },
-						Token::Variable(s) => {
-							if let Some(t) = context.get_variable(s) { t } else {
-								return Err(EvalError::NoHistory);
-							}
-						}
+						Token::Variable(s) => { context.get_variable(&s).unwrap() }
 					};
 				}
 
