@@ -384,7 +384,7 @@ base_units = [ { u = "Meter", p = 3} ]
 [[unit]]
 enum_name = "USGallon"
 print = "gal"
-parse = ["gal", "usgal", "gallon", "gallons"]
+parse = ["gal", "gals", "usgal", "gallon", "gallons", "Gallon", "Gallons"]
 
 base_value_type = "exact"
 base_value = "0.003785411784"
