@@ -2,8 +2,6 @@
  - Reference previous results
  - Minimize parenthesis when printing expressions
  - Sane autoconversion (mi + km)
- - -> as "to"
- - strip_unit function
 
 
 ## Pre-release
@@ -11,7 +9,9 @@
  - Documentation (usage)
  - Documentation (comments)
  - Print with highlighting
- - Cleanup tests, test commands, test units, trig/function tests
+ - Cleanup tests
+   - Test commands
+   - Test functions (nounit, tobase)
  - Releases
 
 
@@ -46,7 +46,6 @@
  - Sums and products
  - Unit info command
  - Constant info command
- - Convert to base unit
 
 ## Prompt
  - Live syntax/output (like firefox js terminal)
