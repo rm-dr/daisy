@@ -74,3 +74,33 @@ enum_name = "PPQ"
 strings = "ppq"
 value = "1e-15"
 unit = true
+
+[[constant]]
+enum_name = "KWH"
+strings = "kWh"
+value = "kW * hour"
+unit = true
+
+[[constant]]
+enum_name = "MWH"
+strings = "WMh"
+value = "MW * hour"
+unit = true
+
+[[constant]]
+enum_name = "GWH"
+strings = "GWh"
+value = "GW * hour"
+unit = true
+
+[[constant]]
+enum_name = "TWH"
+strings = "TWh"
+value = "TW * hour"
+unit = true
+
+[[constant]]
+enum_name = "PWH"
+strings = "PWh"
+value = "PW * hour"
+unit = true

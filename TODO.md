@@ -61,6 +61,7 @@
 
 ## Units
  - long prefixes (megatonne, etc)
+ - Unit order h\*kW vs kW\*h
  - Print units with powers instead of /
  - HMS for degrees
  - Exact radians, using pi constant?
