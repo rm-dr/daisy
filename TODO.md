@@ -60,7 +60,6 @@
  - Show base units on error
 
 ## Units
- - Abbreviations: kWh, bps, fps, dot/in, px/in, parts-per-x(ppm, ppb, ppt, ppq), percent(pct)
  - Selective prefixes: tonne (k M G), Byte (TiB, etc), calorie (kcal)
  - Print units with powers instead of /
  - HMS for degrees

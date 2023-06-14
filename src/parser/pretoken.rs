@@ -74,14 +74,7 @@ impl PreToken {
 			},
 
 			PreToken::PreWord(l, s) => {
-				let c = match &s[..] {
-					"π"|"pi" => { Some(Constant::Pi)},
-					"e" => { Some(Constant::E) },
-					"phi"|"φ" => { Some(Constant::Phi) },
-					"mpg" => { Some(Constant::MPG) },
-					"mph" => { Some(Constant::MPH) },
-					_ => { None }
-				};
+				let c = Constant::from_string(&s);
 
 				if c.is_some() {
 					return Ok(Token::Constant(c.unwrap()));

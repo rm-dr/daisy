@@ -2,7 +2,6 @@ use crate::parser::Token;
 use crate::parser::Operator;
 
 use super::operator::eval_operator;
-use super::constant::eval_constant;
 use super::function::eval_function;
 use super::EvalError;
 
@@ -13,8 +12,8 @@ pub fn evaluate(t: &Token) -> Result<Token, EvalError> {
 	coords.push(0);
 
 	'outer: loop {
-
 		let mut h = &mut g;
+
 		for t in coords.iter() {
 			let inner = h.get_args_mut();
 
@@ -32,7 +31,7 @@ pub fn evaluate(t: &Token) -> Result<Token, EvalError> {
 				loop {
 					e = match e {
 						Token::Quantity(_) => { break; },
-						Token::Constant(c) => { eval_constant(&c)? }
+						Token::Constant(c) => { evaluate(&c.value()).unwrap() }
 						Token::Operator(Operator::Function(f), v) => { eval_function(&f, &v)? }
 						Token::Operator(o, v) => { eval_operator(&o, &v)? }
 					};
@@ -50,22 +49,13 @@ pub fn evaluate(t: &Token) -> Result<Token, EvalError> {
 		}
 
 
-
 		match h {
-			Token::Operator(_,_) => {
-				coords.push(0);
-				continue 'outer;
-			},
-
-			Token::Constant(_) => {
-				coords.push(0);
-				continue 'outer;
-			},
+			Token::Operator(_,_) => { coords.push(0); },
+			Token::Constant(_) => { coords.push(0); },
 
 			Token::Quantity(_) => {
 				let l = coords.pop().unwrap();
 				coords.push(l + 1);
-				continue 'outer;
 			}
 		};
 	}
