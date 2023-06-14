@@ -1,5 +1,6 @@
 # This file defines all units daisy knows about.
 # Each unit is an entry in the `unit` array.
+# Some "units" are constants (mph, for example). They are defined in the "constants" file.
 #
 #
 # Basic properties:

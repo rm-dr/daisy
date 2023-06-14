@@ -1,3 +1,12 @@
+# This file defines all constants daisy knows about.
+# Each is an entry in the `constant` array.
+#
+# Parameters:
+# enum_name: capitalized string. Name of this constant's enum.
+# strings: string or string array. What strings will be parsed as this constant.
+#	The first entry in this array tells daisy how to print this constant.
+# value: value of this constant. Will be evaluated just like user input.
+# unit: true if this constant represents a "fake unit"
 
 [[constant]]
 enum_name = "Pi"

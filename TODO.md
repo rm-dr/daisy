@@ -10,7 +10,6 @@
  - Commands to list constants, units, and substitutions
  - Documentation (usage)
  - Documentation (comments)
- - Build.rs for constants
  - Print with highlighting
  - Cleanup tests, test commands, test units, trig/function tests
  - Releases
@@ -64,7 +63,6 @@
  - Print units with powers instead of /
  - HMS for degrees
  - Exact radians, using pi constant?
- - Constant toml file (update doc in units.toml)
  - Weird units: flops, lumen, lux, bel
 
 ## Bonus
