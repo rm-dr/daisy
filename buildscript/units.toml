@@ -4,9 +4,13 @@
 #
 # Basic properties:
 #	enum_name: unique capitalized string. The name of this unit's enum element.
-#	print: string. What this unit will print as. This string will NOT be parsed into this unit.
 #	base: if true, this is a base unit. Optional, false if omitted.
 #	no_space: if true, don't put a space between this unit and its number. Optional, false if omitted.
+#	strings: array of arrays of strings. Specifies what strings are interpreted as this unit.
+#		Each entry looks like ["s", ...], where the first item is a string and ... is an optional list of valid prefixes. See `prefix.rs`.
+#		Note that the empty string must be in the list of prefixes if you want the string to be available without a prefix.
+#		Units with no prefix must be a one-element array.
+#		The first string in this array will be the string we print when displaying this unit.
 #
 #
 # Base units (only apply if base = false):
@@ -25,80 +29,74 @@
 #		u = base unit enum name
 #		p = base unit power
 #		Any unit included here MUST have `base = true`. THIS IS NOT CHECKED, THINGS WILL BREAK!
-#
-#
-# Parsing:
-#	parse: array of strings. These strings will be parsed into this unit.
-#	parse_with_prefix: string or string array. Prefixes will be generated for this string, including the null prefix.
-#		Strings in `parse_with_prefix` MUST NOT be in `parse`.
 
 
 [[unit]]
 enum_name = "Second"
-print = "s"
-
-parse_with_prefix = "s"
-parse = ["sec", "second", "seconds"]
+strings = [
+	["s", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["sec"], ["second"], ["seconds"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Gram"
-print = "g"
-
-parse_with_prefix = "g"
-parse = ["gram", "grams", "gramme", "grammes"]
+strings = [
+	["g", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["gram"], ["grams"], ["gramme"], ["grammes"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Meter"
-print = "m"
-
-parse_with_prefix = "m"
-parse = ["meter", "meters"]
+strings = [
+	["m", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["meter"], ["meters"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Ampere"
-print = "A"
-
-parse_with_prefix = "A"
-parse = ["ampere", "amperes"]
+strings = [
+	["A", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["ampere"], ["amperes"], ["amp"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Kelvin"
-print = "K"
-
-parse_with_prefix = "K"
-parse = ["kelvin"]
+strings = [
+	["K", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["Kelvin"], ["kelvin"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Mole"
-print = "mol"
-
-parse_with_prefix = "mol"
-parse = ["mole"]
+strings = [
+	["mol", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["mole"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Candela"
-print = "cd"
-
-parse_with_prefix = "cd"
-parse = ["candela"]
+strings = [
+	["cd", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["candela"]
+]
 base = true
 
 
@@ -109,8 +107,9 @@ base = true
 
 [[unit]]
 enum_name = "Minute"
-print = "min"
-parse = ["min", "minute", "minutes"]
+strings = [
+	["min"], ["minute"], ["minutes"]
+]
 
 base_value_type = "exact"
 base_value = "60"
@@ -120,8 +119,9 @@ base_units = [ { u = "Second", p = 1} ]
 
 [[unit]]
 enum_name = "Hour"
-print = "h"
-parse = ["h", "hour", "hours"]
+strings = [
+	["h"], ["hour"], ["hours"]
+]
 
 base_value_type = "exact"
 base_value = "3600"
@@ -131,8 +131,9 @@ base_units = [ { u = "Second", p = 1} ]
 
 [[unit]]
 enum_name = "Day"
-print = "d"
-parse = ["d", "day", "days"]
+strings = [
+	["d"], ["day"], ["days"]
+]
 
 base_value_type = "exact"
 base_value = "86400"
@@ -142,8 +143,9 @@ base_units = [ { u = "Second", p = 1} ]
 
 [[unit]]
 enum_name = "Week"
-print = "w"
-parse = ["w", "week", "weeks"]
+strings = [
+	["w"], ["week"], ["weeks"]
+]
 
 base_value_type = "exact"
 base_value = "604800"
@@ -153,8 +155,9 @@ base_units = [ { u = "Second", p = 1} ]
 
 [[unit]]
 enum_name = "Month"
-print = "month"
-parse = ["month", "months"]
+strings = [
+	["month"], ["months"]
+]
 
 base_value_type = "exact"
 base_value = "2629746"
@@ -164,8 +167,9 @@ base_units = [ { u = "Second", p = 1} ]
 
 [[unit]]
 enum_name = "Fortnight"
-print = "fortnight"
-parse = ["fortnight", "fortnights"]
+strings = [
+	["fortnight"], ["fortnights"]
+]
 
 base_value_type = "exact"
 base_value = "1209600"
@@ -175,8 +179,9 @@ base_units = [ { u = "Second", p = 1} ]
 
 [[unit]]
 enum_name = "GregorianYear"
-print = "year"
-parse = ["year", "years"]
+strings = [
+	["year"], ["years"]
+]
 
 base_value_type = "exact"
 base_value = "31557000"
@@ -186,8 +191,10 @@ base_units = [ { u = "Second", p = 1} ]
 
 [[unit]]
 enum_name = "JulianYear"
-print = "julianYear"
-parse = ["julianYear", "julianYears"]
+strings = [
+	["julianYear"], ["julianYears"],
+	["julianyear"], ["julianyears"]
+]
 
 base_value_type = "exact"
 base_value = "31557600"
@@ -201,8 +208,9 @@ base_units = [ { u = "Second", p = 1} ]
 
 [[unit]]
 enum_name = "Angstrom"
-print = "Å"
-parse = ["Å", "angstrom"]
+strings = [
+	["Å"], ["angstrom"]
+]
 
 base_value_type = "exact"
 base_value = "1e-10"
@@ -212,8 +220,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Thou"
-print = "thou"
-parse = ["thou"]
+strings = [
+	["thou"]
+]
 
 base_value_type = "exact"
 base_value = "0.0000254"
@@ -223,8 +232,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Point"
-print = "pt"
-parse = ["pt", "point"]
+strings = [
+	["pt"], ["point"]
+]
 
 base_value_type = "exact"
 base_value = "0.0003514598"
@@ -234,8 +244,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Inch"
-print = "in"
-parse = ["in", "inch", "inches"]
+strings = [
+	["in"], ["inch"], ["inches"]
+]
 
 base_value_type = "exact"
 base_value = "0.0254"
@@ -245,8 +256,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Foot"
-print = "ft"
-parse = ["ft", "foot", "feet"]
+strings = [
+	["ft"], ["foot"], ["feet"]
+]
 
 base_value_type = "exact"
 base_value = "0.3048"
@@ -256,8 +268,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Yard"
-print = "yd"
-parse = ["yd", "yard", "yards"]
+strings = [
+	["yd"], ["yard"], ["yards"]
+]
 
 base_value_type = "exact"
 base_value = "0.9144"
@@ -267,8 +280,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Furlong"
-print = "furlong"
-parse = ["furlong", "furlongs"]
+strings = [
+	["furlong"], ["furlongs"]
+]
 
 base_value_type = "exact"
 base_value = "201.17"
@@ -277,8 +291,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Rod"
-print = "rod"
-parse = ["rod", "rods"]
+strings = [
+	["rod"], ["rods"]
+]
 
 base_value_type = "exact"
 base_value = "5.0292"
@@ -288,8 +303,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Mile"
-print = "mi"
-parse = ["mi", "mile", "miles"]
+strings = [
+	["mi"], ["mile"], ["miles"]
+]
 
 base_value_type = "exact"
 base_value = "1609.344"
@@ -299,8 +315,10 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "AstronomicalUnit"
-print = "au"
-parse = ["au", "AU", "astronomicalUnit", "astronomicalUnits"]
+strings = [
+	["au"], ["AU"], ["astronomicalUnit"], ["astronomicalUnits"],
+	["astronomicalunit"], ["astronomicalunits"]
+]
 
 base_value_type = "exact"
 base_value = "149597870700"
@@ -310,8 +328,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Lightyear"
-print = "ly"
-parse = ["ly", "lightyear", "lightyears"]
+strings = [
+	["ly"], ["lightyear"], ["lightyears"]
+]
 
 base_value_type = "exact"
 base_value = "9460730472580800"
@@ -321,8 +340,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Parsec"
-print = "pc"
-parse = ["pc", "parsec", "parsecs"]
+strings = [
+	["pc"], ["parsec"], ["parsecs"]
+]
 
 base_value_type = "exact"
 base_value = "3.085677581e16"
@@ -335,8 +355,9 @@ base_units = [ { u = "Meter", p = 1} ]
 
 [[unit]]
 enum_name = "Barn"
-print = "b"
-parse = ["b", "barn"]
+strings = [
+	["barn"]
+]
 
 base_value_type = "exact"
 base_value = "1e-28"
@@ -346,8 +367,9 @@ base_units = [ { u = "Meter", p = 2} ]
 
 [[unit]]
 enum_name = "Hectare"
-print = "ha"
-parse = ["hectare", "hectares"]
+strings = [
+	["ha"], ["hectare"], ["hectares"]
+]
 
 base_value_type = "exact"
 base_value = "10000"
@@ -357,8 +379,9 @@ base_units = [ { u = "Meter", p = 2} ]
 
 [[unit]]
 enum_name = "Acre"
-print = "acre"
-parse = ["acres"]
+strings = [
+	["acre"], ["acres"]
+]
 
 base_value_type = "exact"
 base_value = "4046.8564224"
@@ -371,9 +394,11 @@ base_units = [ { u = "Meter", p = 2} ]
 
 [[unit]]
 enum_name = "Liter"
-print = "l"
-parse_with_prefix = ["l", "L"]
-parse = ["liter", "liters", "litre", "litres"]
+strings = [
+	["l", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["L", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["liter"], ["liters"], ["litre"], ["litres"]
+]
 
 base_value_type = "exact"
 base_value = "0.001"
@@ -383,8 +408,9 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "USGallon"
-print = "gal"
-parse = ["gal", "gals", "usgal", "gallon", "gallons", "Gallon", "Gallons"]
+strings = [
+	["gal"], ["gals"], ["usgal"], ["gallon"], ["gallons"]
+]
 
 base_value_type = "exact"
 base_value = "0.003785411784"
@@ -394,8 +420,9 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "Quart"
-print = "qt"
-parse = ["quart", "quarts"]
+strings = [
+	["qt"], ["quart"], ["quarts"]
+]
 
 base_value_type = "exact"
 base_value = "0.000946352946"
@@ -405,8 +432,9 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "ImperialGallon"
-print = "impgal"
-parse = ["imperialGallon", "imperialGallons"]
+strings = [
+	["impgal"], ["imperialGallon"], ["imperialGallons"]
+]
 
 base_value_type = "exact"
 base_value = "0.00454609"
@@ -416,8 +444,9 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "Hogshead"
-print = "hogshead"
-parse = ["hogshead", "hogsheads"]
+strings = [
+	["hogshead"], ["hogsheads"]
+]
 
 base_value_type = "exact"
 base_value = "0.2385" # 63 gallons
@@ -427,8 +456,9 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "Cup"
-print = "cup"
-parse = ["cup"]
+strings = [
+	["cup"]
+]
 
 base_value_type = "exact"
 base_value = "0.0002365882365"
@@ -438,8 +468,9 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "Floz"
-print = "floz"
-parse = ["floz"]
+strings = [
+	["floz"]
+]
 
 base_value_type = "exact"
 base_value = "0.0000295735295625"
@@ -449,8 +480,9 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "Pint"
-print = "pint"
-parse = ["pint", "pints"]
+strings = [
+	["pint"], ["pints"]
+]
 
 base_value_type = "exact"
 base_value = "0.00056826125"
@@ -460,8 +492,9 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "Tablespoon"
-print = "tbsp"
-parse = ["tbsp", "Tbsp", "tablespoon", "Tablespoon"]
+strings = [
+	["tbsp"], ["Tbsp"], ["tablespoon"], ["Tablespoon"]
+]
 
 base_value_type = "exact"
 base_value = "0.00001478676478125"
@@ -471,8 +504,9 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "Teaspoon"
-print = "tsp"
-parse = ["tsp", "Tsp", "teaspoon", "teaspoons"]
+strings = [
+	["tsp"], ["Tsp"], ["teaspoon"], ["teaspoons"]
+]
 
 base_value_type = "exact"
 base_value = "0.000005"
@@ -485,9 +519,10 @@ base_units = [ { u = "Meter", p = 3} ]
 
 [[unit]]
 enum_name = "Pascal"
-print = "Pa"
-parse_with_prefix = "Pa"
-parse = ["pascal"]
+strings = [
+	["Pa", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["pascal"]
+]
 
 base_value_type = "exact"
 base_value = "1000"
@@ -496,8 +531,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p =
 
 [[unit]]
 enum_name = "Atmosphere"
-print = "atm"
-parse = ["atm", "atmosphere", "atmospheres"]
+strings = [
+	["atm"], ["atmosphere"], ["atmospheres"]
+]
 
 base_value_type = "exact"
 base_value = "101325000"
@@ -506,8 +542,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p =
 
 [[unit]]
 enum_name = "Bar"
-print = "bar"
-parse_with_prefix = "bar"
+strings = [
+	["bar", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+]
 
 base_value_type = "exact"
 base_value = "100000000"
@@ -516,8 +553,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p =
 
 [[unit]]
 enum_name = "Barye"
-print = "Ba"
-parse = ["Ba", "Barye"]
+strings = [
+	["Ba"], ["Barye"]
+]
 
 base_value_type = "exact"
 base_value = "100"
@@ -526,8 +564,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p =
 
 [[unit]]
 enum_name = "Psi"
-print = "psi"
-parse = ["psi"]
+strings = [
+	["psi"]
+]
 
 base_value_type = "exact"
 base_value = "6894757.2931783"
@@ -536,8 +575,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p =
 
 [[unit]]
 enum_name = "MillimeterMercury"
-print = "mmHg"
-parse = ["mmhg", "mmHg"]
+strings = [
+	["mmhg"], ["mmHg"]
+]
 
 base_value_type = "exact"
 base_value = "133322.387415"
@@ -546,8 +586,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p =
 
 [[unit]]
 enum_name = "Torr"
-print = "torr"
-parse = ["torr", "Torr"]
+strings = [
+	["torr"], ["Torr"]
+]
 
 base_value_type = "fract"
 base_value = [101325000, 760]
@@ -556,8 +597,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p =
 
 [[unit]]
 enum_name = "MeterSeaWater"
-print = "MSW"
-parse = ["MSW", "msw"]
+strings = [
+	["MSW"], ["msw"]
+]
 
 base_value_type = "exact"
 base_value = "10000000"
@@ -566,8 +608,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p =
 
 [[unit]]
 enum_name = "FootSeaWater"
-print = "FSW"
-parse = ["FSW", "fsw"]
+strings = [
+	["FSW"], ["fsw"]
+]
 
 base_value_type = "exact"
 base_value = "3064330"
@@ -579,8 +622,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = -1}, { u = "Second", p =
 
 [[unit]]
 enum_name = "Gauss"
-print = "G"
-parse = ["G", "gauss"]
+strings = [
+	["G"], ["gauss"]
+]
 
 base_value_type = "exact"
 base_value = "0.1"
@@ -590,9 +634,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Ampere", p 
 
 [[unit]]
 enum_name = "Tesla"
-print = "T"
-parse = ["tesla"]
-parse_with_prefix = "T"
+strings = [
+	["T", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["tesla"]
+]
 
 base_value_type = "exact"
 base_value = "1000"
@@ -602,9 +647,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Ampere", p 
 
 [[unit]]
 enum_name = "Joule"
-print = "J"
-parse = ["joule", "joules"]
-parse_with_prefix = "J"
+strings = [
+	["J", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["joule"], ["joules"]
+]
 
 base_value_type = "exact"
 base_value = "1000"
@@ -614,9 +660,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p =
 
 [[unit]]
 enum_name = "Calorie"
-print = "cal"
-parse = ["calorie", "calories"]
-parse_with_prefix = "cal"
+strings = [
+	["cal"], ["calorie"], ["calories"]
+]
 
 base_value_type = "exact"
 base_value = "4184"
@@ -626,8 +672,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p =
 
 [[unit]]
 enum_name = "BTU"
-print = "BTU"
-parse = ["btu", "BTU"]
+strings = [
+	["btu"], ["BTU"]
+]
 
 base_value_type = "exact"
 base_value = "1055100"
@@ -637,9 +684,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p =
 
 [[unit]]
 enum_name = "Hertz"
-print = "Hz"
-parse = ["hertz"]
-parse_with_prefix = "Hz"
+strings = [
+	["Hz", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["hertz"], ["Hertz"]
+]
 
 base_value_type = "exact"
 base_value = "1"
@@ -649,9 +697,11 @@ base_units = [ { u = "Second", p = -1} ]
 
 [[unit]]
 enum_name = "Ohm"
-print = "Ω"
-parse = ["ohms"]
-parse_with_prefix = ["ohm", "Ω"]
+strings = [
+	["Ω", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["ohm", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["ohms", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"]
+]
 
 base_value_type = "exact"
 base_value = "1000"
@@ -661,9 +711,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Ampere", p = 
 
 [[unit]]
 enum_name = "Siemens"
-print = "S"
-parse = ["℧", "mho", "mhos", "siemens"]
-parse_with_prefix = "S"
+strings = [
+	["S", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["℧"], ["mho"], ["mhos"], ["siemens"]
+]
 
 base_value_type = "exact"
 base_value = "0.001"
@@ -673,9 +724,10 @@ base_units = [ { u = "Gram", p = -1}, { u = "Meter", p = -2}, { u = "Ampere", p 
 
 [[unit]]
 enum_name = "Coulomb"
-print = "C"
-parse = ["coulomb", "coulombs"]
-parse_with_prefix = "C"
+strings = [
+	["C", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["coulomb"], ["coulombs"]
+]
 
 base_value_type = "exact"
 base_value = "0.001"
@@ -685,9 +737,10 @@ base_units = [ { u = "Ampere", p = 1}, { u = "Second", p = 1} ]
 
 [[unit]]
 enum_name = "Watt"
-print = "W"
-parse = ["watt", "Watt", "Watts", "watts"]
-parse_with_prefix = "W"
+strings = [
+	["W", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["watt"], ["Watt"], ["Watts"], ["watts"]
+]
 
 base_value_type = "exact"
 base_value = "1000"
@@ -697,9 +750,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = 
 
 [[unit]]
 enum_name = "Volt"
-print = "V"
-parse = ["volt", "volts"]
-parse_with_prefix = "V"
+strings = [
+	["V", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["volt"], ["volts"]
+]
 
 base_value_type = "exact"
 base_value = "1000"
@@ -709,9 +763,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = 
 
 [[unit]]
 enum_name = "Henry"
-print = "H"
-parse = ["henry", "henries", "henrys", "Henry", "Henries", "Henrys"]
-parse_with_prefix = "H"
+strings = [
+	["H", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["henry"], ["henries"], ["henrys"], ["Henry"], ["Henries"], ["Henrys"]
+]
 
 base_value_type = "exact"
 base_value = "1000"
@@ -721,9 +776,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = 
 
 [[unit]]
 enum_name = "Farad"
-print = "F"
-parse = ["farad", "Farad", "farads", "Farads"]
-parse_with_prefix = "F"
+strings = [
+	["F", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["farad"], ["Farad"], ["farads"], ["Farads"]
+]
 
 base_value_type = "exact"
 base_value = "0.001"
@@ -733,9 +789,10 @@ base_units = [ { u = "Gram", p = -1}, { u = "Meter", p = -2}, { u = "Second", p 
 
 [[unit]]
 enum_name = "ElectronVolt"
-print = "eV"
-parse = ["electronvolt"]
-parse_with_prefix = "eV"
+strings = [
+	["eV", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["electronvolt"], ["electronVolt"]
+]
 
 base_value_type = "exact"
 base_value = "1.602176634e-16"
@@ -745,9 +802,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Second", p = -2}, { u = "Meter", p =
 
 [[unit]]
 enum_name = "Weber"
-print = "Wb"
-parse = ["weber"]
-parse_with_prefix = "Wb"
+strings = [
+	["Wb", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["weber"]
+]
 
 base_value_type = "exact"
 base_value = "1000"
@@ -761,8 +819,9 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 2}, { u = "Second", p = 
 
 [[unit]]
 enum_name = "Tonne"
-print = "t"
-parse = ["t", "tonne", "tonnes", "ton", "tons"]
+strings = [
+	["t"], ["tonne"], ["tonnes"], ["ton"], ["tons"]
+]
 
 base_value_type = "exact"
 base_value = "1000000"
@@ -772,8 +831,9 @@ base_units = [ { u = "Gram", p = 1} ]
 
 [[unit]]
 enum_name = "Ounce"
-print = "oz"
-parse = ["oz", "ounce", "ounces"]
+strings = [
+	["oz"], ["ounce"], ["ounces"]
+]
 
 base_value_type = "exact"
 base_value = "28.349523125"
@@ -783,8 +843,9 @@ base_units = [ { u = "Gram", p = 1} ]
 
 [[unit]]
 enum_name = "Pound"
-print = "lb"
-parse = ["lb", "lbs", "pound", "pounds"]
+strings = [
+	["lb"], ["lbs"], ["pound"], ["pounds"]
+]
 
 base_value_type = "exact"
 base_value = "453.59237"
@@ -794,8 +855,9 @@ base_units = [ { u = "Gram", p = 1} ]
 
 [[unit]]
 enum_name = "PoundForce"
-print = "lbf"
-parse = ["lbf", "poundforce"]
+strings = [
+	["lbf"], ["poundforce"]
+]
 
 base_value_type = "exact"
 base_value = "4448.2216152605"
@@ -805,9 +867,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 1}, { u = "Second", p = 
 
 [[unit]]
 enum_name = "Newton"
-print = "N"
-parse = ["newton", "newtons"]
-parse_with_prefix = "N"
+strings = [
+	["N", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["newton"], ["newtons"], ["Newton"], ["Newtons"]
+]
 
 base_value_type = "exact"
 base_value = "1000"
@@ -820,9 +883,10 @@ base_units = [ { u = "Gram", p = 1}, { u = "Meter", p = 1}, { u = "Second", p = 
 
 [[unit]]
 enum_name = "Katal"
-print = "kat"
-parse = ["katal"]
-parse_with_prefix = "kat"
+strings = [
+	["kat", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["katal"]
+]
 
 base_value_type = "exact"
 base_value = "1"
@@ -832,8 +896,9 @@ base_units = [ { u = "Mole", p = 1}, { u = "Second", p = -1} ]
 
 [[unit]]
 enum_name = "Degree"
-print = "°"
-parse = ["°", "deg", "degree", "degrees"]
+strings = [
+	["°"], ["deg"], ["degree"], ["degrees"]
+]
 base = true
 no_space = true
 
@@ -841,8 +906,9 @@ no_space = true
 
 [[unit]]
 enum_name = "Radian"
-print = "r"
-parse = ["r", "radian", "radians"]
+strings = [
+	["r"], ["radian"], ["radians"]
+]
 
 base_value_type = "approx"
 base_value = "57.295779513"
@@ -852,8 +918,9 @@ base_units = [ { u = "Degree", p = 1} ]
 
 [[unit]]
 enum_name = "RPM"
-print = "rpm"
-parse = ["rpm"]
+strings = [
+	["rpm"]
+]
 
 base_value_type = "exact"
 base_value = "360"
@@ -865,9 +932,10 @@ base_units = [ { u = "Degree", p = 1}, { u = "Second", p = -1} ]
 
 [[unit]]
 enum_name = "Becquerel"
-print = "Bq"
-parse = ["becquerel"]
-parse_with_prefix = "Bq"
+strings = [
+	["Bq", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["becquerel"]
+]
 
 base_value_type = "exact"
 base_value = "1"
@@ -877,9 +945,10 @@ base_units = [ { u = "Second", p = -1} ]
 
 [[unit]]
 enum_name = "Gray"
-print = "Gy"
-parse = ["gray"]
-parse_with_prefix = "Gy"
+strings = [
+	["Gy", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["gray"]
+]
 
 base_value_type = "exact"
 base_value = "1"
@@ -889,8 +958,9 @@ base_units = [ { u = "Meter", p = 2}, { u = "Second", p = -2} ]
 
 [[unit]] # Not radian, radioactivity unit
 enum_name = "Rad"
-print = "rad"
-parse_with_prefix = "rad"
+strings = [
+	["rad", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+]
 
 base_value_type = "exact"
 base_value = "0.01"
@@ -904,41 +974,49 @@ base_units = [ { u = "Meter", p = 2}, { u = "Second", p = -2} ]
 
 [[unit]]
 enum_name = "Bit"
-print = "bit"
-parse = ["bit", "bits"]
+strings = [
+	["bit"], ["bits"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Frame"
-print = "frame"
-parse = ["frame", "frames"]
+strings = [
+	["frame"], ["frames"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Pixel"
-print = "px"
-parse = ["px", "pixel", "pixels", "Pixel", "Pixels"]
+strings = [
+	["px"], ["pixel"], ["pixels"], ["Pixel"], ["Pixels"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Dot"
-print = "dot"
-parse = ["dot", "dots"]
+strings = [
+	["dot"], ["dots"]
+]
 base = true
 
 
 
 [[unit]]
 enum_name = "Byte"
-print = "B"
-parse = ["Bytes", "bytes", "Byte", "byte", "Octet", "Octets", "octets", "octet"]
-parse_with_prefix = "B"
+strings = [
+	["B", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["b", "","Q","R","Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y","r","q"],
+	["B", "Ei","Pi","Ti","Gi","Mi","Ki"],
+	["b", "Ei","Pi","Ti","Gi","Mi","Ki"],
+	["Bytes"], ["bytes"], ["Byte"], ["byte"], ["Octet"], ["Octets"], ["octets"], ["octet"]
+]
 
 base_value_type = "exact"
 base_value = "8"

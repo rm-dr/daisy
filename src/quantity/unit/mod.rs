@@ -11,4 +11,5 @@ pub use freeunit::FreeUnit;
 use crate::quantity::Quantity;
 use crate::quantity::Scalar;
 
+use prefix::str_to_prefix;
 include!(concat!(env!("OUT_DIR"), "/units.rs"));

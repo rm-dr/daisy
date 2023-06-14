@@ -32,7 +32,15 @@ pub enum Prefix {
 	Zepto,
 	Yocto,
 	Ronto,
-	Quecto
+	Quecto,
+
+
+	BinExa,
+	BinPeta,
+	BinTera,
+	BinGiga,
+	BinMega,
+	BinKilo
 }
 
 
@@ -65,6 +73,14 @@ impl Prefix {
 			Prefix::Ronto => "1e-27",
 			Prefix::Quecto => "1e-30",
 
+
+			Prefix::BinExa => "1152921504606846976", // 2^60
+			Prefix::BinPeta => "1125899906842624", // 2^50
+			Prefix::BinTera => "1099511627776", // 2^40
+			Prefix::BinGiga => "1073741824", // 2^30
+			Prefix::BinMega => "1048576", // 2^20
+			Prefix::BinKilo => "1024", // 2^10
+
 			Prefix::None => { "1" }
 		}).unwrap();
 
@@ -72,6 +88,41 @@ impl Prefix {
 
 	}
 }
+
+macro_rules! str_to_prefix {
+	("") => {Prefix::None};
+	("Q") => {Prefix::Quetta};
+	("R") => {Prefix::Ronna};
+	("Y") => {Prefix::Yotta};
+	("Z") => {Prefix::Zetta};
+	("E") => {Prefix::Exa};
+	("P") => {Prefix::Peta};
+	("T") => {Prefix::Tera};
+	("G") => {Prefix::Giga};
+	("M") => {Prefix::Mega};
+	("k") => {Prefix::Kilo};
+	("h") => {Prefix::Hecto};
+	("da") => {Prefix::Deka};
+	("d") => {Prefix::Deci};
+	("c") => {Prefix::Centi};
+	("m") => {Prefix::Milli};
+	("u") => {Prefix::Micro};
+	("n") => {Prefix::Nano};
+	("p") => {Prefix::Pico};
+	("f") => {Prefix::Femto};
+	("a") => {Prefix::Atto};
+	("z") => {Prefix::Zepto};
+	("y") => {Prefix::Yocto};
+	("r") => {Prefix::Ronto};
+	("q") => {Prefix::Quecto};
+	("Ei") => {Prefix::BinExa};
+	("Pi") => {Prefix::BinPeta};
+	("Ti") => {Prefix::BinTera};
+	("Gi") => {Prefix::BinGiga};
+	("Mi") => {Prefix::BinMega};
+	("Ki") => {Prefix::BinKilo};
+}
+pub (super) use str_to_prefix;
 
 
 impl ToString for Prefix {
@@ -102,6 +153,14 @@ impl ToString for Prefix {
 			Prefix::Yocto => "y",
 			Prefix::Ronto => "r",
 			Prefix::Quecto => "q",
+
+
+			Prefix::BinExa => "Ei",
+			Prefix::BinPeta => "Pi",
+			Prefix::BinTera => "Ti",
+			Prefix::BinGiga => "Gi",
+			Prefix::BinMega => "Mi",
+			Prefix::BinKilo => "Ki",
 
 			Prefix::None => ""
 		})

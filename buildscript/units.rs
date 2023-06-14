@@ -41,7 +41,7 @@ fn write_wholeunit_main(mut file: &File, units: &Vec<Value>) {
 	for u in units {
 		writeln!(file,
 			"\t\t\tWholeUnit::{e} => \"{s}\",",
-			s = u["print"].as_str().unwrap(),
+			s = u["strings"].as_array().unwrap()[0][0].as_str().unwrap(),
 			e = u["enum_name"].as_str().unwrap()
 		).unwrap();
 	}
@@ -158,43 +158,6 @@ fn write_wholeunit_base_factor(mut file: &File, units: &Vec<Value>) {
 }
 
 
-/// Write all SI prefixes.
-/// Used inside freeunit_from_string().
-fn prefix_si(mut file: &File, enum_name: &str, s: &str) {
-	writeln!(file,
-		concat!(
-			"\t\t", "\"{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::None}}),\n",
-			"\t\t", "\"Q{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Quetta}}),\n",
-			"\t\t", "\"R{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Ronna}}),\n",
-			"\t\t", "\"Y{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Yotta}}),\n",
-			"\t\t", "\"Z{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Zetta}}),\n",
-			"\t\t", "\"E{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Exa}}),\n",
-			"\t\t", "\"P{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Peta}}),\n",
-			"\t\t", "\"T{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Tera}}),\n",
-			"\t\t", "\"G{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Giga}}),\n",
-			"\t\t", "\"M{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Mega}}),\n",
-			"\t\t", "\"k{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Kilo}}),\n",
-			"\t\t", "\"h{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Hecto}}),\n",
-			"\t\t", "\"da{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Deka}}),\n",
-			"\t\t", "\"d{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Deci}}),\n",
-			"\t\t", "\"c{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Centi}}),\n",
-			"\t\t", "\"m{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Milli}}),\n",
-			"\t\t", "\"u{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Micro}}),\n",
-			"\t\t", "\"n{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Nano}}),\n",
-			"\t\t", "\"p{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Pico}}),\n",
-			"\t\t", "\"f{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Femto}}),\n",
-			"\t\t", "\"a{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Atto}}),\n",
-			"\t\t", "\"z{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Zepto}}),\n",
-			"\t\t", "\"y{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Yocto}}),\n",
-			"\t\t", "\"r{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Ronto}}),\n",
-			"\t\t", "\"q{s}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: Prefix::Quecto}}),",
-		),
-		e = enum_name,
-		s = s
-	).unwrap();
-}
-
-
 /// Create freeunit_from_string().
 /// Should only be run once.
 fn write_freeunit_from_string(mut file: &File, units: &Vec<Value>) {
@@ -207,33 +170,27 @@ fn write_freeunit_from_string(mut file: &File, units: &Vec<Value>) {
 	).unwrap();
 
 	for u in units {
-		if u.as_table().unwrap().contains_key("parse") {
-			for s in u["parse"].as_array().unwrap() {
+
+		for s in u["strings"].as_array().unwrap() {
+
+			if s.as_array().unwrap().len() == 1 {
 				writeln!(file,
 					"\t\t\"{}\" => Some(FreeUnit{{whole: WholeUnit::{}, prefix: Prefix::None}}),",
-					s.as_str().unwrap(),
+					s.as_array().unwrap()[0].as_str().unwrap(),
 					u["enum_name"].as_str().unwrap()
 				).unwrap();
-			}
-		}
-
-
-		if u.as_table().unwrap().contains_key("parse_with_prefix") {
-			if u.as_table().unwrap()["parse_with_prefix"].is_array() {
-				for p in u["parse_with_prefix"].as_array().unwrap() {
-					prefix_si(
-						&file,
-						u["enum_name"].as_str().unwrap(),
-						p.as_str().unwrap()
-					);
-				}
 			} else {
-				prefix_si(
-					&file,
-					u["enum_name"].as_str().unwrap(),
-					u["parse_with_prefix"].as_str().unwrap()
-				);
+				for p in &s.as_array().unwrap()[1..] {
+					writeln!(file,
+						"\t\t\"{p}{u}\" => Some(FreeUnit{{whole: WholeUnit::{e}, prefix: str_to_prefix!(\"{p}\")}}),",
+						u = s.as_array().unwrap()[0].as_str().unwrap(),
+						p = p.as_str().unwrap(),
+						e = u["enum_name"].as_str().unwrap()
+					).unwrap();
+				}
 			}
+
+
 		}
 
 		writeln!(file, "").unwrap();
