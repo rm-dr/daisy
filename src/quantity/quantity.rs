@@ -99,16 +99,19 @@ impl Quantity {
 
 	pub fn insert_unit(&mut self, ui: FreeUnit, pi: Scalar) { self.unit.insert(ui, pi) }
 	pub fn set_unit(&mut self, u: Unit) { self.unit = u; }
+	pub fn without_unit(&self) -> Quantity { Quantity::from_scalar(self.scalar.clone()) }
 
-
-	pub fn convert_to(self, other: Quantity) -> Option<Quantity> {
+	pub fn convert_to(&self, other: Quantity) -> Option<Quantity> {
 		if !self.unit.compatible_with(&other.unit) { return None; }
 
+		let n = self.clone();
 		let fa = self.unit.to_base_factor();
 		let fb = other.unit.to_base_factor();
 
-		return Some(self.mul_no_convert(fa).div_no_convert(fb))
+		return Some(n.mul_no_convert(fa).div_no_convert(fb))
 	}
+
+	pub fn convert_to_base(&self) -> Quantity { self.convert_to(self.unit.to_base()).unwrap() }
 }
 
 

@@ -123,7 +123,7 @@ impl Unit {
 			flag = false;
 			for (uo, po) in other.get_val() {
 				if {
-					us.get_base().unit.compatible_with(&uo.get_base().unit)
+					us.to_base().unit.compatible_with(&uo.to_base().unit)
 				} {
 					factor.insert_unit(us.clone(), po.clone());
 					flag = true;
@@ -141,7 +141,7 @@ impl Unit {
 			flag = false;
 			for (us, _) in self.get_val() {
 				if {
-					us.get_base().unit.compatible_with(&uo.get_base().unit)
+					us.to_base().unit.compatible_with(&uo.to_base().unit)
 				} {
 					factor.insert_unit(us.clone(), po.clone());
 					flag = true;
@@ -186,11 +186,21 @@ impl Unit {
 
 		return q;
 	}
+
+	pub fn to_base(&self) -> Quantity {
+		let mut q = Quantity::new_rational(1f64).unwrap();
+
+		for (u, p) in self.get_val().iter() {
+			let b = u.to_base();
+			q.mul_assign_no_convert(b.pow(Quantity::from_scalar(p.clone())));
+		}
+
+		return q;
+	}
 }
 
 impl Unit {
 	pub fn from_string(s: &str) -> Option<Quantity> {
-
 		let b = freeunit_from_string(s);
 		if b.is_none() { return None; }
 		let b = Unit::from_free(b.unwrap());

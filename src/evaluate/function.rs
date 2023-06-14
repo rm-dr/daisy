@@ -11,6 +11,13 @@ pub fn eval_function(f: &Function, args: &VecDeque<Token>) -> Result<Token, Eval
 	let a = &args[0];
 	let Token::Quantity(q) = a else {panic!()};
 
+
+	match f {
+		Function::NoUnit => { return Ok(Token::Quantity(q.without_unit())); }
+		Function::ToBase => { return Ok(Token::Quantity(q.convert_to_base())); }
+		_ => {}
+	}
+
 	if !q.unitless() {
 		return Err(EvalError::IncompatibleUnit);
 	}
@@ -89,5 +96,8 @@ pub fn eval_function(f: &Function, args: &VecDeque<Token>) -> Result<Token, Eval
 			);
 		},
 
+		Function::ToBase
+		| Function::NoUnit
+		=> panic!()
 	}
 }

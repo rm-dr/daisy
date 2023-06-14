@@ -51,7 +51,7 @@ impl FreeUnit {
 	}
 
 	// Get this unit in terms of base units
-	pub fn get_base(&self) -> Quantity {
+	pub fn to_base(&self) -> Quantity {
 		let q = self.whole.base_factor();
 		let mut q = q.unwrap_or(Quantity::new_rational_from_string("1").unwrap());
 

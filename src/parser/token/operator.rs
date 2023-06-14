@@ -61,7 +61,13 @@ impl Operator {
 
 	#[inline(always)]
 	pub fn from_string(s: &str) -> Option<Operator> {
-		match s {
+
+		let f = Function::from_string(s);
+		if let Some(f) = f {
+			return Some(Operator::Function(f));
+		}
+
+		return match s {
 			"+"      => {Some( Operator::Add )},
 			"-"      => {Some( Operator::Subtract )},
 			"neg"    => {Some( Operator::Negative )},
@@ -76,32 +82,8 @@ impl Operator {
 			"!"      => {Some( Operator::Factorial )},
 			"sqrt"|"rt"|"√" => {Some( Operator::Sqrt )},
 
-			"abs"     => {Some( Operator::Function(Function::Abs) )},
-			"floor"   => {Some( Operator::Function(Function::Floor) )},
-			"ceil"    => {Some( Operator::Function(Function::Ceil) )},
-			"round"   => {Some( Operator::Function(Function::Round) )},
-			"ln"      => {Some( Operator::Function(Function::NaturalLog) )},
-			"log"     => {Some( Operator::Function(Function::TenLog) )},
-			"sin"     => {Some( Operator::Function(Function::Sin) )},
-			"cos"     => {Some( Operator::Function(Function::Cos) )},
-			"tan"     => {Some( Operator::Function(Function::Tan) )},
-			"asin"    => {Some( Operator::Function(Function::Asin) )},
-			"acos"    => {Some( Operator::Function(Function::Acos) )},
-			"atan"    => {Some( Operator::Function(Function::Atan) )},
-			"csc"     => {Some( Operator::Function(Function::Csc) )},
-			"secant"  => {Some( Operator::Function(Function::Sec) )},
-			"cot"     => {Some( Operator::Function(Function::Cot) )},
-			"sinh"    => {Some( Operator::Function(Function::Sinh) )},
-			"cosh"    => {Some( Operator::Function(Function::Cosh) )},
-			"tanh"    => {Some( Operator::Function(Function::Tanh) )},
-			"asinh"   => {Some( Operator::Function(Function::Asinh) )},
-			"acosh"   => {Some( Operator::Function(Function::Acosh) )},
-			"atanh"   => {Some( Operator::Function(Function::Atanh) )},
-			"csch"    => {Some( Operator::Function(Function::Csch) )},
-			"sech"    => {Some( Operator::Function(Function::Sech) )},
-			"coth"    => {Some( Operator::Function(Function::Coth) )},
 			_ => None
-		}
+		};
 	}
 
 	#[inline(always)]
