@@ -9,7 +9,7 @@ fn eval_to_str(s: &str) -> Result<String, ()> {
 	};
 	//let out_str = g.print();
 
-	return match evaluate(&g) {
+	return match evaluate(&g, &Vec::new()) {
 		Ok(x) => Ok(x.to_string_outer()),
 		Err(_) => Err(())
 	};

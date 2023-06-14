@@ -21,16 +21,18 @@ use crate::evaluate::EvalError;
 
 
 
+
 #[inline(always)]
 fn do_expression(
 	stdout: &mut RawTerminal<std::io::Stdout>,
-	s: &String
-) -> Result<(), std::io::Error> {
+	s: &String,
+	history: &Vec<parser::Token>
+) -> Result<parser::Token, ()> {
 	#[cfg(debug_assertions)]
-	RawTerminal::suspend_raw_mode(&stdout)?;
+	RawTerminal::suspend_raw_mode(&stdout).unwrap();
 	let g = parser::parse(&s);
 	#[cfg(debug_assertions)]
-	RawTerminal::activate_raw_mode(&stdout)?;
+	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
 	// Check for parse errors
 	if let Err((l, e)) = g {
@@ -41,8 +43,8 @@ fn do_expression(
 			"^".repeat(l.len),
 			e.to_string(),
 			color::Fg(color::Reset),
-		)?;
-		return Ok(());
+		).unwrap();
+		return Err(());
 	}
 
 	let Ok(g) = g else {panic!()};
@@ -54,15 +56,15 @@ fn do_expression(
 		style::Bold, color::Fg(color::Magenta),
 		style::Reset, color::Fg(color::Reset),
 		g.to_string()
-	)?;
+	).unwrap();
 
 
 	// Evaluate expression
 	#[cfg(debug_assertions)]
-	RawTerminal::suspend_raw_mode(&stdout)?;
-	let g = evaluate(&g);
+	RawTerminal::suspend_raw_mode(&stdout).unwrap();
+	let g = evaluate(&g, history);
 	#[cfg(debug_assertions)]
-	RawTerminal::activate_raw_mode(&stdout)?;
+	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
 	// Show output
 	if let Ok(q) = g {
@@ -73,7 +75,9 @@ fn do_expression(
 			style::Reset,
 			q.to_string_outer(),
 			color::Fg(color::Reset)
-		)?;
+		).unwrap();
+		return Ok(q);
+
 	} else {
 		match g {
 			Ok(_) => panic!(),
@@ -85,7 +89,7 @@ fn do_expression(
 					color::Fg(color::Red),
 					style::Reset,
 					color::Fg(color::Reset),
-				)?;
+				).unwrap();
 			},
 
 			Err(EvalError::ZeroDivision) => {
@@ -95,7 +99,7 @@ fn do_expression(
 					color::Fg(color::Red),
 					style::Reset,
 					color::Fg(color::Reset),
-				)?;
+				).unwrap();
 			},
 
 			Err(EvalError::BadMath) => {
@@ -105,7 +109,7 @@ fn do_expression(
 					color::Fg(color::Red),
 					style::Reset,
 					color::Fg(color::Reset),
-				)?;
+				).unwrap();
 			},
 
 			Err(EvalError::IncompatibleUnit) => {
@@ -115,14 +119,22 @@ fn do_expression(
 					color::Fg(color::Red),
 					style::Reset,
 					color::Fg(color::Reset),
-				)?;
+				).unwrap();
+			},
+
+			Err(EvalError::NoHistory) => {
+				write!(
+					stdout, "\n  {}{}Evaluation Error: {}There is no previous answer to reference{}\r\n\n",
+					style::Bold,
+					color::Fg(color::Red),
+					style::Reset,
+					color::Fg(color::Reset),
+				).unwrap();
 			}
 		}
 	}
 
-
-
-	return Ok(());
+	return Err(());
 }
 
 
@@ -146,6 +158,8 @@ pub fn main() -> Result<(), std::io::Error> {
 	//write!(stdout, "{:?}", size).unwrap();
 
 	let mut pb: PromptBuffer = PromptBuffer::new(64);
+	let mut history: Vec<parser::Token> = Vec::new();
+
 
 	'outer: loop {
 
@@ -165,7 +179,8 @@ pub fn main() -> Result<(), std::io::Error> {
 						} else if command::is_command(&in_str) {
 							command::do_command(&mut stdout, &in_str)?;
 						} else {
-							do_expression(&mut stdout, &in_str)?;
+							let r = do_expression(&mut stdout, &in_str, &history);
+							if let Ok(t) = r { history.push(t); }
 						}
 
 						break;

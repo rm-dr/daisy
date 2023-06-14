@@ -8,6 +8,7 @@ use super::Constant;
 #[derive(Debug)]
 #[derive(Clone)]
 pub enum Token {
+	Variable(String),
 	Quantity(Quantity),
 	Constant(Constant),
 	Operator(Operator, VecDeque<Token>),
@@ -18,6 +19,7 @@ impl ToString for Token {
 		match self {
 			Token::Quantity(v) => v.to_string(),
 			Token::Constant(c) => c.to_string(),
+			Token::Variable(s) => s.clone(),
 			Token::Operator(o,a) => o.print(a)
 		}
 	}
@@ -30,6 +32,7 @@ impl Token {
 		match self {
 			Token::Quantity(v) => v.to_string_outer(),
 			Token::Constant(c) => c.to_string(),
+			Token::Variable(s) => s.clone(),
 			Token::Operator(o,a) => o.print(a)
 		}
 	}

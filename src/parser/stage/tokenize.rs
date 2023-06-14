@@ -50,9 +50,9 @@ fn push_token(g: &mut VecDeque<PreToken>, t: Option<PreToken>, stop_i: usize) {
 		}
 	}
 
+	// Some operators are written as words.
 	if let PreToken::PreWord(l, s) = &t {
-		let o = Operator::from_string(s);
-		if o.is_some() {
+		if Operator::from_string(s).is_some() {
 			t = PreToken::PreOperator(*l, s.clone());
 		}
 	}

@@ -6,7 +6,7 @@ use super::function::eval_function;
 use super::EvalError;
 
 
-pub fn evaluate(t: &Token) -> Result<Token, EvalError> {
+pub fn evaluate(t: &Token, history: &Vec<Token>) -> Result<Token, EvalError> {
 	let mut g = t.clone();
 	let mut coords: Vec<usize> = Vec::with_capacity(16);
 	coords.push(0);
@@ -31,9 +31,18 @@ pub fn evaluate(t: &Token) -> Result<Token, EvalError> {
 				loop {
 					e = match e {
 						Token::Quantity(_) => { break; },
-						Token::Constant(c) => { evaluate(&c.value()).unwrap() }
-						Token::Operator(Operator::Function(f), v) => { eval_function(&f, &v)? }
-						Token::Operator(o, v) => { eval_operator(&o, &v)? }
+						Token::Constant(c) => { evaluate(&c.value(), history).unwrap() },
+						Token::Operator(Operator::Function(f), v) => { eval_function(&f, &v)? },
+						Token::Operator(o, v) => { eval_operator(&o, &v)? },
+						Token::Variable(s) => {
+							if s == "ans" {
+								if history.len() == 0 {
+									return Err(EvalError::NoHistory);
+								} else {
+									history.last().unwrap().clone()
+								}
+							} else { panic!(); }
+						}
 					};
 				}
 
@@ -50,8 +59,10 @@ pub fn evaluate(t: &Token) -> Result<Token, EvalError> {
 
 
 		match h {
-			Token::Operator(_,_) => { coords.push(0); },
-			Token::Constant(_) => { coords.push(0); },
+			Token::Operator(_,_)
+			| Token::Constant(_)
+			| Token::Variable(_)
+			=> { coords.push(0); },
 
 			Token::Quantity(_) => {
 				let l = coords.pop().unwrap();

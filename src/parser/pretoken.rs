@@ -83,6 +83,9 @@ impl PreToken {
 				let c = Unit::from_string(&s);
 				if c.is_some() { return Ok(Token::Quantity(c.unwrap())); }
 
+
+				if s == "ans" { return Ok(Token::Variable(String::from("ans"))); }
+
 				return Err((l, ParserError::Undefined(s)));
 			}
 
