@@ -1,5 +1,4 @@
  - Fix unit autoconversion (Hz * s)
- - Reference previous results
  - Minimize parenthesis when printing expressions
  - Sane autoconversion (mi + km)
 
