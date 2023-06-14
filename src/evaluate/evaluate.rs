@@ -1,12 +1,13 @@
 use crate::parser::Token;
 use crate::parser::Operator;
+use crate::context::Context;
+
 
 use super::operator::eval_operator;
 use super::function::eval_function;
 use super::EvalError;
 
-
-pub fn evaluate(t: &Token, history: &Vec<Token>) -> Result<Token, EvalError> {
+pub fn evaluate(t: &Token, context: &Context) -> Result<Token, EvalError> {
 	let mut g = t.clone();
 	let mut coords: Vec<usize> = Vec::with_capacity(16);
 	coords.push(0);
@@ -31,17 +32,13 @@ pub fn evaluate(t: &Token, history: &Vec<Token>) -> Result<Token, EvalError> {
 				loop {
 					e = match e {
 						Token::Quantity(_) => { break; },
-						Token::Constant(c) => { evaluate(&c.value(), history).unwrap() },
+						Token::Constant(c) => { evaluate(&c.value(), context).unwrap() },
 						Token::Operator(Operator::Function(f), v) => { eval_function(&f, &v)? },
 						Token::Operator(o, v) => { eval_operator(&o, &v)? },
 						Token::Variable(s) => {
-							if s == "ans" {
-								if history.len() == 0 {
-									return Err(EvalError::NoHistory);
-								} else {
-									history.last().unwrap().clone()
-								}
-							} else { panic!(); }
+							if let Some(t) = context.get_variable(s) { t } else {
+								return Err(EvalError::NoHistory);
+							}
 						}
 					};
 				}

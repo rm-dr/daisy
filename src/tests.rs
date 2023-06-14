@@ -1,6 +1,7 @@
 // Many of these have been borrowed from insect.
 use crate::parser;
 use crate::evaluate::evaluate;
+use crate::context::Context;
 
 fn eval_to_str(s: &str) -> Result<String, ()> {
 	let g = match parser::parse(&String::from(s)) {
@@ -9,7 +10,7 @@ fn eval_to_str(s: &str) -> Result<String, ()> {
 	};
 	//let out_str = g.print();
 
-	return match evaluate(&g, &Vec::new()) {
+	return match evaluate(&g, &Context::new()) {
 		Ok(x) => Ok(x.to_string_outer()),
 		Err(_) => Err(())
 	};

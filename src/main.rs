@@ -2,7 +2,7 @@ pub mod parser;
 pub mod command;
 pub mod quantity;
 pub mod evaluate;
-
+pub mod context;
 
 mod entry;
 use crate::entry::main_e;

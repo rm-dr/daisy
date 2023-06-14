@@ -13,20 +13,18 @@ use termion::{
 };
 
 use super::promptbuffer::PromptBuffer;
-//use crate::tokens::EvalError;
 use crate::parser;
 use crate::command;
 use crate::evaluate::evaluate;
 use crate::evaluate::EvalError;
-
-
+use crate::context::Context;
 
 
 #[inline(always)]
 fn do_expression(
 	stdout: &mut RawTerminal<std::io::Stdout>,
 	s: &String,
-	history: &Vec<parser::Token>
+	context: &Context
 ) -> Result<parser::Token, ()> {
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
@@ -62,7 +60,7 @@ fn do_expression(
 	// Evaluate expression
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g = evaluate(&g, history);
+	let g = evaluate(&g, context);
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
@@ -158,7 +156,7 @@ pub fn main() -> Result<(), std::io::Error> {
 	//write!(stdout, "{:?}", size).unwrap();
 
 	let mut pb: PromptBuffer = PromptBuffer::new(64);
-	let mut history: Vec<parser::Token> = Vec::new();
+	let mut context: Context = Context::new();
 
 
 	'outer: loop {
@@ -179,8 +177,8 @@ pub fn main() -> Result<(), std::io::Error> {
 						} else if command::is_command(&in_str) {
 							command::do_command(&mut stdout, &in_str)?;
 						} else {
-							let r = do_expression(&mut stdout, &in_str, &history);
-							if let Ok(t) = r { history.push(t); }
+							let r = do_expression(&mut stdout, &in_str, &context);
+							if let Ok(t) = r { context.push_hist(t); }
 						}
 
 						break;
