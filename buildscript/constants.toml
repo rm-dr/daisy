@@ -76,6 +76,12 @@ value = "1e-15"
 unit = true
 
 [[constant]]
+enum_name = "WH"
+strings = "Wh"
+value = "W * hour"
+unit = true
+
+[[constant]]
 enum_name = "KWH"
 strings = "kWh"
 value = "kW * hour"
