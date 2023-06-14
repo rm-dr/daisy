@@ -60,7 +60,7 @@
  - Show base units on error
 
 ## Units
- - Selective prefixes: tonne (k M G), Byte (TiB, etc), calorie (kcal)
+ - long prefixes (megatonne, etc)
  - Print units with powers instead of /
  - HMS for degrees
  - Exact radians, using pi constant?
