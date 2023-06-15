@@ -1,7 +1,13 @@
  - Fix unit autoconversion (Hz * s)
  - Minimize parenthesis when printing expressions
  - Sane autoconversion (mi + km)
-
+ - Consistent errors:
+   - Consistent look
+   - Linelocation for math errors
+   - Undefined error?
+   - Better error when `sin = 2`
+   - Check syntax when parsing or when evaluating?
+ - list and delete variables
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
@@ -30,7 +36,6 @@
  - Backend-independent colorful printing
 
 ## Math Features
- - Variable definitions (list and delete commands)
  - Function definitions
  - Dice
  - Mean, Median, Min, Max: arrays and multi-argument functions
@@ -59,7 +64,4 @@
  - HMS for degrees
  - Exact radians, using pi constant?
  - Weird units: flops, lumen, lux, bel
-
-## Bonus
  - Plural unit names
- - Manpage
