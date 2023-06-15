@@ -11,7 +11,8 @@ use super::Function;
 #[derive(Clone)]
 #[repr(usize)]
 pub enum Operator {
-	ModuloLong = 0, // Mod invoked with "mod"
+	Define = 0, // Variable and function definition
+	ModuloLong, // Mod invoked with "mod"
 	DivideLong,
 	UnitConvert,
 	Subtract,
@@ -68,6 +69,7 @@ impl Operator {
 		}
 
 		return match s {
+			"="      => {Some( Operator::Define )},
 			"+"      => {Some( Operator::Add )},
 			"-"      => {Some( Operator::Subtract )},
 			"neg"    => {Some( Operator::Negative )},
@@ -166,6 +168,7 @@ impl Operator {
 			| Operator::Power
 			| Operator::ModuloLong
 			| Operator::UnitConvert
+			| Operator::Define
 			=> { Token::Operator(self, args) },
 		}
 	}
@@ -200,6 +203,14 @@ impl Operator {
 			Operator::Sqrt |
 			Operator::Divide |
 			Operator::Subtract => { panic!() }
+
+			Operator::Define => {
+				return format!(
+					"{} = {}",
+					self.add_parens_to_arg(&args[0]),
+					self.add_parens_to_arg(&args[1])
+				);
+			},
 
 			Operator::Flip => {
 				return format!("{}⁻¹", Operator::Divide.add_parens_to_arg(&args[0]));

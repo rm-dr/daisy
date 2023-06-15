@@ -15,7 +15,6 @@ pub enum ParserError {
 	ExtraCloseParen,
 	EmptyGroup,
 	Syntax,
-	Undefined(String),
 	BadNumber
 }
 
@@ -33,9 +32,6 @@ impl ToString for ParserError {
 			},
 			ParserError::Syntax => {
 				String::from("Syntax")
-			},
-			ParserError::Undefined(s) => {
-				format!("\"{s}\" isn't defined")
 			},
 			ParserError::BadNumber => {
 				String::from("Invalid number")

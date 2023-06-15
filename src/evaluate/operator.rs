@@ -4,8 +4,9 @@ use crate::quantity::Quantity;
 use crate::parser::Operator;
 use crate::parser::Token;
 use super::EvalError;
+use crate::context::Context;
 
-pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, EvalError> {
+pub fn eval_operator(op: &Operator, args: &VecDeque<Token>, context: &mut Context) -> Result<Option<Token>, EvalError> {
 	match op {
 
 		// Handled seperately in evaluate.rs
@@ -19,32 +20,42 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, Eva
 		Operator::DivideLong |
 		Operator::Subtract => { panic!() }
 
+		Operator::Define => {
+			if args.len() != 2 { panic!() };
+			let b = &args[1];
+
+			if let Token::Variable(s) = &args[0] {
+				context.push_var(s.clone(), b.clone());
+				return Ok(Some(b.clone()));
+			} else { return Err(EvalError::BadDefineName); }
+		},
+
 		Operator::Negative => {
-			if args.len() != 1 {panic!()};
+			if args.len() != 1 { panic!() };
 			let args = &args[0];
 
 			if let Token::Quantity(v) = args {
-				return Ok(Token::Quantity(-v.clone()));
-			} else { panic!(); }
+				return Ok(Some(Token::Quantity(-v.clone())));
+			} else { return Ok(None); }
 		},
 
 		Operator::Flip => {
-			if args.len() != 1 {panic!()};
+			if args.len() != 1 { panic!() };
 			let args = &args[0];
 
 			if let Token::Quantity(v) = args {
 				if v.is_zero() { return Err(EvalError::ZeroDivision); }
-				return Ok(Token::Quantity(
+				return Ok(Some(Token::Quantity(
 					Quantity::new_rational(1f64).unwrap()/v.clone()
-				));
-			} else { panic!(); }
+				)));
+			} else { return Ok(None); }
 		},
 
 		Operator::Add => {
 			let mut sum: Quantity;
 			if let Token::Quantity(s) = &args[0] {
 				sum = s.clone();
-			} else {panic!()};
+			} else { return Ok(None); };
 
 			let mut i: usize = 1;
 			while i < args.len() {
@@ -56,12 +67,10 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, Eva
 					}
 
 					sum += v.clone();
-				} else {
-					panic!();
-				}
+				} else { return Ok(None); }
 				i += 1;
 			}
-			return Ok(Token::Quantity(sum));
+			return Ok(Some(Token::Quantity(sum)));
 		},
 
 		Operator::Multiply => {
@@ -70,16 +79,14 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, Eva
 				let j = i;
 				if let Token::Quantity(v) = j {
 					prod *= v.clone();
-				} else {
-					panic!();
-				}
+				} else { return Ok(None); }
 			}
-			return Ok(Token::Quantity(prod));
+			return Ok(Some(Token::Quantity(prod)));
 		},
 
 		Operator::ModuloLong
 		| Operator::Modulo => {
-			if args.len() != 2 {panic!()};
+			if args.len() != 2 { panic!() };
 			let a = &args[0];
 			let b = &args[1];
 
@@ -94,14 +101,14 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, Eva
 					if va.fract() != Quantity::new_rational(0f64).unwrap() { return Err(EvalError::BadMath); }
 					if vb.fract() != Quantity::new_rational(0f64).unwrap() { return Err(EvalError::BadMath); }
 
-					return Ok(Token::Quantity(va.clone() % vb.clone()));
-				} else { panic!(); }
-			} else { panic!(); }
+					return Ok(Some(Token::Quantity(va.clone() % vb.clone())));
+				} else { return Ok(None); }
+			} else { return Ok(None); }
 		},
 
 		Operator::UnitConvert
 		=> {
-			if args.len() != 2 {panic!()};
+			if args.len() != 2 { panic!() };
 			let a = &args[0];
 			let b = &args[1];
 
@@ -111,9 +118,9 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, Eva
 					if n.is_none() {
 						return Err(EvalError::IncompatibleUnit);
 					}
-					return Ok(Token::Quantity(n.unwrap()));
-				} else { panic!(); }
-			} else { panic!(); }
+					return Ok(Some(Token::Quantity(n.unwrap())));
+				} else { return Ok(None); }
+			} else { return Ok(None); }
 		},
 
 		Operator::Power => {
@@ -134,9 +141,9 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, Eva
 
 					let p = va.pow(vb.clone());
 					if p.is_nan() {return Err(EvalError::BadMath);}
-					return Ok(Token::Quantity(p));
-				} else { panic!(); }
-			} else { panic!(); }
+					return Ok(Some(Token::Quantity(p)));
+				} else { return Ok(None); }
+			} else { return Ok(None); }
 		},
 
 		Operator::Factorial => {
@@ -159,8 +166,8 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Token>) -> Result<Token, Eva
 					u = u - Quantity::new_rational(1f64).unwrap();
 				}
 
-				return Ok(Token::Quantity(prod));
-			} else { panic!(); }
+				return Ok(Some(Token::Quantity(prod)));
+			} else { return Ok(None); }
 		}
 	};
 }

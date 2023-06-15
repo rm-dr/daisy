@@ -37,6 +37,13 @@ impl Token {
 		}
 	}
 
+	pub fn is_quantity(&self) -> bool {
+		match self {
+			Token::Quantity(_) => true,
+			_ => false
+		}
+	}
+
 	#[inline(always)]
 	pub fn get_args_mut(&mut self) -> Option<&mut VecDeque<Token>> {
 		match self {
@@ -46,14 +53,34 @@ impl Token {
 	}
 
 	#[inline(always)]
-	pub fn get_at_coords<'a>(g: &'a mut Token, coords: &Vec<usize>) -> &'a mut Token {
-		let mut h = &mut *g;
-
-		for t in coords.iter() {
-			let inner = h.get_args_mut().unwrap();
-			h = &mut inner[*t];
+	pub fn get_args(&self) -> Option<&VecDeque<Token>> {
+		match self {
+			Token::Operator(_, ref a) => Some(a),
+			_ => None
 		}
+	}
 
-		return h;
+	#[inline(always)]
+	pub fn get_at_coords<'a, 'b, I>(&'a self, coords: I) -> Option<&'a Token>
+	where I: IntoIterator<Item = &'b usize> + Sized {
+		let mut g = self;
+		for t in coords.into_iter() {
+			let args = g.get_args();
+			let Some(args) = args else { return None; };
+			g = &args[*t];
+		}
+		return Some(g);
+	}
+
+	#[inline(always)]
+	pub fn get_at_coords_mut<'a, 'b, I>(&'a mut self, coords: I) -> Option<&'a mut Token>
+	where I: IntoIterator<Item = &'b usize> + Sized {
+		let mut g = self;
+		for t in coords.into_iter() {
+			let args = g.get_args_mut();
+			let Some(args) = args else { return None; };
+			g = &mut args[*t];
+		}
+		return Some(g);
 	}
 }

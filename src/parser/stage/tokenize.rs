@@ -136,7 +136,7 @@ pub fn tokenize(input: &String) -> VecDeque<PreToken> {
 
 			// Operator
 			'*'|'×'|'/'|'÷'|
-			'^'|'!'|'%'
+			'^'|'!'|'%'|'='
 			=> {
 				match &mut t {
 					Some(PreToken::PreOperator(_, val)) => { val.push(c); },

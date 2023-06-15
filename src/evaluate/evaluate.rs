@@ -26,7 +26,9 @@ pub fn evaluate(t: &Token, context: &mut Context) -> Result<Token, EvalError> {
 	// Exits when we finish parsing the root node.
 	loop {
 		// Current position in the tree
-		let g = root.get_at_coords_mut(&coords[0 .. coords.len() - 1]);
+		let g = root.get_at_coords_mut(
+			&coords[0 .. coords.len() - 1]
+		).unwrap();
 
 		// "Move up" step.
 		// We move up if we're at a leaf or if we're out of children to move down to.
@@ -36,16 +38,18 @@ pub fn evaluate(t: &Token, context: &mut Context) -> Result<Token, EvalError> {
 			(coords.len() != 0 && (*coords.last().unwrap() >= g.get_args().unwrap().len()))
 		} {
 
-			if !g.is_quantity() {
-				*g = match g {
-					Token::Quantity(_) => panic!(),
 
-					Token::Constant(c) => { evaluate(&c.value(), context).unwrap() },
-					Token::Variable(s) => { context.get_variable(&s).unwrap() },
-					Token::Operator(Operator::Function(f), v) => { eval_function(&f, &v)? },
-					Token::Operator(o, v) => { eval_operator(&o, &v, context)? },
-				}
-			}
+			let new = match g {
+				Token::Quantity(_) => None,
+
+				Token::Constant(c) => { Some(evaluate(&c.value(), context).unwrap()) },
+				Token::Variable(s) => { context.get_variable(&s) },
+				Token::Operator(Operator::Function(f), v) => { Some(eval_function(&f, &v)?) },
+				Token::Operator(o, v) => { eval_operator(&o, &v, context)? },
+			};
+
+			if new.is_some() { *g = new.unwrap()}
+
 
 			// Move up the tree
 			coords.pop();
@@ -56,6 +60,13 @@ pub fn evaluate(t: &Token, context: &mut Context) -> Result<Token, EvalError> {
 		} else {
 			// Move down the tree
 			coords.push(0);
+
+			let n = root.get_at_coords(&coords[..]);
+			if let Some(n) = n {
+				if let Token::Operator(Operator::Define, _) = n {
+					*coords.last_mut().unwrap() += 1;
+				}
+			}
 		}
 	}
 

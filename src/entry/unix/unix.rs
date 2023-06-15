@@ -24,7 +24,7 @@ use crate::context::Context;
 fn do_expression(
 	stdout: &mut RawTerminal<std::io::Stdout>,
 	s: &String,
-	context: &Context
+	context: &mut Context
 ) -> Result<parser::Token, ()> {
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
@@ -118,6 +118,16 @@ fn do_expression(
 					style::Reset,
 					color::Fg(color::Reset),
 				).unwrap();
+			},
+
+			Err(EvalError::BadDefineName) => {
+				write!(
+					stdout, "\n  {}{}Evaluation Error: {}Invalid variable name{}\r\n\n",
+					style::Bold,
+					color::Fg(color::Red),
+					style::Reset,
+					color::Fg(color::Reset),
+				).unwrap();
 			}
 		}
 	}
@@ -167,7 +177,7 @@ pub fn main() -> Result<(), std::io::Error> {
 						} else if command::is_command(&in_str) {
 							command::do_command(&mut stdout, &in_str)?;
 						} else {
-							let r = do_expression(&mut stdout, &in_str, &context);
+							let r = do_expression(&mut stdout, &in_str, &mut context);
 							if let Ok(t) = r { context.push_hist(t); }
 						}
 

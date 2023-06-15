@@ -68,13 +68,15 @@ impl PreToken {
 				}
 
 				let r = Quantity::new_rational_from_string(&s);
+
 				if r.is_none() {
 					return Err((l, ParserError::BadNumber))
 				}
+
 				return Ok(Token::Quantity(r.unwrap()));
 			},
 
-			PreToken::PreWord(l, s) => {
+			PreToken::PreWord(_l, s) => {
 
 				let c = Constant::from_string(&s);
 				if c.is_some() { return Ok(Token::Constant(c.unwrap())); }
@@ -84,8 +86,7 @@ impl PreToken {
 
 				let c = context.get_variable(&s);
 				if c.is_some() { return Ok(Token::Variable(s)); }
-
-				return Err((l, ParserError::Undefined(s)));
+				return Ok(Token::Variable(s));
 			}
 
 			PreToken::Container(v) => { return Ok(v); }
