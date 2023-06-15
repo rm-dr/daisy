@@ -145,12 +145,18 @@ impl Quantity {
 	quant_foward!(sin);
 	quant_foward!(cos);
 	quant_foward!(tan);
+	quant_foward!(csc);
+	quant_foward!(sec);
+	quant_foward!(cot);
 	quant_foward!(asin);
 	quant_foward!(acos);
 	quant_foward!(atan);
 	quant_foward!(sinh);
 	quant_foward!(cosh);
 	quant_foward!(tanh);
+	quant_foward!(csch);
+	quant_foward!(sech);
+	quant_foward!(coth);
 	quant_foward!(asinh);
 	quant_foward!(acosh);
 	quant_foward!(atanh);

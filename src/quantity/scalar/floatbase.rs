@@ -138,6 +138,9 @@ impl ScalarBase for FloatBase {
 	foward!(sin);
 	foward!(cos);
 	foward!(tan);
+	foward!(csc);
+	foward!(sec);
+	foward!(cot);
 	foward!(asin);
 	foward!(acos);
 	foward!(atan);
@@ -145,6 +148,9 @@ impl ScalarBase for FloatBase {
 	foward!(sinh);
 	foward!(cosh);
 	foward!(tanh);
+	foward!(csch);
+	foward!(sech);
+	foward!(coth);
 	foward!(asinh);
 	foward!(acosh);
 	foward!(atanh);

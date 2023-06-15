@@ -2,7 +2,6 @@ use std::collections::VecDeque;
 
 use crate::parser::Token;
 use crate::parser::Function;
-use crate::parser::Operator;
 use super::EvalError;
 
 
@@ -38,31 +37,9 @@ pub fn eval_function(f: &Function, args: &VecDeque<Token>) -> Result<Token, Eval
 		Function::Acos => { return Ok(Token::Quantity(q.acos())); },
 		Function::Atan => { return Ok(Token::Quantity(q.atan())); },
 
-		Function::Csc => {
-			return Ok(
-				Token::Operator(
-					Operator::Flip,
-					VecDeque::from(vec!(Token::Quantity(q.sin())))
-				)
-			);
-		},
-		Function::Sec => {
-			return Ok(
-				Token::Operator(
-					Operator::Flip,
-					VecDeque::from(vec!(Token::Quantity(q.cos())))
-				)
-			);
-		},
-		Function::Cot => {
-			return Ok(
-				Token::Operator(
-					Operator::Flip,
-					VecDeque::from(vec!(Token::Quantity(q.tan())))
-				)
-			);
-		},
-
+		Function::Csc => { return Ok(Token::Quantity(q.csc())); },
+		Function::Sec => { return Ok(Token::Quantity(q.sec())); },
+		Function::Cot => { return Ok(Token::Quantity(q.cot())); },
 
 		Function::Sinh => { return Ok(Token::Quantity(q.sinh())); },
 		Function::Cosh => { return Ok(Token::Quantity(q.cosh())); },
@@ -71,30 +48,9 @@ pub fn eval_function(f: &Function, args: &VecDeque<Token>) -> Result<Token, Eval
 		Function::Acosh => { return Ok(Token::Quantity(q.acosh())); },
 		Function::Atanh => { return Ok(Token::Quantity(q.atanh())); },
 
-		Function::Csch => {
-			return Ok(
-				Token::Operator(
-					Operator::Flip,
-					VecDeque::from(vec!(Token::Quantity(q.sinh())))
-				)
-			);
-		},
-		Function::Sech => {
-			return Ok(
-				Token::Operator(
-					Operator::Flip,
-					VecDeque::from(vec!(Token::Quantity(q.cosh())))
-				)
-			);
-		},
-		Function::Coth => {
-			return Ok(
-				Token::Operator(
-					Operator::Flip,
-					VecDeque::from(vec!(Token::Quantity(q.tanh())))
-				)
-			);
-		},
+		Function::Csch => { return Ok(Token::Quantity(q.csch())); },
+		Function::Sech => { return Ok(Token::Quantity(q.sech())); },
+		Function::Coth => { return Ok(Token::Quantity(q.coth())); },
 
 		Function::ToBase
 		| Function::NoUnit

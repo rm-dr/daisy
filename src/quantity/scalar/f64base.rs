@@ -60,6 +60,9 @@ impl ScalarBase for F64Base {
 	foward!(sin);
 	foward!(cos);
 	foward!(tan);
+	foward!(csc);
+	foward!(sec);
+	foward!(cot);
 	foward!(asin);
 	foward!(acos);
 	foward!(atan);
@@ -67,6 +70,9 @@ impl ScalarBase for F64Base {
 	foward!(sinh);
 	foward!(cosh);
 	foward!(tanh);
+	foward!(csch);
+	foward!(sech);
+	foward!(coth);
 	foward!(asinh);
 	foward!(acosh);
 	foward!(atanh);

@@ -121,6 +121,9 @@ impl ScalarBase for RationalBase {
 	cant_do!(sin);
 	cant_do!(cos);
 	cant_do!(tan);
+	cant_do!(csc);
+	cant_do!(sec);
+	cant_do!(cot);
 	cant_do!(asin);
 	cant_do!(acos);
 	cant_do!(atan);
@@ -128,6 +131,9 @@ impl ScalarBase for RationalBase {
 	cant_do!(sinh);
 	cant_do!(cosh);
 	cant_do!(tanh);
+	cant_do!(csch);
+	cant_do!(sech);
+	cant_do!(coth);
 	cant_do!(asinh);
 	cant_do!(acosh);
 	cant_do!(atanh);
