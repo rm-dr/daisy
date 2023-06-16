@@ -1,19 +1,19 @@
 use std::collections::VecDeque;
 
-use crate::parser::Token;
+use crate::parser::Expression;
 use crate::parser::Function;
 use super::EvalError;
 
 
-pub fn eval_function(f: &Function, args: &VecDeque<Token>) -> Result<Token, EvalError> {
+pub fn eval_function(f: &Function, args: &VecDeque<Expression>) -> Result<Expression, EvalError> {
 	if args.len() != 1 {panic!()};
 	let a = &args[0];
-	let Token::Quantity(q) = a else {panic!()};
+	let Expression::Quantity(q) = a else {panic!()};
 
 
 	match f {
-		Function::NoUnit => { return Ok(Token::Quantity(q.without_unit())); }
-		Function::ToBase => { return Ok(Token::Quantity(q.convert_to_base())); }
+		Function::NoUnit => { return Ok(Expression::Quantity(q.without_unit())); }
+		Function::ToBase => { return Ok(Expression::Quantity(q.convert_to_base())); }
 		_ => {}
 	}
 
@@ -22,35 +22,35 @@ pub fn eval_function(f: &Function, args: &VecDeque<Token>) -> Result<Token, Eval
 	}
 
 	match f {
-		Function::Abs => { return Ok(Token::Quantity(q.abs())); },
-		Function::Floor => { return Ok(Token::Quantity(q.floor())); },
-		Function::Ceil => { return Ok(Token::Quantity(q.ceil())); },
-		Function::Round => { return Ok(Token::Quantity(q.round())); },
+		Function::Abs => { return Ok(Expression::Quantity(q.abs())); },
+		Function::Floor => { return Ok(Expression::Quantity(q.floor())); },
+		Function::Ceil => { return Ok(Expression::Quantity(q.ceil())); },
+		Function::Round => { return Ok(Expression::Quantity(q.round())); },
 
-		Function::NaturalLog => { return Ok(Token::Quantity(q.ln())); },
-		Function::TenLog => { return Ok(Token::Quantity(q.log10())); },
+		Function::NaturalLog => { return Ok(Expression::Quantity(q.ln())); },
+		Function::TenLog => { return Ok(Expression::Quantity(q.log10())); },
 
-		Function::Sin => { return Ok(Token::Quantity(q.sin())); },
-		Function::Cos => { return Ok(Token::Quantity(q.cos())); },
-		Function::Tan => { return Ok(Token::Quantity(q.tan())); },
-		Function::Asin => { return Ok(Token::Quantity(q.asin())); },
-		Function::Acos => { return Ok(Token::Quantity(q.acos())); },
-		Function::Atan => { return Ok(Token::Quantity(q.atan())); },
+		Function::Sin => { return Ok(Expression::Quantity(q.sin())); },
+		Function::Cos => { return Ok(Expression::Quantity(q.cos())); },
+		Function::Tan => { return Ok(Expression::Quantity(q.tan())); },
+		Function::Asin => { return Ok(Expression::Quantity(q.asin())); },
+		Function::Acos => { return Ok(Expression::Quantity(q.acos())); },
+		Function::Atan => { return Ok(Expression::Quantity(q.atan())); },
 
-		Function::Csc => { return Ok(Token::Quantity(q.csc())); },
-		Function::Sec => { return Ok(Token::Quantity(q.sec())); },
-		Function::Cot => { return Ok(Token::Quantity(q.cot())); },
+		Function::Csc => { return Ok(Expression::Quantity(q.csc())); },
+		Function::Sec => { return Ok(Expression::Quantity(q.sec())); },
+		Function::Cot => { return Ok(Expression::Quantity(q.cot())); },
 
-		Function::Sinh => { return Ok(Token::Quantity(q.sinh())); },
-		Function::Cosh => { return Ok(Token::Quantity(q.cosh())); },
-		Function::Tanh => { return Ok(Token::Quantity(q.tanh())); },
-		Function::Asinh => { return Ok(Token::Quantity(q.asinh())); },
-		Function::Acosh => { return Ok(Token::Quantity(q.acosh())); },
-		Function::Atanh => { return Ok(Token::Quantity(q.atanh())); },
+		Function::Sinh => { return Ok(Expression::Quantity(q.sinh())); },
+		Function::Cosh => { return Ok(Expression::Quantity(q.cosh())); },
+		Function::Tanh => { return Ok(Expression::Quantity(q.tanh())); },
+		Function::Asinh => { return Ok(Expression::Quantity(q.asinh())); },
+		Function::Acosh => { return Ok(Expression::Quantity(q.acosh())); },
+		Function::Atanh => { return Ok(Expression::Quantity(q.atanh())); },
 
-		Function::Csch => { return Ok(Token::Quantity(q.csch())); },
-		Function::Sech => { return Ok(Token::Quantity(q.sech())); },
-		Function::Coth => { return Ok(Token::Quantity(q.coth())); },
+		Function::Csch => { return Ok(Expression::Quantity(q.csch())); },
+		Function::Sech => { return Ok(Expression::Quantity(q.sech())); },
+		Function::Coth => { return Ok(Expression::Quantity(q.coth())); },
 
 		Function::ToBase
 		| Function::NoUnit

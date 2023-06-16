@@ -25,7 +25,7 @@ fn do_expression(
 	stdout: &mut RawTerminal<std::io::Stdout>,
 	s: &String,
 	context: &mut Context
-) -> Result<parser::Token, ()> {
+) -> Result<parser::Expression, ()> {
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
 	let g = parser::parse(&s, context);

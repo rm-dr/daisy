@@ -1,23 +1,23 @@
 use std::collections::VecDeque;
 
 use super::super::{
-	PreToken,
+	Token,
 	LineLocation
 };
 
 
 pub fn find_subs(
-	mut g: VecDeque<PreToken>,
+	mut g: VecDeque<Token>,
 ) -> (
 	Vec<(LineLocation, String)>,
-	VecDeque<PreToken>
+	VecDeque<Token>
 ) {
 
 	// Array of replacements
 	let mut r: Vec<(LineLocation, String)> = Vec::with_capacity(8);
 
 	// New token array, with updated locations
-	let mut n: VecDeque<PreToken> = VecDeque::with_capacity(g.len());
+	let mut n: VecDeque<Token> = VecDeque::with_capacity(g.len());
 
 	let mut offset: usize = 0;
 
@@ -26,7 +26,7 @@ pub fn find_subs(
 		let mut t = g.pop_back().unwrap();
 
 		let target: Option<&str> = match &mut t {
-			PreToken::PreOperator(_, s) => {
+			Token::PreOperator(_, s) => {
 				let target = match &s[..] {
 					"*" => {Some("×")},
 					"/" => {Some("÷")},
@@ -41,7 +41,7 @@ pub fn find_subs(
 				target
 			},
 
-			PreToken::PreWord(_, s) => {
+			Token::PreWord(_, s) => {
 				let target = match &s[..] {
 					// Greek letters
 					"alpha"   => {Some("α")},

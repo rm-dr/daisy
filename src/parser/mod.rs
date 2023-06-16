@@ -1,20 +1,20 @@
 mod stage;
 
-mod pretoken;
-mod parsererror;
 mod token;
+mod parsererror;
+mod expression;
 
 use self::{
-	pretoken::PreToken,
+	token::Token,
 	parsererror::ParserError,
 	parsererror::LineLocation
 };
 
 pub use self::{
-	token::Token,
-	token::Constant,
-	token::Operator,
-	token::Function,
+	expression::Expression,
+	expression::Constant,
+	expression::Operator,
+	expression::Function,
 };
 
 use crate::context::Context;
@@ -22,18 +22,18 @@ use crate::context::Context;
 
 pub fn parse(
 	s: &String, context: &Context
-) -> Result<Token, (LineLocation, ParserError)> {
+) -> Result<Expression, (LineLocation, ParserError)> {
 
-	let tokens = stage::tokenize(s);
-	let (_, tokens) = stage::find_subs(tokens);
-	let g = stage::groupify(tokens)?;
+	let expressions = stage::tokenize(s);
+	let (_, expressions) = stage::find_subs(expressions);
+	let g = stage::groupify(expressions)?;
 
 	let g = stage::treeify(g, context)?;
 
 	return Ok(g);
 }
 
-pub fn parse_no_context(s: &String) -> Result<Token, (LineLocation, ParserError)> {
+pub fn parse_no_context(s: &String) -> Result<Expression, (LineLocation, ParserError)> {
 	parse(s, &Context::new())
 }
 
@@ -49,8 +49,8 @@ pub fn substitute(
 	let mut new_s = s.clone();
 
 	let l = s.chars().count();
-	let tokens = stage::tokenize(s);
-	let (subs, _) = stage::find_subs(tokens);
+	let expressions = stage::tokenize(s);
+	let (subs, _) = stage::find_subs(expressions);
 	let mut new_c = l - c;
 
 	for r in subs.iter() {

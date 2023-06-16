@@ -1,5 +1,4 @@
 /// Specifies the location of a token in an input string.
-/// Used to locate ParserErrors.
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 pub struct LineLocation {

@@ -1,10 +1,10 @@
-use crate::parser::Token;
+use crate::parser::Expression;
 use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Context {
-	history: Vec<Token>,
-	variables: HashMap<String, Token>
+	history: Vec<Expression>,
+	variables: HashMap<String, Expression>
 }
 
 impl Context {
@@ -12,13 +12,13 @@ impl Context {
 		Context{ history: Vec::new(), variables: HashMap::new() }
 	}
 
-	pub fn push_hist(&mut self, t: Token) { self.history.push(t); }
-	pub fn push_var(&mut self, s: String, t: Token) { self.variables.insert(s, t); }
+	pub fn push_hist(&mut self, t: Expression) { self.history.push(t); }
+	pub fn push_var(&mut self, s: String, t: Expression) { self.variables.insert(s, t); }
 	pub fn del_var(&mut self, s: &String) { self.variables.remove(s); }
 
-	pub fn get_variable(&self, s: &String) -> Option<Token> {
+	pub fn get_variable(&self, s: &String) -> Option<Expression> {
 
-		let v: Option<&Token>;
+		let v: Option<&Expression>;
 
 		if s == "ans" {
 			v = self.history.last();

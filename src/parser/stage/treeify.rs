@@ -2,25 +2,25 @@ use std::collections::VecDeque;
 use crate::context::Context;
 
 use super::super::{
-	PreToken,
+	Token,
 	ParserError,
 	LineLocation,
-	Token,
+	Expression,
 	Operator
 };
 
 fn treeify_binary(
 	i: usize,
-	g_inner: &mut VecDeque<PreToken>,
+	g_inner: &mut VecDeque<Token>,
 	context: &Context
 ) -> Result<bool, (LineLocation, ParserError)> {
 
-	let this: &PreToken = &g_inner[i];
+	let this: &Token = &g_inner[i];
 
 	if i == 0 {
 		// This binary operator is at the end of an expression.
 		let l = match this {
-			PreToken::PreOperator(l, _) => l,
+			Token::PreOperator(l, _) => l,
 			_ => panic!()
 		};
 		return Err((*l, ParserError::Syntax));
@@ -32,7 +32,7 @@ fn treeify_binary(
 			&g_inner[i-1]
 		} else {
 			let l = match this {
-				PreToken::PreOperator(l, _) => l,
+				Token::PreOperator(l, _) => l,
 				_ => panic!()
 			};
 			return Err((*l, ParserError::Syntax));
@@ -44,7 +44,7 @@ fn treeify_binary(
 			&g_inner[i+1]
 		} else {
 			let l = match this {
-				PreToken::PreOperator(l, _) => l,
+				Token::PreOperator(l, _) => l,
 				_ => panic!()
 			};
 			return Err((*l, ParserError::Syntax));
@@ -55,7 +55,7 @@ fn treeify_binary(
 
 
 
-	if let PreToken::PreOperator(l, s) = left {
+	if let Token::PreOperator(l, s) = left {
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		let o = o.unwrap();
@@ -74,7 +74,7 @@ fn treeify_binary(
 		}
 	}
 
-	if let PreToken::PreOperator(l, s) = right {
+	if let Token::PreOperator(l, s) = right {
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		let o = o.unwrap();
@@ -96,7 +96,7 @@ fn treeify_binary(
 
 	// This operator
 	let this_op = {
-		let PreToken::PreOperator(l, s) = this else {panic!()};
+		let Token::PreOperator(l, s) = this else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		o.unwrap()
@@ -104,14 +104,14 @@ fn treeify_binary(
 
 	// The operators contesting our arguments
 	let left_op = if i > 1 {
-		let PreToken::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
+		let Token::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		Some(o.unwrap())
 	} else { None };
 
 	let right_op = if i < g_inner.len()-2 {
-		let PreToken::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
+		let Token::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		Some(o.unwrap())
@@ -126,22 +126,22 @@ fn treeify_binary(
 		let left_pre = g_inner.remove(i-1).unwrap();
 		let this_pre = g_inner.remove(i-1).unwrap();
 		let right_pre = g_inner.remove(i-1).unwrap();
-		let left: Token; let right: Token;
-		if let PreToken::PreGroup(_, _) = right_pre { right = treeify(right_pre, context)?; } else {right = right_pre.to_token(context)?;}
-		if let PreToken::PreGroup(_, _) = left_pre { left = treeify(left_pre, context)?; } else {left = left_pre.to_token(context)?;}
+		let left: Expression; let right: Expression;
+		if let Token::PreGroup(_, _) = right_pre { right = treeify(right_pre, context)?; } else {right = right_pre.to_expression(context)?;}
+		if let Token::PreGroup(_, _) = left_pre { left = treeify(left_pre, context)?; } else {left = left_pre.to_expression(context)?;}
 
 		let o = {
-			let PreToken::PreOperator(_, s) = this_pre else {panic!()};
+			let Token::PreOperator(_, s) = this_pre else {panic!()};
 			let o = Operator::from_string(&s);
 			if o.is_none() { panic!() }
 			o.unwrap()
 		};
 
-		let mut new_token_args: VecDeque<Token> = VecDeque::with_capacity(2);
+		let mut new_token_args: VecDeque<Expression> = VecDeque::with_capacity(2);
 		new_token_args.push_back(left);
 		new_token_args.push_back(right);
 
-		g_inner.insert(i-1, PreToken::Container(o.into_token(new_token_args)));
+		g_inner.insert(i-1, Token::Container(o.into_expression(new_token_args)));
 
 		return Ok(true);
 	} else {
@@ -151,20 +151,20 @@ fn treeify_binary(
 
 fn treeify_unary(
 	i: usize,
-	g_inner: &mut VecDeque<PreToken>,
+	g_inner: &mut VecDeque<Token>,
 	left_associative: bool,
 	context: &Context
 ) -> Result<bool, (LineLocation, ParserError)> {
 
-	let this: &PreToken = &g_inner[i];
-	let next: &PreToken;
+	let this: &Token = &g_inner[i];
+	let next: &Token;
 	if left_associative {
 		next = {
 			if i > 0 {
 				&g_inner[i-1]
 			} else {
 				let l = match this {
-					PreToken::PreOperator(l, _) => l,
+					Token::PreOperator(l, _) => l,
 					_ => panic!()
 				};
 				return Err((*l, ParserError::Syntax));
@@ -176,7 +176,7 @@ fn treeify_unary(
 				&g_inner[i+1]
 			} else {
 				let l = match this {
-					PreToken::PreOperator(l, _) => l,
+					Token::PreOperator(l, _) => l,
 					_ => panic!()
 				};
 				return Err((*l, ParserError::Syntax));
@@ -186,7 +186,7 @@ fn treeify_unary(
 
 	// We need to check the element after unary operators too.
 	// Bad syntax like `3!3` won't be caught otherwise.
-	let prev: Option<&PreToken>;
+	let prev: Option<&Token>;
 	if left_associative {
 		prev = if i < g_inner.len()-1 { Some(&g_inner[i+1]) } else {None};
 	} else {
@@ -194,7 +194,7 @@ fn treeify_unary(
 	}
 
 	if prev.is_some() {
-		if let PreToken::PreOperator(_,_) = prev.unwrap() {
+		if let Token::PreOperator(_,_) = prev.unwrap() {
 		} else {
 			return Err((
 				*this.get_line_location(),
@@ -203,7 +203,7 @@ fn treeify_unary(
 		}
 	}
 
-	if let PreToken::PreOperator(l, _) = next {
+	if let Token::PreOperator(l, _) = next {
 		let tl = *this.get_line_location();
 		return Err((
 			LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
@@ -214,7 +214,7 @@ fn treeify_unary(
 
 		// This operator
 		let this_op = {
-			let PreToken::PreOperator(l, s) = this else {panic!()};
+			let Token::PreOperator(l, s) = this else {panic!()};
 			let o = Operator::from_string(s);
 			if o.is_none() { return Err((*l, ParserError::Syntax)); }
 			o.unwrap()
@@ -223,14 +223,14 @@ fn treeify_unary(
 		// The operator contesting our argument
 		let next_op = if left_associative {
 			if i > 1 {
-				let PreToken::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
+				let Token::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
 				let o = Operator::from_string(s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
 				Some(o.unwrap())
 			} else { None }
 		} else {
 			if i < g_inner.len()-2 {
-				let PreToken::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
+				let Token::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
 				let o = Operator::from_string(s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
 				Some(o.unwrap())
@@ -239,28 +239,28 @@ fn treeify_unary(
 
 		if next_op.is_none() || this_op > next_op.unwrap() {
 			let this_pre = g_inner.remove(i).unwrap();
-			let next_pre: PreToken; let next: Token;
+			let next_pre: Token; let next: Expression;
 			if left_associative {
 				next_pre = g_inner.remove(i-1).unwrap();
 			} else {
 				next_pre = g_inner.remove(i).unwrap();
 			}
-			if let PreToken::PreGroup(_, _) = next_pre { next = treeify(next_pre, context)?; } else { next = next_pre.to_token(context)? }
+			if let Token::PreGroup(_, _) = next_pre { next = treeify(next_pre, context)?; } else { next = next_pre.to_expression(context)? }
 
 			let o = {
-				let PreToken::PreOperator(_, s) = this_pre else {panic!()};
+				let Token::PreOperator(_, s) = this_pre else {panic!()};
 				let o = Operator::from_string(&s);
 				if o.is_none() { panic!() }
 				o.unwrap()
 			};
 
-			let mut new_token_args: VecDeque<Token> = VecDeque::with_capacity(3);
+			let mut new_token_args: VecDeque<Expression> = VecDeque::with_capacity(3);
 			new_token_args.push_back(next);
 
 			if left_associative {
-				g_inner.insert(i-1, PreToken::Container(o.into_token(new_token_args)));
+				g_inner.insert(i-1, Token::Container(o.into_expression(new_token_args)));
 			} else {
-				g_inner.insert(i, PreToken::Container(o.into_token(new_token_args)));
+				g_inner.insert(i, Token::Container(o.into_expression(new_token_args)));
 			}
 
 			return Ok(true);
@@ -274,12 +274,12 @@ fn treeify_unary(
 
 
 pub fn treeify(
-	mut g: PreToken,
+	mut g: Token,
 	context: &Context
-) -> Result<Token, (LineLocation, ParserError)> {
+) -> Result<Expression, (LineLocation, ParserError)> {
 
-	let g_inner: &mut VecDeque<PreToken> = match g {
-		PreToken::PreGroup(_, ref mut x) => x,
+	let g_inner: &mut VecDeque<Token> = match g {
+		Token::PreGroup(_, ref mut x) => x,
 		_ => panic!()
 	};
 
@@ -300,7 +300,7 @@ pub fn treeify(
 		// Convert preoperators
 		// If not an operator, move on.
 		let this_op = match &g_inner[i] {
-			PreToken::PreOperator(l, s) => {
+			Token::PreOperator(l, s) => {
 				let o = Operator::from_string(&s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
 				o.unwrap()
@@ -342,13 +342,13 @@ pub fn treeify(
 	let g = g_inner.pop_front().unwrap();
 	return match g {
 		// Catch edge cases
-		PreToken::PreOperator(l, _) => {
+		Token::PreOperator(l, _) => {
 			Err((l, ParserError::Syntax))
 		},
-		PreToken::PreGroup(_,_) => {
+		Token::PreGroup(_,_) => {
 			treeify(g, context)
 		},
 
-		_ => { Ok(g.to_token(context)?) }
+		_ => { Ok(g.to_expression(context)?) }
 	};
 }

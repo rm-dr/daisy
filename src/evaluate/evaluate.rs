@@ -1,4 +1,4 @@
-use crate::parser::Token;
+use crate::parser::Expression;
 use crate::parser::Operator;
 use crate::context::Context;
 
@@ -7,9 +7,9 @@ use super::operator::eval_operator;
 use super::function::eval_function;
 use super::EvalError;
 
-pub fn evaluate(t: &Token, context: &mut Context) -> Result<Token, EvalError> {
+pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, EvalError> {
 
-	// Keeps track of our position in the token tree.
+	// Keeps track of our position in the expression tree.
 	// For example, the coordinates [0, 2, 1] are interpreted as follows:
 	// Start at the root node,
 	//    then move to that node's 0th child,
@@ -40,12 +40,12 @@ pub fn evaluate(t: &Token, context: &mut Context) -> Result<Token, EvalError> {
 
 
 			let new = match g {
-				Token::Quantity(_) => None,
+				Expression::Quantity(_) => None,
 
-				Token::Constant(c) => { Some(evaluate(&c.value(), context).unwrap()) },
-				Token::Variable(s) => { context.get_variable(&s) },
-				Token::Operator(Operator::Function(f), v) => { Some(eval_function(&f, &v)?) },
-				Token::Operator(o, v) => { eval_operator(&o, &v, context)? },
+				Expression::Constant(c) => { Some(evaluate(&c.value(), context).unwrap()) },
+				Expression::Variable(s) => { context.get_variable(&s) },
+				Expression::Operator(Operator::Function(f), v) => { Some(eval_function(&f, &v)?) },
+				Expression::Operator(o, v) => { eval_operator(&o, &v, context)? },
 			};
 
 			if new.is_some() { *g = new.unwrap()}
@@ -63,7 +63,7 @@ pub fn evaluate(t: &Token, context: &mut Context) -> Result<Token, EvalError> {
 
 			let n = root.get_at_coords(&coords[..]);
 			if let Some(n) = n {
-				if let Token::Operator(Operator::Define, _) = n {
+				if let Expression::Operator(Operator::Define, _) = n {
 					*coords.last_mut().unwrap() += 1;
 				}
 			}

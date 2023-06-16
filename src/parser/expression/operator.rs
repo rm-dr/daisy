@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::collections::VecDeque;
 use crate::quantity::Quantity;
 
-use super::Token;
+use super::Expression;
 use super::Function;
 
 
@@ -112,7 +112,7 @@ impl Operator {
 	}
 
 	#[inline(always)]
-	pub fn into_token(self, mut args: VecDeque<Token>) -> Token {
+	pub fn into_expression(self, mut args: VecDeque<Expression>) -> Expression {
 		match self {
 			Operator::Subtract => {
 				if args.len() != 2 { panic!() }
@@ -120,13 +120,13 @@ impl Operator {
 				let b = args.pop_front().unwrap();
 
 				let b_new;
-				if let Token::Quantity(q) = b {
-					b_new = Token::Quantity(-q);
+				if let Expression::Quantity(q) = b {
+					b_new = Expression::Quantity(-q);
 				} else {
-					b_new = Token::Operator(Operator::Negative, VecDeque::from(vec!(b)));
+					b_new = Expression::Operator(Operator::Negative, VecDeque::from(vec!(b)));
 				}
 
-				Token::Operator(
+				Expression::Operator(
 					Operator::Add,
 					VecDeque::from(vec!(a,b_new))
 				)
@@ -137,9 +137,9 @@ impl Operator {
 				if args.len() != 2 { panic!() }
 				let a = args.pop_front().unwrap();
 				let b = args.pop_front().unwrap();
-				let b = Token::Operator(Operator::Flip, VecDeque::from(vec!(b)));
+				let b = Expression::Operator(Operator::Flip, VecDeque::from(vec!(b)));
 
-				Token::Operator(
+				Expression::Operator(
 					Operator::Multiply,
 					VecDeque::from(vec!(a,b))
 				)
@@ -149,14 +149,14 @@ impl Operator {
 				if args.len() != 1 { panic!() }
 				let a = args.pop_front().unwrap();
 
-				Token::Operator(
+				Expression::Operator(
 					Operator::Power,
-					VecDeque::from(vec!(a, Token::Quantity(Quantity::new_rational_from_string("0.5").unwrap())))
+					VecDeque::from(vec!(a, Expression::Quantity(Quantity::new_rational_from_string("0.5").unwrap())))
 				)
 			},
 
 			Operator::ImplicitMultiply
-			=> { Token::Operator(Operator::Multiply, args) },
+			=> { Expression::Operator(Operator::Multiply, args) },
 
 			Operator::Function(_)
 			| Operator::Factorial
@@ -169,15 +169,15 @@ impl Operator {
 			| Operator::ModuloLong
 			| Operator::UnitConvert
 			| Operator::Define
-			=> { Token::Operator(self, args) },
+			=> { Expression::Operator(self, args) },
 		}
 	}
 
 
 	#[inline(always)]
-	fn add_parens_to_arg(&self, arg: &Token) -> String {
+	fn add_parens_to_arg(&self, arg: &Expression) -> String {
 		let mut astr: String = arg.to_string();
-		if let Token::Operator(o,_) = arg {
+		if let Expression::Operator(o,_) = arg {
 			if o < self {
 				astr = format!("({})", astr);
 			}
@@ -186,9 +186,9 @@ impl Operator {
 	}
 
 	#[inline(always)]
-	fn add_parens_to_arg_strict(&self, arg: &Token) -> String {
+	fn add_parens_to_arg_strict(&self, arg: &Expression) -> String {
 		let mut astr: String = arg.to_string();
-		if let Token::Operator(o,_) = arg {
+		if let Expression::Operator(o,_) = arg {
 			if o <= self {
 				astr = format!("({})", astr);
 			}
@@ -197,7 +197,7 @@ impl Operator {
 	}
 
 
-	pub fn print(&self, args: &VecDeque<Token>) -> String {
+	pub fn print(&self, args: &VecDeque<Expression>) -> String {
 		match self {
 			Operator::ImplicitMultiply |
 			Operator::Sqrt |
@@ -268,7 +268,7 @@ impl Operator {
 				let a = &args[0];
 
 				let b; let sub;
-				if let Token::Operator(o, ar) = &args[1] {
+				if let Expression::Operator(o, ar) = &args[1] {
 					if let Operator::Negative = o {
 						sub = true;
 						b = &ar[0];
@@ -294,7 +294,7 @@ impl Operator {
 				let a = &args[0];
 
 				let b; let div;
-				if let Token::Operator(o, ar) = &args[1] {
+				if let Expression::Operator(o, ar) = &args[1] {
 					if let Operator::Flip = o {
 						div = true;
 						b = &ar[0];
@@ -314,15 +314,15 @@ impl Operator {
 				// multiplied by a unit (like 10 m)
 				// Times sign should stay in all other cases.
 				let no_times = {
-					if let Token::Quantity(p) = a {
-						if let Token::Quantity(q) = b {
+					if let Expression::Quantity(p) = a {
+						if let Expression::Quantity(q) = b {
 							p.unitless() && !q.unitless()
 						} else {false}
 					} else {false}
 				};
 
 				if no_times {
-					let Token::Quantity(u) = b else {panic!()};
+					let Expression::Quantity(u) = b else {panic!()};
 					if u.unit.no_space() {
 						return format!("{}{}",
 							self.add_parens_to_arg_strict(a),

@@ -6,34 +6,34 @@ use crate::context::Context;
 use super::{
 	LineLocation,
 	ParserError,
-	Token,
+	Expression,
 	Constant
 };
 
 
 #[derive(Debug)]
-pub enum PreToken {
+pub enum Token {
 	PreQuantity(LineLocation, String),
 	PreWord(LineLocation, String),
 	PreOperator(LineLocation, String),
 
 	PreGroupStart(LineLocation),
 	PreGroupEnd(LineLocation),
-	PreGroup(LineLocation, VecDeque<PreToken>),
+	PreGroup(LineLocation, VecDeque<Token>),
 
-	Container(Token)
+	Container(Expression)
 }
 
-impl PreToken {
+impl Token {
 	#[inline(always)]
 	pub fn get_line_location(&self) -> &LineLocation {
 		match self {
-			PreToken::PreQuantity(l, _)
-			| PreToken::PreWord(l, _)
-			| PreToken::PreOperator(l, _)
-			| PreToken::PreGroupStart(l)
-			| PreToken::PreGroupEnd(l)
-			| PreToken::PreGroup(l, _)
+			Token::PreQuantity(l, _)
+			| Token::PreWord(l, _)
+			| Token::PreOperator(l, _)
+			| Token::PreGroupStart(l)
+			| Token::PreGroupEnd(l)
+			| Token::PreGroup(l, _)
 			=> l,
 
 			_ => panic!()
@@ -43,12 +43,12 @@ impl PreToken {
 	#[inline(always)]
 	pub fn get_mut_line_location(&mut self) -> &mut LineLocation {
 		match self {
-			PreToken::PreQuantity(l, _)
-			| PreToken::PreWord(l, _)
-			| PreToken::PreOperator(l, _)
-			| PreToken::PreGroupStart(l)
-			| PreToken::PreGroupEnd(l)
-			| PreToken::PreGroup(l, _)
+			Token::PreQuantity(l, _)
+			| Token::PreWord(l, _)
+			| Token::PreOperator(l, _)
+			| Token::PreGroupStart(l)
+			| Token::PreGroupEnd(l)
+			| Token::PreGroup(l, _)
 			=> l,
 
 			_ => panic!()
@@ -56,9 +56,9 @@ impl PreToken {
 	}
 
 	#[inline(always)]
-	pub fn to_token(self, context: &Context) -> Result<Token, (LineLocation, ParserError)>{
+	pub fn to_expression(self, context: &Context) -> Result<Expression, (LineLocation, ParserError)>{
 		match self {
-			PreToken::PreQuantity(l, mut s) => {
+			Token::PreQuantity(l, mut s) => {
 
 				// The length check here ensures that
 				// `.` is not parsed as `0.`
@@ -73,28 +73,28 @@ impl PreToken {
 					return Err((l, ParserError::BadNumber))
 				}
 
-				return Ok(Token::Quantity(r.unwrap()));
+				return Ok(Expression::Quantity(r.unwrap()));
 			},
 
-			PreToken::PreWord(_l, s) => {
+			Token::PreWord(_l, s) => {
 
 				let c = Constant::from_string(&s);
-				if c.is_some() { return Ok(Token::Constant(c.unwrap())); }
+				if c.is_some() { return Ok(Expression::Constant(c.unwrap())); }
 
 				let c = Unit::from_string(&s);
-				if c.is_some() { return Ok(Token::Quantity(c.unwrap())); }
+				if c.is_some() { return Ok(Expression::Quantity(c.unwrap())); }
 
 				let c = context.get_variable(&s);
-				if c.is_some() { return Ok(Token::Variable(s)); }
-				return Ok(Token::Variable(s));
+				if c.is_some() { return Ok(Expression::Variable(s)); }
+				return Ok(Expression::Variable(s));
 			}
 
-			PreToken::Container(v) => { return Ok(v); }
+			Token::Container(v) => { return Ok(v); }
 
-			PreToken::PreOperator(_,_)
-			| PreToken::PreGroupStart(_)
-			| PreToken::PreGroupEnd(_)
-			| PreToken::PreGroup(_, _)
+			Token::PreOperator(_,_)
+			| Token::PreGroupStart(_)
+			| Token::PreGroupEnd(_)
+			| Token::PreGroup(_, _)
 			=> panic!()
 		};
 	}

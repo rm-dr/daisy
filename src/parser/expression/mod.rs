@@ -1,10 +1,10 @@
 mod operator;
 mod function;
-mod token;
+mod expression;
 
 pub use self::operator::Operator;
 pub use self::function::Function;
-pub use self::token::Token;
+pub use self::expression::Expression;
 
 
 use super::parse_no_context;

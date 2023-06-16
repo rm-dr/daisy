@@ -93,7 +93,7 @@ pub fn write(target: &Path) {
 
 	writeln!(file,
 		concat!(
-			"\tpub fn value(&self) -> Token {{\n",
+			"\tpub fn value(&self) -> Expression {{\n",
 			"\t\tmatch self {{"
 		)
 	).unwrap();

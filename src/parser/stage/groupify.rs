@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use super::super::{
-	PreToken,
+	Token,
 	LineLocation,
 	ParserError,
 	Operator
@@ -9,7 +9,7 @@ use super::super::{
 
 
 fn lookback_signs(
-	g: &mut VecDeque<PreToken>
+	g: &mut VecDeque<Token>
 ) -> Result<(), (LineLocation, ParserError)> {
 
 	// Convert `-` operators to `neg` operators
@@ -17,12 +17,12 @@ fn lookback_signs(
 	let mut i: usize = 0;
 	while i < g.len() {
 		if i == 0 {
-			let a: PreToken = g.remove(i).unwrap();
+			let a: Token = g.remove(i).unwrap();
 			match &a {
-				PreToken::PreOperator(l,o)
+				Token::PreOperator(l,o)
 				=> {
 					if o == "-" {
-						g.insert(i, PreToken::PreOperator(*l, String::from("neg")));
+						g.insert(i, Token::PreOperator(*l, String::from("neg")));
 					} else if o == "+" {
 						continue; // We should not increment i if we remove a token
 					} else {g.insert(i, a);}
@@ -31,11 +31,11 @@ fn lookback_signs(
 			};
 
 		} else {
-			let a: PreToken = g.remove(i-1).unwrap();
-			let b: PreToken = g.remove(i-1).unwrap();
+			let a: Token = g.remove(i-1).unwrap();
+			let b: Token = g.remove(i-1).unwrap();
 
 			match (&a, &b) {
-				(PreToken::PreOperator(_, sa), PreToken::PreOperator(l,sb))
+				(Token::PreOperator(_, sa), Token::PreOperator(l,sb))
 				=> {
 					if {
 						let o = Operator::from_string(sa);
@@ -47,7 +47,7 @@ fn lookback_signs(
 						)
 					} {
 						if sb == "-" {
-							g.insert(i-1, PreToken::PreOperator(*l, String::from("neg")));
+							g.insert(i-1, Token::PreOperator(*l, String::from("neg")));
 							g.insert(i-1, a);
 						} else if sb == "+" {
 							g.insert(i-1, a);
@@ -67,11 +67,11 @@ fn lookback_signs(
 	// Delete consecutive `neg`s
 	let mut i: usize = 1;
 	while i < g.len() {
-		let a: PreToken = g.remove(i-1).unwrap();
-		let b: PreToken = g.remove(i-1).unwrap();
+		let a: Token = g.remove(i-1).unwrap();
+		let b: Token = g.remove(i-1).unwrap();
 
 		match (&a, &b) {
-			(PreToken::PreOperator(_,sa), PreToken::PreOperator(_,sb))
+			(Token::PreOperator(_,sa), Token::PreOperator(_,sb))
 			=> {
 				if !((sa == "neg") && (sb == "neg")) {
 					g.insert(i-1, b);
@@ -95,7 +95,7 @@ fn lookback_signs(
 
 // Inserts implicit operators
 fn lookback(
-	g: &mut VecDeque<PreToken>
+	g: &mut VecDeque<Token>
 ) -> Result<(), (LineLocation, ParserError)> {
 
 	lookback_signs(g)?;
@@ -103,24 +103,24 @@ fn lookback(
 	let mut i: usize = 0;
 	while i < g.len() {
 		if i >= 1 {
-			let a: PreToken = g.remove(i-1).unwrap();
-			let b: PreToken = g.remove(i-1).unwrap();
+			let a: Token = g.remove(i-1).unwrap();
+			let b: Token = g.remove(i-1).unwrap();
 
 			match (&a, &b) {
 				// Insert ImplicitMultiply
-				(PreToken::PreGroup(_,_), PreToken::PreGroup(l ,_))
-				| (PreToken::PreGroup(_,_), PreToken::PreQuantity(l,_))
-				| (PreToken::PreQuantity(_,_), PreToken::PreGroup(l,_))
-				| (PreToken::PreGroup(_,_), PreToken::PreWord(l,_))
-				| (PreToken::PreWord(_,_), PreToken::PreGroup(l,_))
-				| (PreToken::PreQuantity(_,_), PreToken::PreWord(l,_))
-				| (PreToken::PreWord(_,_), PreToken::PreQuantity(l,_))
-				| (PreToken::PreWord(_,_), PreToken::PreWord(l,_))
+				(Token::PreGroup(_,_), Token::PreGroup(l ,_))
+				| (Token::PreGroup(_,_), Token::PreQuantity(l,_))
+				| (Token::PreQuantity(_,_), Token::PreGroup(l,_))
+				| (Token::PreGroup(_,_), Token::PreWord(l,_))
+				| (Token::PreWord(_,_), Token::PreGroup(l,_))
+				| (Token::PreQuantity(_,_), Token::PreWord(l,_))
+				| (Token::PreWord(_,_), Token::PreQuantity(l,_))
+				| (Token::PreWord(_,_), Token::PreWord(l,_))
 				=> {
 					let loc = LineLocation{pos: l.pos-1, len: 0};
 
 					g.insert(i-1, b);
-					g.insert(i-1, PreToken::PreOperator(
+					g.insert(i-1, Token::PreOperator(
 						loc,
 						String::from("i*")
 					));
@@ -128,9 +128,9 @@ fn lookback(
 				},
 
 				// Insert implicit multiplications for right-unary operators
-				(PreToken::PreQuantity(_,_), PreToken::PreOperator(l,s))
-				| (PreToken::PreGroup(_,_), PreToken::PreOperator(l,s))
-				| (PreToken::PreWord(_,_), PreToken::PreOperator(l,s))
+				(Token::PreQuantity(_,_), Token::PreOperator(l,s))
+				| (Token::PreGroup(_,_), Token::PreOperator(l,s))
+				| (Token::PreWord(_,_), Token::PreOperator(l,s))
 				=> {
 					let o = Operator::from_string(s);
 					let loc = LineLocation{pos: l.pos-1, len: 0};
@@ -139,7 +139,7 @@ fn lookback(
 					if o.is_some() {
 						let o = o.unwrap();
 						if (!o.is_binary()) && (!o.is_left_associative()) {
-							g.insert(i-1, PreToken::PreOperator(
+							g.insert(i-1, Token::PreOperator(
 								loc,
 								String::from("i*")
 							));
@@ -149,9 +149,9 @@ fn lookback(
 				},
 
 				// Insert implicit multiplications for left-unary operators.
-				(PreToken::PreOperator(_,s), PreToken::PreQuantity(l,_))
-				| (PreToken::PreOperator(_,s), PreToken::PreGroup(l,_))
-				| (PreToken::PreOperator(_,s), PreToken::PreWord(l,_))
+				(Token::PreOperator(_,s), Token::PreQuantity(l,_))
+				| (Token::PreOperator(_,s), Token::PreGroup(l,_))
+				| (Token::PreOperator(_,s), Token::PreWord(l,_))
 				=> {
 					let o = Operator::from_string(s);
 					let loc = LineLocation{pos: l.pos-1, len: 0};
@@ -160,7 +160,7 @@ fn lookback(
 					if o.is_some() {
 						let o = o.unwrap();
 						if (!o.is_binary()) && o.is_left_associative() {
-							g.insert(i-1, PreToken::PreOperator(
+							g.insert(i-1, Token::PreOperator(
 								loc,
 								String::from("i*")
 							));
@@ -170,7 +170,7 @@ fn lookback(
 				},
 
 				// The following are syntax errors
-				(PreToken::PreQuantity(la,_), PreToken::PreQuantity(lb,_))
+				(Token::PreQuantity(la,_), Token::PreQuantity(lb,_))
 				=> {
 					return Err((
 						LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
@@ -189,13 +189,13 @@ fn lookback(
 
 
 pub fn groupify(
-	mut g: VecDeque<PreToken>
+	mut g: VecDeque<Token>
 ) -> Result<
-	PreToken,
+	Token,
 	(LineLocation, ParserError)
 > {
 	// Vector of grouping levels
-	let mut levels: Vec<(LineLocation, VecDeque<PreToken>)> = Vec::with_capacity(8);
+	let mut levels: Vec<(LineLocation, VecDeque<Token>)> = Vec::with_capacity(8);
 	levels.push((LineLocation{pos: 0, len: 0}, VecDeque::with_capacity(8)));
 
 	// Makes sure parenthesis are matched
@@ -206,12 +206,12 @@ pub fn groupify(
 		let (l_now, v_now) = levels.last_mut().unwrap();
 
 		match t {
-			PreToken::PreGroupStart(l) => {
+			Token::PreGroupStart(l) => {
 				levels.push((l, VecDeque::with_capacity(8)));
 				i_level += 1;
 			},
 
-			PreToken::PreGroupEnd(l) => {
+			Token::PreGroupEnd(l) => {
 				let l = LineLocation {
 					pos: l_now.pos,
 					len: l.len + l.pos - l_now.pos
@@ -226,7 +226,7 @@ pub fn groupify(
 				let (_, v_now) = levels.last_mut().unwrap();
 				lookback(&mut v)?;
 
-				v_now.push_back(PreToken::PreGroup(l, v));
+				v_now.push_back(Token::PreGroup(l, v));
 			},
 
 			_ => {
@@ -252,12 +252,12 @@ pub fn groupify(
 		if v.len() == 0 { return Err((l, ParserError::EmptyGroup)) }
 		lookback(&mut v)?;
 
-		v_now.push_back(PreToken::PreGroup(l, v));
+		v_now.push_back(Token::PreGroup(l, v));
 	}
 
 
 	let (_, mut v) = levels.pop().unwrap();
 	lookback(&mut v)?;
 
-	return Ok(PreToken::PreGroup(LineLocation{pos:0, len:0}, v));
+	return Ok(Token::PreGroup(LineLocation{pos:0, len:0}, v));
 }
