@@ -35,13 +35,24 @@ fn do_expression(
 	// Check for parse errors
 	if let Err((l, e)) = g {
 		write!(
-			stdout, "{}{}{} {}{}\r\n",
+			stdout, "{}{}{}{}{}{}\r\n",
 			color::Fg(color::Red),
+			style::Bold,
 			" ".repeat(l.pos + 4),
 			"^".repeat(l.len),
+			color::Fg(color::Reset),
+			style::Reset,
+		).unwrap();
+
+		write!(
+			stdout, "  {}{}Parse Error: {}{}{}\r\n\n",
+			style::Bold,
+			color::Fg(color::Red),
+			style::Reset,
 			e.to_string(),
 			color::Fg(color::Reset),
 		).unwrap();
+
 		return Err(());
 	}
 
