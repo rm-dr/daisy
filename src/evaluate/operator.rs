@@ -15,7 +15,8 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Expression>, context: &mut C
 			let b = &args[1];
 
 			if let Expression::Variable(s) = &args[0] {
-				context.push_var(s.clone(), b.clone());
+				let r = context.push_var(s.clone(), b.clone());
+				if r.is_err() { return Err(EvalError::BadDefineName); }
 				return Ok(Some(b.clone()));
 			} else { return Err(EvalError::BadDefineName); }
 		},
