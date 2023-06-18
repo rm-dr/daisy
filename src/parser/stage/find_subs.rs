@@ -26,7 +26,7 @@ pub fn find_subs(
 		let mut t = g.pop_back().unwrap();
 
 		let target: Option<&str> = match &mut t {
-			Token::PreOperator(_, s) => {
+			Token::Operator(_, s) => {
 				let target = match &s[..] {
 					"*" => {Some("×")},
 					"/" => {Some("÷")},
@@ -41,7 +41,7 @@ pub fn find_subs(
 				target
 			},
 
-			Token::PreWord(_, s) => {
+			Token::Word(_, s) => {
 				let target = match &s[..] {
 					// Greek letters
 					"alpha"   => {Some("α")},

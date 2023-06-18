@@ -14,11 +14,11 @@ fn push_token(g: &mut VecDeque<Token>, t: Option<Token>, stop_i: usize) {
 	let mut t = t.unwrap();
 
 	match t {
-		Token::PreGroupStart(ref mut l)
-		| Token::PreGroupEnd(ref mut l)
-		| Token::PreOperator(ref mut l, _)
-		| Token::PreQuantity(ref mut l, _)
-		| Token::PreWord(ref mut l, _)
+		Token::GroupStart(ref mut l)
+		| Token::GroupEnd(ref mut l)
+		| Token::Operator(ref mut l, _)
+		| Token::Quantity(ref mut l, _)
+		| Token::Word(ref mut l, _)
 		=> {
 			*l = LineLocation{
 				pos: l.pos,
@@ -26,7 +26,7 @@ fn push_token(g: &mut VecDeque<Token>, t: Option<Token>, stop_i: usize) {
 			};
 		},
 
-		Token::PreGroup(_,_)
+		Token::Group(_,_)
 		| Token::Container(_)
 		=> panic!()
 	};
@@ -34,14 +34,14 @@ fn push_token(g: &mut VecDeque<Token>, t: Option<Token>, stop_i: usize) {
 
 	// `2e` isn't exponential notation, it's 2*e.
 	// If a number ends in `e`, disconnect the `e` and make it a word.
-	if let Token::PreQuantity(l, s) = &t {
+	if let Token::Quantity(l, s) = &t {
 		let last = &s[s.len()-1..];
 		if last == "e" {
-			g.push_back(Token::PreQuantity(
+			g.push_back(Token::Quantity(
 				LineLocation { pos: l.pos, len: l.len-1 },
 				String::from(&s[0..s.len()-1])
 			));
-			g.push_back(Token::PreWord(
+			g.push_back(Token::Word(
 				LineLocation { pos: l.pos + l.len - 1, len: 1 },
 				String::from("e")
 			));
@@ -51,9 +51,9 @@ fn push_token(g: &mut VecDeque<Token>, t: Option<Token>, stop_i: usize) {
 	}
 
 	// Some operators are written as words.
-	if let Token::PreWord(l, s) = &t {
+	if let Token::Word(l, s) = &t {
 		if Operator::from_string(s).is_some() {
-			t = Token::PreOperator(*l, s.clone());
+			t = Token::Operator(*l, s.clone());
 		}
 	}
 
@@ -74,7 +74,7 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 				match &mut t {
 					// If we're already building a number,
 					// append.
-					Some(Token::PreQuantity(_, val)) => {
+					Some(Token::Quantity(_, val)) => {
 						val.push(if c == ',' {'.'} else {c});
 					},
 
@@ -82,7 +82,7 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 					// previous token and start one.
 					_ => {
 						push_token(&mut g, t, i);
-						t = Some(Token::PreQuantity(LineLocation{pos: i, len: 0}, String::from(c)));
+						t = Some(Token::Quantity(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
 			},
@@ -91,12 +91,12 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 			// Can be both a word or a number.
 			'e' => {
 				match &mut t {
-					Some(Token::PreWord(_, val)) => { val.push(c); },
-					Some(Token::PreQuantity(_, val)) => { val.push(c); },
+					Some(Token::Word(_, val)) => { val.push(c); },
+					Some(Token::Quantity(_, val)) => { val.push(c); },
 
 					_ => {
 						push_token(&mut g, t, i);
-						t = Some(Token::PreWord(LineLocation{pos: i, len: 0}, String::from(c)));
+						t = Some(Token::Word(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
 			}
@@ -106,7 +106,7 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 			// or it can specify a negative exponent.
 			'-' | '+' => {
 				match &mut t {
-					Some(Token::PreQuantity(_, val)) => {
+					Some(Token::Quantity(_, val)) => {
 						if &val[val.len()-1..] == "e" {
 							// If the current number ends in an `e`,
 							// this negative specifies a negative exponent
@@ -116,7 +116,7 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 							// Otherwise, end the number.
 							// We probably have a subtraction.
 							push_token(&mut g, t, i);
-							t = Some(Token::PreOperator(
+							t = Some(Token::Operator(
 								LineLocation{pos: i, len: 1},
 								String::from(c)
 							));
@@ -126,7 +126,7 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 					// This may be a negative or a subtraction
 					_ => {
 						push_token(&mut g, t, i);
-						t = Some(Token::PreOperator(
+						t = Some(Token::Operator(
 							LineLocation{pos: i, len: 1},
 							String::from(c)
 						));
@@ -139,10 +139,10 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 			'^'|'!'|'%'|'='
 			=> {
 				match &mut t {
-					Some(Token::PreOperator(_, val)) => { val.push(c); },
+					Some(Token::Operator(_, val)) => { val.push(c); },
 					_ => {
 						push_token(&mut g, t, i);
-						t = Some(Token::PreOperator(LineLocation{pos: i, len: 0}, String::from(c)));
+						t = Some(Token::Operator(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
 			},
@@ -150,11 +150,11 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 			// Group
 			'(' => {
 				push_token(&mut g, t, i);
-				t = Some(Token::PreGroupStart(LineLocation{pos: i, len: 0}));
+				t = Some(Token::GroupStart(LineLocation{pos: i, len: 0}));
 			},
 			')' => {
 				push_token(&mut g, t, i);
-				t = Some(Token::PreGroupEnd(LineLocation{pos: i, len: 0}));
+				t = Some(Token::GroupEnd(LineLocation{pos: i, len: 0}));
 			},
 
 			// Space. Basic seperator.
@@ -166,11 +166,11 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 			// Word
 			_ => {
 				match &mut t {
-					Some(Token::PreWord(_, val)) => { val.push(c); },
+					Some(Token::Word(_, val)) => { val.push(c); },
 
 					_ => {
 						push_token(&mut g, t, i);
-						t = Some(Token::PreWord(LineLocation{pos: i, len: 0}, String::from(c)));
+						t = Some(Token::Word(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
 			}

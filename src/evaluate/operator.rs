@@ -8,17 +8,7 @@ use crate::context::Context;
 
 pub fn eval_operator(op: &Operator, args: &VecDeque<Expression>, context: &mut Context) -> Result<Option<Expression>, EvalError> {
 	match op {
-
-		// Handled seperately in evaluate.rs
-		Operator::Function(_) |
-
-		// These are never evaluated,
-		// but are converted to one of the following instead.
-		Operator::ImplicitMultiply |
-		Operator::Sqrt |
-		Operator::Divide |
-		Operator::DivideLong |
-		Operator::Subtract => { panic!() }
+		Operator::Function(_) => unreachable!("Functions are handled seperately."),
 
 		Operator::Define => {
 			if args.len() != 2 { panic!() };
@@ -36,18 +26,6 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Expression>, context: &mut C
 
 			if let Expression::Quantity(v) = args {
 				return Ok(Some(Expression::Quantity(-v.clone())));
-			} else { return Ok(None); }
-		},
-
-		Operator::Flip => {
-			if args.len() != 1 { panic!() };
-			let args = &args[0];
-
-			if let Expression::Quantity(v) = args {
-				if v.is_zero() { return Err(EvalError::ZeroDivision); }
-				return Ok(Some(Expression::Quantity(
-					Quantity::new_rational(1f64).unwrap()/v.clone()
-				)));
 			} else { return Ok(None); }
 		},
 
@@ -73,6 +51,38 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Expression>, context: &mut C
 			return Ok(Some(Expression::Quantity(sum)));
 		},
 
+		Operator::Subtract => {
+			if args.len() != 2 { panic!() };
+			let a = &args[0];
+			let b = &args[1];
+
+			if let Expression::Quantity(a) = a {
+				if let Expression::Quantity(b) = b {
+					return Ok(Some(Expression::Quantity(a.clone() - b.clone())));
+				}
+			}
+
+			return Ok(None);
+		},
+
+
+		Operator::Divide |
+		Operator::DivideLong => {
+			if args.len() != 2 { panic!() };
+			let a = &args[0];
+			let b = &args[1];
+
+			if let Expression::Quantity(a) = a {
+				if let Expression::Quantity(b) = b {
+					if b.is_zero() { return Err(EvalError::ZeroDivision); }
+					return Ok(Some(Expression::Quantity(a.clone() / b.clone())));
+				}
+			}
+
+			return Ok(None);
+		},
+
+		Operator::ImplicitMultiply |
 		Operator::Multiply => {
 			let mut prod = Quantity::new_rational(1f64).unwrap();
 			for i in args.iter() {
@@ -106,8 +116,7 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Expression>, context: &mut C
 			} else { return Ok(None); }
 		},
 
-		Operator::UnitConvert
-		=> {
+		Operator::UnitConvert => {
 			if args.len() != 2 { panic!() };
 			let a = &args[0];
 			let b = &args[1];
@@ -120,6 +129,19 @@ pub fn eval_operator(op: &Operator, args: &VecDeque<Expression>, context: &mut C
 					}
 					return Ok(Some(Expression::Quantity(n.unwrap())));
 				} else { return Ok(None); }
+			} else { return Ok(None); }
+		},
+
+
+		Operator::Sqrt => {
+			if args.len() != 1 { panic!() }
+			let a = &args[0];
+
+			if let Expression::Quantity(va) = a {
+				if va.is_negative() { return Err(EvalError::BadMath); }
+				let p = va.pow(Quantity::new_rational_from_string("0.5").unwrap());
+				if p.is_nan() {return Err(EvalError::BadMath);}
+				return Ok(Some(Expression::Quantity(p)));
 			} else { return Ok(None); }
 		},
 

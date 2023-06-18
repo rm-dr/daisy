@@ -19,10 +19,10 @@ fn lookback_signs(
 		if i == 0 {
 			let a: Token = g.remove(i).unwrap();
 			match &a {
-				Token::PreOperator(l,o)
+				Token::Operator(l,o)
 				=> {
 					if o == "-" {
-						g.insert(i, Token::PreOperator(*l, String::from("neg")));
+						g.insert(i, Token::Operator(*l, String::from("neg")));
 					} else if o == "+" {
 						continue; // We should not increment i if we remove a token
 					} else {g.insert(i, a);}
@@ -35,7 +35,7 @@ fn lookback_signs(
 			let b: Token = g.remove(i-1).unwrap();
 
 			match (&a, &b) {
-				(Token::PreOperator(_, sa), Token::PreOperator(l,sb))
+				(Token::Operator(_, sa), Token::Operator(l,sb))
 				=> {
 					if {
 						let o = Operator::from_string(sa);
@@ -47,7 +47,7 @@ fn lookback_signs(
 						)
 					} {
 						if sb == "-" {
-							g.insert(i-1, Token::PreOperator(*l, String::from("neg")));
+							g.insert(i-1, Token::Operator(*l, String::from("neg")));
 							g.insert(i-1, a);
 						} else if sb == "+" {
 							g.insert(i-1, a);
@@ -71,7 +71,7 @@ fn lookback_signs(
 		let b: Token = g.remove(i-1).unwrap();
 
 		match (&a, &b) {
-			(Token::PreOperator(_,sa), Token::PreOperator(_,sb))
+			(Token::Operator(_,sa), Token::Operator(_,sb))
 			=> {
 				if !((sa == "neg") && (sb == "neg")) {
 					g.insert(i-1, b);
@@ -108,19 +108,19 @@ fn lookback(
 
 			match (&a, &b) {
 				// Insert ImplicitMultiply
-				(Token::PreGroup(_,_), Token::PreGroup(l ,_))
-				| (Token::PreGroup(_,_), Token::PreQuantity(l,_))
-				| (Token::PreQuantity(_,_), Token::PreGroup(l,_))
-				| (Token::PreGroup(_,_), Token::PreWord(l,_))
-				| (Token::PreWord(_,_), Token::PreGroup(l,_))
-				| (Token::PreQuantity(_,_), Token::PreWord(l,_))
-				| (Token::PreWord(_,_), Token::PreQuantity(l,_))
-				| (Token::PreWord(_,_), Token::PreWord(l,_))
+				(Token::Group(_,_), Token::Group(l ,_))
+				| (Token::Group(_,_), Token::Quantity(l,_))
+				| (Token::Quantity(_,_), Token::Group(l,_))
+				| (Token::Group(_,_), Token::Word(l,_))
+				| (Token::Word(_,_), Token::Group(l,_))
+				| (Token::Quantity(_,_), Token::Word(l,_))
+				| (Token::Word(_,_), Token::Quantity(l,_))
+				| (Token::Word(_,_), Token::Word(l,_))
 				=> {
 					let loc = LineLocation{pos: l.pos-1, len: 0};
 
 					g.insert(i-1, b);
-					g.insert(i-1, Token::PreOperator(
+					g.insert(i-1, Token::Operator(
 						loc,
 						String::from("i*")
 					));
@@ -128,9 +128,9 @@ fn lookback(
 				},
 
 				// Insert implicit multiplications for right-unary operators
-				(Token::PreQuantity(_,_), Token::PreOperator(l,s))
-				| (Token::PreGroup(_,_), Token::PreOperator(l,s))
-				| (Token::PreWord(_,_), Token::PreOperator(l,s))
+				(Token::Quantity(_,_), Token::Operator(l,s))
+				| (Token::Group(_,_), Token::Operator(l,s))
+				| (Token::Word(_,_), Token::Operator(l,s))
 				=> {
 					let o = Operator::from_string(s);
 					let loc = LineLocation{pos: l.pos-1, len: 0};
@@ -139,7 +139,7 @@ fn lookback(
 					if o.is_some() {
 						let o = o.unwrap();
 						if (!o.is_binary()) && (!o.is_left_associative()) {
-							g.insert(i-1, Token::PreOperator(
+							g.insert(i-1, Token::Operator(
 								loc,
 								String::from("i*")
 							));
@@ -149,9 +149,9 @@ fn lookback(
 				},
 
 				// Insert implicit multiplications for left-unary operators.
-				(Token::PreOperator(_,s), Token::PreQuantity(l,_))
-				| (Token::PreOperator(_,s), Token::PreGroup(l,_))
-				| (Token::PreOperator(_,s), Token::PreWord(l,_))
+				(Token::Operator(_,s), Token::Quantity(l,_))
+				| (Token::Operator(_,s), Token::Group(l,_))
+				| (Token::Operator(_,s), Token::Word(l,_))
 				=> {
 					let o = Operator::from_string(s);
 					let loc = LineLocation{pos: l.pos-1, len: 0};
@@ -160,7 +160,7 @@ fn lookback(
 					if o.is_some() {
 						let o = o.unwrap();
 						if (!o.is_binary()) && o.is_left_associative() {
-							g.insert(i-1, Token::PreOperator(
+							g.insert(i-1, Token::Operator(
 								loc,
 								String::from("i*")
 							));
@@ -170,7 +170,7 @@ fn lookback(
 				},
 
 				// The following are syntax errors
-				(Token::PreQuantity(la,_), Token::PreQuantity(lb,_))
+				(Token::Quantity(la,_), Token::Quantity(lb,_))
 				=> {
 					return Err((
 						LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
@@ -206,12 +206,12 @@ pub fn groupify(
 		let (l_now, v_now) = levels.last_mut().unwrap();
 
 		match t {
-			Token::PreGroupStart(l) => {
+			Token::GroupStart(l) => {
 				levels.push((l, VecDeque::with_capacity(8)));
 				i_level += 1;
 			},
 
-			Token::PreGroupEnd(l) => {
+			Token::GroupEnd(l) => {
 				let l = LineLocation {
 					pos: l_now.pos,
 					len: l.len + l.pos - l_now.pos
@@ -226,7 +226,7 @@ pub fn groupify(
 				let (_, v_now) = levels.last_mut().unwrap();
 				lookback(&mut v)?;
 
-				v_now.push_back(Token::PreGroup(l, v));
+				v_now.push_back(Token::Group(l, v));
 			},
 
 			_ => {
@@ -252,12 +252,12 @@ pub fn groupify(
 		if v.len() == 0 { return Err((l, ParserError::EmptyGroup)) }
 		lookback(&mut v)?;
 
-		v_now.push_back(Token::PreGroup(l, v));
+		v_now.push_back(Token::Group(l, v));
 	}
 
 
 	let (_, mut v) = levels.pop().unwrap();
 	lookback(&mut v)?;
 
-	return Ok(Token::PreGroup(LineLocation{pos:0, len:0}, v));
+	return Ok(Token::Group(LineLocation{pos:0, len:0}, v));
 }

@@ -20,7 +20,7 @@ fn treeify_binary(
 	if i == 0 {
 		// This binary operator is at the end of an expression.
 		let l = match this {
-			Token::PreOperator(l, _) => l,
+			Token::Operator(l, _) => l,
 			_ => panic!()
 		};
 		return Err((*l, ParserError::Syntax));
@@ -32,7 +32,7 @@ fn treeify_binary(
 			&g_inner[i-1]
 		} else {
 			let l = match this {
-				Token::PreOperator(l, _) => l,
+				Token::Operator(l, _) => l,
 				_ => panic!()
 			};
 			return Err((*l, ParserError::Syntax));
@@ -44,7 +44,7 @@ fn treeify_binary(
 			&g_inner[i+1]
 		} else {
 			let l = match this {
-				Token::PreOperator(l, _) => l,
+				Token::Operator(l, _) => l,
 				_ => panic!()
 			};
 			return Err((*l, ParserError::Syntax));
@@ -55,7 +55,7 @@ fn treeify_binary(
 
 
 
-	if let Token::PreOperator(l, s) = left {
+	if let Token::Operator(l, s) = left {
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		let o = o.unwrap();
@@ -74,7 +74,7 @@ fn treeify_binary(
 		}
 	}
 
-	if let Token::PreOperator(l, s) = right {
+	if let Token::Operator(l, s) = right {
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		let o = o.unwrap();
@@ -96,7 +96,7 @@ fn treeify_binary(
 
 	// This operator
 	let this_op = {
-		let Token::PreOperator(l, s) = this else {panic!()};
+		let Token::Operator(l, s) = this else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		o.unwrap()
@@ -104,14 +104,14 @@ fn treeify_binary(
 
 	// The operators contesting our arguments
 	let left_op = if i > 1 {
-		let Token::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
+		let Token::Operator(l, s) = &g_inner[i-2] else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		Some(o.unwrap())
 	} else { None };
 
 	let right_op = if i < g_inner.len()-2 {
-		let Token::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
+		let Token::Operator(l, s) = &g_inner[i+2] else {panic!()};
 		let o = Operator::from_string(s);
 		if o.is_none() { return Err((*l, ParserError::Syntax)); }
 		Some(o.unwrap())
@@ -127,11 +127,11 @@ fn treeify_binary(
 		let this_pre = g_inner.remove(i-1).unwrap();
 		let right_pre = g_inner.remove(i-1).unwrap();
 		let left: Expression; let right: Expression;
-		if let Token::PreGroup(_, _) = right_pre { right = treeify(right_pre, context)?; } else {right = right_pre.to_expression(context)?;}
-		if let Token::PreGroup(_, _) = left_pre { left = treeify(left_pre, context)?; } else {left = left_pre.to_expression(context)?;}
+		if let Token::Group(_, _) = right_pre { right = treeify(right_pre, context)?; } else {right = right_pre.to_expression(context)?;}
+		if let Token::Group(_, _) = left_pre { left = treeify(left_pre, context)?; } else {left = left_pre.to_expression(context)?;}
 
 		let o = {
-			let Token::PreOperator(_, s) = this_pre else {panic!()};
+			let Token::Operator(_, s) = this_pre else {panic!()};
 			let o = Operator::from_string(&s);
 			if o.is_none() { panic!() }
 			o.unwrap()
@@ -141,7 +141,7 @@ fn treeify_binary(
 		new_token_args.push_back(left);
 		new_token_args.push_back(right);
 
-		g_inner.insert(i-1, Token::Container(o.into_expression(new_token_args)));
+		g_inner.insert(i-1, Token::Container(Expression::Operator(o, new_token_args)));
 
 		return Ok(true);
 	} else {
@@ -164,7 +164,7 @@ fn treeify_unary(
 				&g_inner[i-1]
 			} else {
 				let l = match this {
-					Token::PreOperator(l, _) => l,
+					Token::Operator(l, _) => l,
 					_ => panic!()
 				};
 				return Err((*l, ParserError::Syntax));
@@ -176,7 +176,7 @@ fn treeify_unary(
 				&g_inner[i+1]
 			} else {
 				let l = match this {
-					Token::PreOperator(l, _) => l,
+					Token::Operator(l, _) => l,
 					_ => panic!()
 				};
 				return Err((*l, ParserError::Syntax));
@@ -194,7 +194,7 @@ fn treeify_unary(
 	}
 
 	if prev.is_some() {
-		if let Token::PreOperator(_,_) = prev.unwrap() {
+		if let Token::Operator(_,_) = prev.unwrap() {
 		} else {
 			return Err((
 				*this.get_line_location(),
@@ -203,7 +203,7 @@ fn treeify_unary(
 		}
 	}
 
-	if let Token::PreOperator(l, _) = next {
+	if let Token::Operator(l, _) = next {
 		let tl = *this.get_line_location();
 		return Err((
 			LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
@@ -214,7 +214,7 @@ fn treeify_unary(
 
 		// This operator
 		let this_op = {
-			let Token::PreOperator(l, s) = this else {panic!()};
+			let Token::Operator(l, s) = this else {panic!()};
 			let o = Operator::from_string(s);
 			if o.is_none() { return Err((*l, ParserError::Syntax)); }
 			o.unwrap()
@@ -223,14 +223,14 @@ fn treeify_unary(
 		// The operator contesting our argument
 		let next_op = if left_associative {
 			if i > 1 {
-				let Token::PreOperator(l, s) = &g_inner[i-2] else {panic!()};
+				let Token::Operator(l, s) = &g_inner[i-2] else {panic!()};
 				let o = Operator::from_string(s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
 				Some(o.unwrap())
 			} else { None }
 		} else {
 			if i < g_inner.len()-2 {
-				let Token::PreOperator(l, s) = &g_inner[i+2] else {panic!()};
+				let Token::Operator(l, s) = &g_inner[i+2] else {panic!()};
 				let o = Operator::from_string(s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
 				Some(o.unwrap())
@@ -245,10 +245,10 @@ fn treeify_unary(
 			} else {
 				next_pre = g_inner.remove(i).unwrap();
 			}
-			if let Token::PreGroup(_, _) = next_pre { next = treeify(next_pre, context)?; } else { next = next_pre.to_expression(context)? }
+			if let Token::Group(_, _) = next_pre { next = treeify(next_pre, context)?; } else { next = next_pre.to_expression(context)? }
 
 			let o = {
-				let Token::PreOperator(_, s) = this_pre else {panic!()};
+				let Token::Operator(_, s) = this_pre else {panic!()};
 				let o = Operator::from_string(&s);
 				if o.is_none() { panic!() }
 				o.unwrap()
@@ -258,9 +258,9 @@ fn treeify_unary(
 			new_token_args.push_back(next);
 
 			if left_associative {
-				g_inner.insert(i-1, Token::Container(o.into_expression(new_token_args)));
+				g_inner.insert(i-1, Token::Container(Expression::Operator(o, new_token_args)));
 			} else {
-				g_inner.insert(i, Token::Container(o.into_expression(new_token_args)));
+				g_inner.insert(i, Token::Container(Expression::Operator(o, new_token_args)));
 			}
 
 			return Ok(true);
@@ -279,7 +279,7 @@ pub fn treeify(
 ) -> Result<Expression, (LineLocation, ParserError)> {
 
 	let g_inner: &mut VecDeque<Token> = match g {
-		Token::PreGroup(_, ref mut x) => x,
+		Token::Group(_, ref mut x) => x,
 		_ => panic!()
 	};
 
@@ -297,10 +297,10 @@ pub fn treeify(
 
 		let i = j as usize;
 
-		// Convert preoperators
+		// Convert operators
 		// If not an operator, move on.
 		let this_op = match &g_inner[i] {
-			Token::PreOperator(l, s) => {
+			Token::Operator(l, s) => {
 				let o = Operator::from_string(&s);
 				if o.is_none() { return Err((*l, ParserError::Syntax)); }
 				o.unwrap()
@@ -342,10 +342,10 @@ pub fn treeify(
 	let g = g_inner.pop_front().unwrap();
 	return match g {
 		// Catch edge cases
-		Token::PreOperator(l, _) => {
+		Token::Operator(l, _) => {
 			Err((l, ParserError::Syntax))
 		},
-		Token::PreGroup(_,_) => {
+		Token::Group(_,_) => {
 			treeify(g, context)
 		},
 
