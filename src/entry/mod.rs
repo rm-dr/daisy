@@ -5,8 +5,7 @@ cfg_if::cfg_if! {
 		pub use unix::main as main_e;
 	} else {
 		pub fn main_e () -> Result<(), std::io::Error> {
-			println!("Not yet implemented.");
-			Ok(())
+			unimplemented!("Not yet implemented.");
 		}
 	}
 }
