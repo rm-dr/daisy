@@ -1,6 +1,4 @@
- - Fix unit autoconversion (Hz * s)
  - Minimize parenthesis when printing expressions
- - Sane autoconversion (mi + km)
  - Consistent errors:
    - Consistent look
    - Linelocation for math errors
@@ -8,7 +6,6 @@
    - Better error when `sin = 2`
    - Check syntax when parsing or when evaluating?
  - list and delete variables
- - redefine variables
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
