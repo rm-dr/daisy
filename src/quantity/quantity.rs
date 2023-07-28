@@ -111,6 +111,37 @@ impl Quantity {
 		return Some(n.mul_no_convert(fa).div_no_convert(fb))
 	}
 
+
+	pub fn match_units(&mut self, other: &Quantity) {
+
+		let mut new_units = Quantity::new_rational_from_string("1").unwrap();
+		let mut flag;
+
+		// Check every unit in `self`
+		for (us, ps) in self.unit.get_val() {
+			flag = false;
+
+			// Check if `us` matches some unit in `other`
+			for (uo, _) in other.unit.get_val() {
+				if {
+					uo.to_base().unit.compatible_with(&us.to_base().unit)
+				} {
+					// If it does, convert `us` to `uo`
+					new_units.insert_unit(uo.clone(), ps.clone());
+					flag = true;
+					break;
+				}
+			}
+			if !flag {
+				// If no unit in `other` matches `us`, don't convert `us`
+				new_units.insert_unit(us.clone(), ps.clone());
+			}
+		}
+
+		// Convert self to new units
+		*self = self.convert_to(new_units).unwrap();
+	}
+
 	pub fn convert_to_base(&self) -> Quantity { self.convert_to(self.unit.to_base()).unwrap() }
 }
 
@@ -282,24 +313,13 @@ impl SubAssign for Quantity where {
 	}
 }
 
-
 impl Mul for Quantity {
 	type Output = Self;
 
 	fn mul(self, other: Self) -> Self::Output {
 
-
 		let mut o = other;
-		if self.unit != o.unit {
-			if o.unit.compatible_with(&self.unit) {
-				o = o.convert_to(self.clone()).unwrap()
-			} else {
-				let cf = self.unit.common_factor(&o.unit);
-				if let Some(f) = cf {
-					o = o.convert_to(f).unwrap();
-				}
-			}
-		}
+		o.match_units(&self);
 
 		Quantity {
 			scalar: self.scalar * o.scalar,
@@ -311,18 +331,8 @@ impl Mul for Quantity {
 impl MulAssign for Quantity where {
 	fn mul_assign(&mut self, other: Self) {
 
-
 		let mut o = other;
-		if self.unit != o.unit {
-			if o.unit.compatible_with(&self.unit) {
-				o = o.convert_to(self.clone()).unwrap()
-			} else {
-				let cf = self.unit.common_factor(&o.unit);
-				if let Some(f) = cf {
-					o = o.convert_to(f).unwrap();
-				}
-			}
-		}
+		o.match_units(&self);
 
 		self.scalar *= o.scalar;
 		self.unit *= o.unit;
@@ -335,16 +345,7 @@ impl Div for Quantity {
 	fn div(self, other: Self) -> Self::Output {
 
 		let mut o = other;
-		if self.unit != o.unit {
-			if o.unit.compatible_with(&self.unit) {
-				o = o.convert_to(self.clone()).unwrap()
-			} else {
-				let cf = self.unit.common_factor(&o.unit);
-				if let Some(f) = cf {
-					o = o.convert_to(f).unwrap();
-				}
-			}
-		}
+		o.match_units(&self);
 
 		Quantity {
 			scalar: self.scalar / o.scalar,
@@ -357,16 +358,7 @@ impl DivAssign for Quantity where {
 	fn div_assign(&mut self, other: Self) {
 
 		let mut o = other;
-		if self.unit != o.unit {
-			if o.unit.compatible_with(&self.unit) {
-				o = o.convert_to(self.clone()).unwrap()
-			} else {
-				let cf = self.unit.common_factor(&o.unit);
-				if let Some(f) = cf {
-					o = o.convert_to(f).unwrap();
-				}
-			}
-		}
+		o.match_units(&self);
 
 		self.scalar /= o.scalar;
 		self.unit /= o.unit;

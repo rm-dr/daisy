@@ -161,52 +161,6 @@ impl Unit {
 		return o == s;
 	}
 
-	// True if these two units have a common factor
-	pub fn common_factor(&self, other: &Unit) -> Option<Quantity> {
-
-		if self.unitless() || other.unitless() { return None; }
-
-
-		let mut failed = false;
-
-		// What to convert `other` to before multiplying
-		let mut factor = Quantity::new_rational_from_string("1").unwrap();
-		let mut flag;
-		for (us, _) in self.get_val() {
-			flag = false;
-			for (uo, po) in other.get_val() {
-				if {
-					us.to_base().unit.compatible_with(&uo.to_base().unit)
-				} {
-					factor.insert_unit(us.clone(), po.clone());
-					flag = true;
-					break;
-				}
-			}
-			if !flag { failed = true }
-		}
-
-		if !failed { return Some(factor);}
-
-
-		let mut factor = Quantity::new_rational_from_string("1").unwrap();
-		for (uo, po) in other.get_val() {
-			flag = false;
-			for (us, _) in self.get_val() {
-				if {
-					us.to_base().unit.compatible_with(&uo.to_base().unit)
-				} {
-					factor.insert_unit(us.clone(), po.clone());
-					flag = true;
-					break;
-				}
-			}
-			if !flag { return None; }
-		}
-
-		return Some(factor);
-	}
-
 	pub fn insert(&mut self, u: FreeUnit, p: Scalar) {
 		let v = self.get_val_mut();
 		match v.get_mut(&u) {
