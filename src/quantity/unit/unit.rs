@@ -52,7 +52,7 @@ impl ToString for Unit {
 						'7' => '⁷',
 						'8' => '⁸',
 						'9' => '⁹',
-						_ => panic!()
+						_ => unreachable!()
 					});
 				}
 				t.push('·');
@@ -90,7 +90,7 @@ impl ToString for Unit {
 						'7' => '⁷',
 						'8' => '⁸',
 						'9' => '⁹',
-						_ => panic!()
+						_ => unreachable!()
 					});
 				}
 				b.push('·');

@@ -145,7 +145,7 @@ pub fn do_command(
 				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
 			)?;
 		},
-		_ => panic!("Bad command!")
+		_ => unreachable!("Bad command!")
 	};
 
 	return Ok(());

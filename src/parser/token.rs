@@ -96,7 +96,7 @@ impl Token {
 			| Token::GroupStart(_)
 			| Token::GroupEnd(_)
 			| Token::Group(_, _)
-			=> panic!()
+			=> panic!("This token cannot be converted to an expression")
 		};
 	}
 

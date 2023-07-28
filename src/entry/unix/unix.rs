@@ -89,7 +89,7 @@ fn do_expression(
 
 	} else {
 		match g {
-			Ok(_) => panic!(),
+			Ok(_) => unreachable!(),
 
 			Err(EvalError::TooBig) => {
 				write!(

@@ -255,7 +255,7 @@ impl Add for Quantity {
 	type Output = Self;
 
 	fn add(self, other: Self) -> Self::Output {
-		if !self.unit.compatible_with(&other.unit) { panic!() }
+		if !self.unit.compatible_with(&other.unit) { panic!("Tried to add incompatible units") }
 
 		let mut o = other;
 		if self.unit != o.unit {
@@ -271,7 +271,7 @@ impl Add for Quantity {
 
 impl AddAssign for Quantity where {
 	fn add_assign(&mut self, other: Self) {
-		if !self.unit.compatible_with(&other.unit) { panic!() }
+		if !self.unit.compatible_with(&other.unit) { panic!("Tried to addassign incompatible units") }
 
 		let mut o = other;
 		if self.unit != o.unit {
@@ -286,7 +286,7 @@ impl Sub for Quantity {
 	type Output = Self;
 
 	fn sub(self, other: Self) -> Self::Output {
-		if !self.unit.compatible_with(&other.unit) { panic!() }
+		if !self.unit.compatible_with(&other.unit) { panic!("Tried to subtract incompatible units") }
 
 		let mut o = other;
 		if self.unit != o.unit {
@@ -302,7 +302,7 @@ impl Sub for Quantity {
 
 impl SubAssign for Quantity where {
 	fn sub_assign(&mut self, other: Self) {
-		if !self.unit.compatible_with(&other.unit) { panic!() }
+		if !self.unit.compatible_with(&other.unit) { panic!("Tried to subassign incompatible units") }
 
 		let mut o = other;
 		if self.unit != o.unit {
@@ -369,8 +369,8 @@ impl Rem<Quantity> for Quantity {
 	type Output = Self;
 
 	fn rem(self, other: Quantity) -> Self::Output {
-		if !self.unit.unitless() { panic!() }
-		if !other.unit.unitless() { panic!() }
+		if !self.unit.unitless() { panic!("Tried to % a quantity with units") }
+		if !other.unit.unitless() { panic!("Tried to % by a quantity with units") }
 
 		Quantity {
 			scalar: self.scalar % other.scalar,
@@ -389,7 +389,7 @@ impl PartialEq for Quantity {
 
 impl PartialOrd for Quantity {
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-		if self.unit != other.unit { panic!() }
+		if self.unit != other.unit { panic!("Tried to compare incompatible units") }
 		self.scalar.partial_cmp(&other.scalar)
 	}
 }

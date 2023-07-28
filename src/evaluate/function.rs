@@ -54,6 +54,6 @@ pub fn eval_function(f: &Function, args: &VecDeque<Expression>) -> Result<Expres
 
 		Function::ToBase
 		| Function::NoUnit
-		=> panic!()
+		=> unreachable!()
 	}
 }
