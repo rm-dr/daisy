@@ -162,6 +162,55 @@ impl Unit {
 		return o == s;
 	}
 
+
+	// True if all base units are the same AND there is a constant factor between their powers.
+	// This is a generalization of `compatible_with`. `compatible_with` is true iff
+	// `compatible_with_power` is one.
+	pub fn compatible_with_power(&self, other: &Unit) -> Option<Scalar> {
+		let mut flag;
+		let mut pow_factor: Option<Scalar> = None;
+
+		let sbu = self.to_base().unit;
+		let obu = other.to_base().unit;
+
+		for (us, ps) in sbu.get_val() {
+			flag = false;
+			for (uo, po) in obu.get_val() {
+				if uo.whole == us.whole {
+					if pow_factor.is_none() {
+						pow_factor = Some(po.clone() / ps.clone());
+					} else if let Some(ref f) = pow_factor {
+						if *f != po.clone() / ps.clone() { return None; }
+					}
+
+					flag = true;
+					break;
+				}
+			}
+			if !flag { return None; }
+		}
+
+		pow_factor = None;
+		for (uo, po) in obu.get_val() {
+			flag = false;
+			for (us, ps) in sbu.get_val() {
+				if uo.whole == us.whole {
+					if pow_factor.is_none() {
+						pow_factor = Some(po.clone() / ps.clone());
+					} else if let Some(ref f) = pow_factor {
+						if *f != po.clone() / ps.clone() { return None; }
+					}
+
+					flag = true;
+					break;
+				}
+			}
+			if !flag { return None; }
+		}
+
+		return pow_factor;
+	}
+
 	pub fn insert(&mut self, u: FreeUnit, p: Scalar) {
 		let v = self.get_val_mut();
 		match v.get_mut(&u) {

@@ -111,7 +111,6 @@ impl Quantity {
 		return Some(n.mul_no_convert(fa).div_no_convert(fb))
 	}
 
-
 	pub fn match_units(&mut self, other: &Quantity) {
 
 		let mut new_units = Quantity::new_rational_from_string("1").unwrap();
@@ -123,14 +122,15 @@ impl Quantity {
 
 			// Check if `us` matches some unit in `other`
 			for (uo, _) in other.unit.get_val() {
-				if {
-					uo.to_base().unit.compatible_with(&us.to_base().unit)
-				} {
-					// If it does, convert `us` to `uo`
-					new_units.insert_unit(uo.clone(), ps.clone());
-					flag = true;
-					break;
-				}
+				// Use generalized compatible_with check to match reciprocal units
+				// (for example, 1Hz * 1 sec.)
+				let f = uo.to_base().unit.compatible_with_power(&us.to_base().unit);
+				if f.is_none() { continue; }
+				let f = f.unwrap();
+
+				new_units.insert_unit(uo.clone(), ps.clone() * f);
+				flag = true;
+				break;
 			}
 			if !flag {
 				// If no unit in `other` matches `us`, don't convert `us`

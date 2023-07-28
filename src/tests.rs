@@ -211,4 +211,6 @@ fn complex_units() {
 	good_expr("20 mi", "10 mph * 2 hours");
 	good_expr("120 m", "1 (m/s) * 2 min");
 	good_expr("120 m", "(2 min) * (1 m/s)");
+	good_expr("180", "1 Hz * 3 min");
+	good_expr("3600", "1 hour * 1 Hz");
 }
