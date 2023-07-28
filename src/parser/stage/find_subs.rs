@@ -84,7 +84,7 @@ pub fn find_subs(
 		} else {
 			let target = target.unwrap();
 			let l = t.get_mut_line_location();
-			r.push_front((l.clone(), String::from(target)));
+			r.push_back((l.clone(), String::from(target)));
 
 			let old_len = l.len;
 			let new_len = target.chars().count();
