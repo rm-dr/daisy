@@ -1,13 +1,13 @@
 use crate::parser::Expression;
 use crate::parser::Operator;
 use crate::context::Context;
-
+use crate::parser::LineLocation;
 
 use super::operator::eval_operator;
 use super::function::eval_function;
 use super::EvalError;
 
-pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, EvalError> {
+pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, (LineLocation, EvalError)> {
 
 	// Keeps track of our position in the expression tree.
 	// For example, the coordinates [0, 2, 1] are interpreted as follows:
@@ -40,15 +40,23 @@ pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, Eva
 
 
 			let new = match g {
-				Expression::Quantity(_) => None,
+				Expression::Quantity(_, _) => None,
 
-				Expression::Constant(c) => { Some(evaluate(&c.value(), context).unwrap()) },
-				Expression::Variable(s) => { context.get_variable(&s) },
-				Expression::Operator(Operator::Function(f), v) => { Some(eval_function(&f, &v)?) },
-				Expression::Operator(o, v) => { eval_operator(&o, &v, context)? },
+				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context).unwrap()) },
+				Expression::Variable(_, s) => { context.get_variable(&s) },
+				Expression::Operator(_, Operator::Function(_), _) => { Some(eval_function(g)?) },
+				Expression::Operator(_, _, _) => { eval_operator(g, context)? },
 			};
 
-			if new.is_some() { *g = new.unwrap()}
+			if let Some(mut new) = new {
+				if let Expression::Constant(_,_) = g {
+					// Fix constant line location.
+					// Constant expansion does not change the location of a value,
+					// but other operations might.
+					new.set_linelocation(&g.get_linelocation());
+				}
+				*g = new;
+			}
 
 
 			// Move up the tree
@@ -62,11 +70,11 @@ pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, Eva
 
 			// Don't evaluate the first argument of a define.
 			// This prevents variables from being expanded before a re-assignment.
-			if let Expression::Operator(Operator::Define, _) = g {
-					*coords.last_mut().unwrap() += 1;
+			if let Expression::Operator(_, Operator::Define, _) = g {
+				*coords.last_mut().unwrap() += 1;
 				coords.push(0);
 				continue;
-				}
+			}
 
 			coords.push(0);
 		}

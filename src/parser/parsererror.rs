@@ -1,11 +1,3 @@
-/// Specifies the location of a token in an input string.
-#[derive(Debug)]
-#[derive(Copy, Clone)]
-pub struct LineLocation {
-	pub pos: usize,
-	pub len: usize
-}
-
 /// Types of parser errors.
 /// If we cannot parse a string, one of these is returned.
 #[derive(Debug)]
