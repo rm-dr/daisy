@@ -134,6 +134,9 @@ pub fn do_command(
 					"  hyperbolic sin, etc      {c}sinh, asinh, csch{r}\r\n",
 					"  hyperbolic cos, etc      {c}cosh, acosh, sech{r}\r\n",
 					"  hyperbolic tan, etc      {c}tanh, atanh, coth{r}\r\n",
+					"\r\n",
+					"  convert to base unit     {c}tobase(quantity){r}\r\n",
+					"  remove units             {c}nounit(quantity){r}\r\n",
 					"\n"
 				),
 
