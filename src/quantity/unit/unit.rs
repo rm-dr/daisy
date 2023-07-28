@@ -154,6 +154,7 @@ impl Unit {
 	}
 
 	// True if base units are the same
+	// compatible <=> can be converted to
 	pub fn compatible_with(&self, other: &Unit) -> bool {
 		let s = self.clone() * self.to_base_factor().unit;
 		let o = other.clone() * other.to_base_factor().unit;
@@ -183,6 +184,7 @@ impl Unit {
 		return u;
 	}
 
+	// Returns a unit `u` so that `self * u` contains only base units.
 	pub fn to_base_factor(&self) -> Quantity {
 		let mut q = Quantity::new_rational(1f64).unwrap();
 
@@ -194,6 +196,7 @@ impl Unit {
 		return q;
 	}
 
+	// Returns a unit `u` equivalent to `self` that contains only base units.
 	pub fn to_base(&self) -> Quantity {
 		let mut q = Quantity::new_rational(1f64).unwrap();
 
