@@ -124,7 +124,7 @@ impl Quantity {
 			for (uo, _) in other.unit.get_val() {
 				// Use generalized compatible_with check to match reciprocal units
 				// (for example, 1Hz * 1 sec.)
-				let f = uo.to_base().unit.compatible_with_power(&us.to_base().unit);
+				let f = Unit::from_free(*uo).compatible_with_power(&Unit::from_free(*us));
 				if f.is_none() { continue; }
 				let f = f.unwrap();
 
