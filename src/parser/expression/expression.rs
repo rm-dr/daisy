@@ -3,24 +3,26 @@ use crate::quantity::Quantity;
 
 use super::Operator;
 use super::Constant;
+use super::super::LineLocation;
+
 
 /// Expressions represent logical objects in an expession.
 #[derive(Debug)]
 #[derive(Clone)]
 pub enum Expression {
-	Variable(String),
-	Quantity(Quantity),
-	Constant(Constant),
-	Operator(Operator, VecDeque<Expression>),
+	Variable(LineLocation, String),
+	Quantity(LineLocation, Quantity),
+	Constant(LineLocation, Constant),
+	Operator(LineLocation, Operator, VecDeque<Expression>),
 }
 
 impl ToString for Expression {
 	fn to_string(&self) -> String {
 		match self {
-			Expression::Quantity(v) => v.to_string(),
-			Expression::Constant(c) => c.to_string(),
-			Expression::Variable(s) => s.clone(),
-			Expression::Operator(o,a) => o.print(a)
+			Expression::Quantity(_, v) => v.to_string(),
+			Expression::Constant(_, c) => c.to_string(),
+			Expression::Variable(_, s) => s.clone(),
+			Expression::Operator(_, o,a) => o.print(a)
 		}
 	}
 }
@@ -30,16 +32,16 @@ impl Expression {
 	// This sometimes leads to different--usually more verbose--behavior.
 	pub fn to_string_outer(&self) -> String {
 		match self {
-			Expression::Quantity(v) => v.to_string_outer(),
-			Expression::Constant(c) => c.to_string(),
-			Expression::Variable(s) => s.clone(),
-			Expression::Operator(o,a) => o.print(a)
+			Expression::Quantity(_, v) => v.to_string_outer(),
+			Expression::Constant(_, c) => c.to_string(),
+			Expression::Variable(_, s) => s.clone(),
+			Expression::Operator(_, o,a) => o.print(a)
 		}
 	}
 
 	pub fn is_quantity(&self) -> bool {
 		match self {
-			Expression::Quantity(_) => true,
+			Expression::Quantity(_,_) => true,
 			_ => false
 		}
 	}
@@ -47,7 +49,7 @@ impl Expression {
 	#[inline(always)]
 	pub fn get_args_mut(&mut self) -> Option<&mut VecDeque<Expression>> {
 		match self {
-			Expression::Operator(_, ref mut a) => Some(a),
+			Expression::Operator(_, _, ref mut a) => Some(a),
 			_ => None
 		}
 	}
@@ -55,7 +57,7 @@ impl Expression {
 	#[inline(always)]
 	pub fn get_args(&self) -> Option<&VecDeque<Expression>> {
 		match self {
-			Expression::Operator(_, ref a) => Some(a),
+			Expression::Operator(_, _, ref a) => Some(a),
 			_ => None
 		}
 	}
@@ -82,5 +84,24 @@ impl Expression {
 			g = &mut args[*t];
 		}
 		return Some(g);
+	}
+
+	pub fn get_linelocation(&self) -> LineLocation {
+		match self {
+			Expression::Quantity(l, _)
+			| Expression::Constant(l, _)
+			| Expression::Variable(l, _)
+			| Expression::Operator(l, _,_)
+			=> { l.clone() }
+		}
+	}
+
+	pub fn set_linelocation(&mut self, loc: &LineLocation) {
+		match self {
+			Expression::Quantity(l, _) => { *l = *loc },
+			Expression::Constant(l, _) => { *l = *loc },
+			Expression::Variable(l, _) => { *l = *loc },
+			Expression::Operator(l, _,_) => { *l = *loc },
+		}
 	}
 }

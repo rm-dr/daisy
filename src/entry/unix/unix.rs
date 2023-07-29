@@ -59,24 +59,24 @@ fn do_expression(
 	let Ok(g) = g else {panic!()};
 
 
-	// Display parsed string
-	write!(
-		stdout, " {}{}=>{}{} {}\r\n",
-		style::Bold, color::Fg(color::Magenta),
-		style::Reset, color::Fg(color::Reset),
-		g.to_string()
-	).unwrap();
-
 
 	// Evaluate expression
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g = evaluate(&g, context);
+	let g_evaluated = evaluate(&g, context);
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
 	// Show output
-	if let Ok(q) = g {
+	if let Ok(q) = g_evaluated {
+		// Display parsed string
+		write!(
+			stdout, " {}{}=>{}{} {}\r\n",
+			style::Bold, color::Fg(color::Magenta),
+			style::Reset, color::Fg(color::Reset),
+			g.to_string()
+		).unwrap();
+
 		write!(
 			stdout, "\n  {}{}={} {}{}\r\n\n",
 			style::Bold,
@@ -88,12 +88,22 @@ fn do_expression(
 		return Ok(q);
 
 	} else {
-		match g {
-			Ok(_) => panic!(),
+		match g_evaluated {
+			Ok(_) => unreachable!(),
 
-			Err(EvalError::TooBig) => {
+			Err((l, EvalError::TooBig)) => {
 				write!(
-					stdout, "\n  {}{}Mathematical Error: {}Number too big{}\r\n\n",
+					stdout, "{}{}{}{}{}{}\r\n",
+					color::Fg(color::Red),
+					style::Bold,
+					" ".repeat(l.pos + 4),
+					"^".repeat(l.len),
+					color::Fg(color::Reset),
+					style::Reset,
+				).unwrap();
+
+				write!(
+					stdout, "  {}{}Mathematical Error: {}Number too big{}\r\n\n",
 					style::Bold,
 					color::Fg(color::Red),
 					style::Reset,
@@ -101,9 +111,19 @@ fn do_expression(
 				).unwrap();
 			},
 
-			Err(EvalError::ZeroDivision) => {
+			Err((l, EvalError::ZeroDivision)) => {
 				write!(
-					stdout, "\n  {}{}Mathematical Error: {}Division by zero{}\r\n\n",
+					stdout, "{}{}{}{}{}{}\r\n",
+					color::Fg(color::Red),
+					style::Bold,
+					" ".repeat(l.pos + 4),
+					"^".repeat(l.len),
+					color::Fg(color::Reset),
+					style::Reset,
+				).unwrap();
+
+				write!(
+					stdout, "  {}{}Mathematical Error: {}Division by zero{}\r\n\n",
 					style::Bold,
 					color::Fg(color::Red),
 					style::Reset,
@@ -111,9 +131,19 @@ fn do_expression(
 				).unwrap();
 			},
 
-			Err(EvalError::BadMath) => {
+			Err((l, EvalError::BadMath)) => {
 				write!(
-					stdout, "\n  {}{}Mathematical Error: {}Failed to evaluate expression{}\r\n\n",
+					stdout, "{}{}{}{}{}{}\r\n",
+					color::Fg(color::Red),
+					style::Bold,
+					" ".repeat(l.pos + 4),
+					"^".repeat(l.len),
+					color::Fg(color::Reset),
+					style::Reset,
+				).unwrap();
+
+				write!(
+					stdout, "  {}{}Mathematical Error: {}Failed to evaluate expression{}\r\n\n",
 					style::Bold,
 					color::Fg(color::Red),
 					style::Reset,
@@ -121,9 +151,19 @@ fn do_expression(
 				).unwrap();
 			},
 
-			Err(EvalError::IncompatibleUnit) => {
+			Err((l, EvalError::IncompatibleUnit)) => {
 				write!(
-					stdout, "\n  {}{}Evaluation Error: {}Incompatible units{}\r\n\n",
+					stdout, "{}{}{}{}{}{}\r\n",
+					color::Fg(color::Red),
+					style::Bold,
+					" ".repeat(l.pos + 4),
+					"^".repeat(l.len),
+					color::Fg(color::Reset),
+					style::Reset,
+				).unwrap();
+
+				write!(
+					stdout, "  {}{}Evaluation Error: {}Incompatible units{}\r\n\n",
 					style::Bold,
 					color::Fg(color::Red),
 					style::Reset,
@@ -131,9 +171,19 @@ fn do_expression(
 				).unwrap();
 			},
 
-			Err(EvalError::BadDefineName) => {
+			Err((l, EvalError::BadDefineName)) => {
 				write!(
-					stdout, "\n  {}{}Evaluation Error: {}Invalid variable name{}\r\n\n",
+					stdout, "{}{}{}{}{}{}\r\n",
+					color::Fg(color::Red),
+					style::Bold,
+					" ".repeat(l.pos + 4),
+					"^".repeat(l.len),
+					color::Fg(color::Reset),
+					style::Reset,
+				).unwrap();
+
+				write!(
+					stdout, "  {}{}Evaluation Error: {}Invalid variable name{}\r\n\n",
 					style::Bold,
 					color::Fg(color::Red),
 					style::Reset,

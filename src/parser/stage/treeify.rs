@@ -85,11 +85,8 @@ fn treeify_binary(
 		} {
 			return Ok(false);
 		} else {
-			let tl = *this.get_line_location();
-			return Err((
-				LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
-				ParserError::Syntax
-			));
+			let tl = *this.get_line_location() + *l;
+			return Err((tl, ParserError::Syntax));
 		}
 	}
 
@@ -126,22 +123,33 @@ fn treeify_binary(
 		let left_pre = g_inner.remove(i-1).unwrap();
 		let this_pre = g_inner.remove(i-1).unwrap();
 		let right_pre = g_inner.remove(i-1).unwrap();
-		let left: Expression; let right: Expression;
-		if let Token::Group(_, _) = right_pre { right = treeify(right_pre, context)?; } else {right = right_pre.to_expression(context)?;}
-		if let Token::Group(_, _) = left_pre { left = treeify(left_pre, context)?; } else {left = left_pre.to_expression(context)?;}
+		let mut left: Expression; let mut right: Expression;
+		if let Token::Group(l, _) = right_pre {
+			right = treeify(right_pre, context)?;
+			right.set_linelocation(&(right.get_linelocation() + l));
+		} else {
+			right = right_pre.to_expression(context)?;
+		}
 
-		let o = {
-			let Token::Operator(_, s) = this_pre else {panic!()};
+		if let Token::Group(l, _) = left_pre {
+			left = treeify(left_pre, context)?;
+			left.set_linelocation(&(left.get_linelocation() + l));
+		} else {
+			left = left_pre.to_expression(context)?;
+		}
+
+		let (l, o) = {
+			let Token::Operator(l, s) = this_pre else {panic!()};
 			let o = Operator::from_string(&s);
 			if o.is_none() { panic!() }
-			o.unwrap()
+			(l, o.unwrap())
 		};
 
 		let mut new_token_args: VecDeque<Expression> = VecDeque::with_capacity(2);
 		new_token_args.push_back(left);
 		new_token_args.push_back(right);
 
-		g_inner.insert(i-1, Token::Container(Expression::Operator(o, new_token_args)));
+		g_inner.insert(i-1, Token::Container(Expression::Operator(l, o, new_token_args)));
 
 		return Ok(true);
 	} else {
@@ -204,12 +212,8 @@ fn treeify_unary(
 	}
 
 	if let Token::Operator(l, _) = next {
-		let tl = *this.get_line_location();
-		return Err((
-			LineLocation{pos: tl.pos, len: l.pos - tl.pos + l.len},
-			ParserError::Syntax
-		));
-
+		let tl = *this.get_line_location() + *l;
+		return Err((tl, ParserError::Syntax));
 	} else {
 
 		// This operator
@@ -239,28 +243,34 @@ fn treeify_unary(
 
 		if next_op.is_none() || this_op > next_op.unwrap() {
 			let this_pre = g_inner.remove(i).unwrap();
-			let next_pre: Token; let next: Expression;
+			let next_pre: Token; let mut next: Expression;
 			if left_associative {
 				next_pre = g_inner.remove(i-1).unwrap();
 			} else {
 				next_pre = g_inner.remove(i).unwrap();
 			}
-			if let Token::Group(_, _) = next_pre { next = treeify(next_pre, context)?; } else { next = next_pre.to_expression(context)? }
+			if let Token::Group(l, _) = next_pre {
+				next = treeify(next_pre, context)?;
+				next.set_linelocation(&(next.get_linelocation() + l));
+			} else {
+				next = next_pre.to_expression(context)?;
+			}
 
-			let o = {
-				let Token::Operator(_, s) = this_pre else {panic!()};
+
+			let (l, o) = {
+				let Token::Operator(l, s) = this_pre else {panic!()};
 				let o = Operator::from_string(&s);
 				if o.is_none() { panic!() }
-				o.unwrap()
+				(l, o.unwrap())
 			};
 
 			let mut new_token_args: VecDeque<Expression> = VecDeque::with_capacity(3);
 			new_token_args.push_back(next);
 
 			if left_associative {
-				g_inner.insert(i-1, Token::Container(Expression::Operator(o, new_token_args)));
+				g_inner.insert(i-1, Token::Container(Expression::Operator(l, o, new_token_args)));
 			} else {
-				g_inner.insert(i, Token::Container(Expression::Operator(o, new_token_args)));
+				g_inner.insert(i, Token::Container(Expression::Operator(l, o, new_token_args)));
 			}
 
 			return Ok(true);

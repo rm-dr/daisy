@@ -74,20 +74,20 @@ impl Token {
 					return Err((l, ParserError::BadNumber))
 				}
 
-				return Ok(Expression::Quantity(r.unwrap()));
+				return Ok(Expression::Quantity(l, r.unwrap()));
 			},
 
-			Token::Word(_l, s) => {
+			Token::Word(l, s) => {
 
 				let c = Constant::from_string(&s);
-				if c.is_some() { return Ok(Expression::Constant(c.unwrap())); }
+				if c.is_some() { return Ok(Expression::Constant(l, c.unwrap())); }
 
 				let c = Unit::from_string(&s);
-				if c.is_some() { return Ok(Expression::Quantity(c.unwrap())); }
+				if c.is_some() { return Ok(Expression::Quantity(l, c.unwrap())); }
 
 				let c = context.get_variable(&s);
-				if c.is_some() { return Ok(Expression::Variable(s)); }
-				return Ok(Expression::Variable(s));
+				if c.is_some() { return Ok(Expression::Variable(l, s)); }
+				return Ok(Expression::Variable(l, s));
 			}
 
 			Token::Container(v) => { return Ok(v); }
@@ -96,7 +96,7 @@ impl Token {
 			| Token::GroupStart(_)
 			| Token::GroupEnd(_)
 			| Token::Group(_, _)
-			=> panic!()
+			=> panic!("This token cannot be converted to an expression")
 		};
 	}
 

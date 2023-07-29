@@ -28,7 +28,7 @@ fn push_token(g: &mut VecDeque<Token>, t: Option<Token>, stop_i: usize) {
 
 		Token::Group(_,_)
 		| Token::Container(_)
-		=> panic!()
+		=> unreachable!()
 	};
 
 

@@ -3,11 +3,11 @@ mod stage;
 mod token;
 mod parsererror;
 mod expression;
+mod linelocation;
 
 use self::{
 	token::Token,
 	parsererror::ParserError,
-	parsererror::LineLocation
 };
 
 pub use self::{
@@ -15,6 +15,7 @@ pub use self::{
 	expression::Constant,
 	expression::Operator,
 	expression::Function,
+	linelocation::LineLocation,
 };
 
 use crate::context::Context;
@@ -27,7 +28,6 @@ pub fn parse(
 	let expressions = stage::tokenize(s);
 	let (_, expressions) = stage::find_subs(expressions);
 	let g = stage::groupify(expressions)?;
-
 	let g = stage::treeify(g, context)?;
 
 	return Ok(g);
@@ -50,11 +50,12 @@ pub fn substitute(
 
 	let l = s.chars().count();
 	let expressions = stage::tokenize(s);
-	let (subs, _) = stage::find_subs(expressions);
+	let (mut subs, _) = stage::find_subs(expressions);
 	let mut new_c = l - c;
 
-	for r in subs.iter() {
-		// find_subs gives substitutions in reverse order.
+	while subs.len() > 0 {
+		let r = subs.pop_back().unwrap();
+		// Apply substitutions in reverse order
 
 		if { // Don't substitute if our cursor is inside the substitution
 			c >= r.0.pos &&

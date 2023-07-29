@@ -194,9 +194,12 @@ pub fn groupify(
 	Token,
 	(LineLocation, ParserError)
 > {
+
+	let last_linelocation = g.back().unwrap().get_line_location().clone();
+
 	// Vector of grouping levels
 	let mut levels: Vec<(LineLocation, VecDeque<Token>)> = Vec::with_capacity(8);
-	levels.push((LineLocation{pos: 0, len: 0}, VecDeque::with_capacity(8)));
+	levels.push((LineLocation{pos: 0, len: last_linelocation.pos + last_linelocation.len}, VecDeque::with_capacity(8)));
 
 	// Makes sure parenthesis are matched
 	let mut i_level = 0;
@@ -212,10 +215,7 @@ pub fn groupify(
 			},
 
 			Token::GroupEnd(l) => {
-				let l = LineLocation {
-					pos: l_now.pos,
-					len: l.len + l.pos - l_now.pos
-				};
+				let l = *l_now + l;
 
 				if i_level == 0 { return Err((l, ParserError::ExtraCloseParen)) }
 				if v_now.len() == 0 { return Err((l, ParserError::EmptyGroup)) }
@@ -259,5 +259,5 @@ pub fn groupify(
 	let (_, mut v) = levels.pop().unwrap();
 	lookback(&mut v)?;
 
-	return Ok(Token::Group(LineLocation{pos:0, len:0}, v));
+	return Ok(Token::Group(LineLocation{pos:0, len:last_linelocation.pos + last_linelocation.len}, v));
 }

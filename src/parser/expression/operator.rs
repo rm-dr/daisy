@@ -110,7 +110,7 @@ impl Operator {
 	#[inline(always)]
 	fn add_parens_to_arg(&self, arg: &Expression) -> String {
 		let mut astr: String = arg.to_string();
-		if let Expression::Operator(o,_) = arg {
+		if let Expression::Operator(_, o,_) = arg {
 			if o < self {
 				astr = format!("({})", astr);
 			}
@@ -121,7 +121,7 @@ impl Operator {
 	#[inline(always)]
 	fn add_parens_to_arg_strict(&self, arg: &Expression) -> String {
 		let mut astr: String = arg.to_string();
-		if let Expression::Operator(o,_) = arg {
+		if let Expression::Operator(_, o,_) = arg {
 			if o <= self {
 				astr = format!("({})", astr);
 			}
@@ -220,15 +220,15 @@ impl Operator {
 				// multiplied by a unit (like 10 m)
 				// Times sign should stay in all other cases.
 				let no_times = {
-					if let Expression::Quantity(p) = a {
-						if let Expression::Quantity(q) = b {
+					if let Expression::Quantity(_, p) = a {
+						if let Expression::Quantity(_, q) = b {
 							p.unitless() && !q.unitless()
 						} else {false}
 					} else {false}
 				};
 
 				if no_times {
-					let Expression::Quantity(u) = b else {panic!()};
+					let Expression::Quantity(_, u) = b else {panic!()};
 					if u.unit.no_space() {
 						return format!("{}{}",
 							self.add_parens_to_arg_strict(a),
@@ -252,7 +252,7 @@ impl Operator {
 				let a = &args[0];
 				let b = &args[1];
 
-				if let Expression::Quantity(q) = a {
+				if let Expression::Quantity(_, q) = a {
 					if q.is_one() {
 						return format!("{}⁻¹",
 							self.add_parens_to_arg_strict(b)

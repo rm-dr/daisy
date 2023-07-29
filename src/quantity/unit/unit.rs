@@ -52,7 +52,7 @@ impl ToString for Unit {
 						'7' => '⁷',
 						'8' => '⁸',
 						'9' => '⁹',
-						_ => panic!()
+						_ => unreachable!()
 					});
 				}
 				t.push('·');
@@ -90,7 +90,7 @@ impl ToString for Unit {
 						'7' => '⁷',
 						'8' => '⁸',
 						'9' => '⁹',
-						_ => panic!()
+						_ => unreachable!()
 					});
 				}
 				b.push('·');
@@ -154,6 +154,7 @@ impl Unit {
 	}
 
 	// True if base units are the same
+	// compatible <=> can be converted to
 	pub fn compatible_with(&self, other: &Unit) -> bool {
 		let s = self.clone() * self.to_base_factor().unit;
 		let o = other.clone() * other.to_base_factor().unit;
@@ -161,42 +162,27 @@ impl Unit {
 		return o == s;
 	}
 
-	// True if these two units have a common factor
-	pub fn common_factor(&self, other: &Unit) -> Option<Quantity> {
 
-		if self.unitless() || other.unitless() { return None; }
-
-
-		let mut failed = false;
-
-		// What to convert `other` to before multiplying
-		let mut factor = Quantity::new_rational_from_string("1").unwrap();
+	// True if all base units are the same AND there is a constant factor between their powers.
+	// This is a generalization of `compatible_with`. `compatible_with` is true iff
+	// `compatible_with_power` is one.
+	pub fn compatible_with_power(&self, other: &Unit) -> Option<Scalar> {
 		let mut flag;
-		for (us, _) in self.get_val() {
+		let mut pow_factor: Option<Scalar> = None;
+
+		let sbu = self.to_base().unit;
+		let obu = other.to_base().unit;
+
+		for (us, ps) in sbu.get_val() {
 			flag = false;
-			for (uo, po) in other.get_val() {
-				if {
-					us.to_base().unit.compatible_with(&uo.to_base().unit)
-				} {
-					factor.insert_unit(us.clone(), po.clone());
-					flag = true;
-					break;
-				}
-			}
-			if !flag { failed = true }
-		}
+			for (uo, po) in obu.get_val() {
+				if uo.whole == us.whole {
+					if pow_factor.is_none() {
+						pow_factor = Some(po.clone() / ps.clone());
+					} else if let Some(ref f) = pow_factor {
+						if *f != po.clone() / ps.clone() { return None; }
+					}
 
-		if !failed { return Some(factor);}
-
-
-		let mut factor = Quantity::new_rational_from_string("1").unwrap();
-		for (uo, po) in other.get_val() {
-			flag = false;
-			for (us, _) in self.get_val() {
-				if {
-					us.to_base().unit.compatible_with(&uo.to_base().unit)
-				} {
-					factor.insert_unit(us.clone(), po.clone());
 					flag = true;
 					break;
 				}
@@ -204,7 +190,25 @@ impl Unit {
 			if !flag { return None; }
 		}
 
-		return Some(factor);
+		pow_factor = None;
+		for (uo, po) in obu.get_val() {
+			flag = false;
+			for (us, ps) in sbu.get_val() {
+				if uo.whole == us.whole {
+					if pow_factor.is_none() {
+						pow_factor = Some(po.clone() / ps.clone());
+					} else if let Some(ref f) = pow_factor {
+						if *f != po.clone() / ps.clone() { return None; }
+					}
+
+					flag = true;
+					break;
+				}
+			}
+			if !flag { return None; }
+		}
+
+		return pow_factor;
 	}
 
 	pub fn insert(&mut self, u: FreeUnit, p: Scalar) {
@@ -229,6 +233,7 @@ impl Unit {
 		return u;
 	}
 
+	// Returns a unit `u` so that `self * u` contains only base units.
 	pub fn to_base_factor(&self) -> Quantity {
 		let mut q = Quantity::new_rational(1f64).unwrap();
 
@@ -240,6 +245,7 @@ impl Unit {
 		return q;
 	}
 
+	// Returns a unit `u` equivalent to `self` that contains only base units.
 	pub fn to_base(&self) -> Quantity {
 		let mut q = Quantity::new_rational(1f64).unwrap();
 

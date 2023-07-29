@@ -9,12 +9,12 @@ use super::super::{
 pub fn find_subs(
 	mut g: VecDeque<Token>,
 ) -> (
-	Vec<(LineLocation, String)>,
+	VecDeque<(LineLocation, String)>,
 	VecDeque<Token>
 ) {
 
 	// Array of replacements
-	let mut r: Vec<(LineLocation, String)> = Vec::with_capacity(8);
+	let mut r: VecDeque<(LineLocation, String)> = VecDeque::with_capacity(8);
 
 	// New token array, with updated locations
 	let mut n: VecDeque<Token> = VecDeque::with_capacity(g.len());
@@ -22,8 +22,7 @@ pub fn find_subs(
 	let mut offset: usize = 0;
 
 	while g.len() > 0 {
-		// Read in reverse. Very important!
-		let mut t = g.pop_back().unwrap();
+		let mut t = g.pop_front().unwrap();
 
 		let target: Option<&str> = match &mut t {
 			Token::Operator(_, s) => {
@@ -85,11 +84,14 @@ pub fn find_subs(
 		} else {
 			let target = target.unwrap();
 			let l = t.get_mut_line_location();
-			r.push((l.clone(), String::from(target)));
-			*l = LineLocation{ pos: l.pos - offset, len: target.chars().count()};
-			offset += l.len - target.chars().count();
+			r.push_back((l.clone(), String::from(target)));
+
+			let old_len = l.len;
+			let new_len = target.chars().count();
+			*l = LineLocation{ pos: l.pos - offset, len: new_len};
+			offset += old_len - new_len;
 		}
-		n.push_front(t);
+		n.push_back(t);
 	}
 
 	return (r, n);
