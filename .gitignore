@@ -1,1 +1,4 @@
 /target
+/src/target
+/pkg
+*.pkg.*
