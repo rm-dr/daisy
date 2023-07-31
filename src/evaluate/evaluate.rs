@@ -43,7 +43,11 @@ pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, (Li
 				Expression::Quantity(_, _) => None,
 
 				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context).unwrap()) },
-				Expression::Variable(_, s) => { context.get_variable(&s) },
+				Expression::Variable(l, s) => {
+					let v = context.get_variable(&s);
+					if v.is_none() { return Err((*l, EvalError::Undefined(s.clone()))); }
+					v
+				},
 				Expression::Operator(_, Operator::Function(_), _) => { Some(eval_function(g)?) },
 				Expression::Operator(_, _, _) => { eval_operator(g, context)? },
 			};

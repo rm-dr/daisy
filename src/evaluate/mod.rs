@@ -10,7 +10,8 @@ pub enum EvalError {
 	TooBig,
 	ZeroDivision,
 	IncompatibleUnit,
-	BadDefineName
+	BadDefineName,
+	Undefined(String)
 }
 
 
@@ -31,6 +32,9 @@ impl ToString for EvalError {
 			},
 			EvalError::BadDefineName => {
 				String::from("Invalid variable name")
+			},
+			EvalError::Undefined(s) => {
+				format!("{} is undefined", s)
 			}
 		}
 	}
