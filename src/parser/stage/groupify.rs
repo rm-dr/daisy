@@ -23,7 +23,10 @@ fn lookback_signs(
 				=> {
 					if o == "-" {
 						g.insert(i, Token::Operator(*l, String::from("neg")));
-					} else if o == "+" {
+					} else if o == "+" && g.len() != 0 {
+						// Don't remove "+" if it's the only token,
+						// this is a syntax error that is caught later.e
+
 						continue; // We should not increment i if we remove a token
 					} else {g.insert(i, a);}
 				},

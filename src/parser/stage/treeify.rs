@@ -288,10 +288,15 @@ pub fn treeify(
 	context: &Context
 ) -> Result<Expression, (LineLocation, ParserError)> {
 
-	let g_inner: &mut VecDeque<Token> = match g {
-		Token::Group(_, ref mut x) => x,
+	let (l, g_inner): (LineLocation, &mut VecDeque<Token>) = match g {
+		Token::Group(l, ref mut x) => (l, x),
 		_ => panic!()
 	};
+
+	if g_inner.len() == 0 {
+		// This shouldn't ever happen.
+		return Err((l, ParserError::EmptyGroup));
+	}
 
 	let mut left_associative = true;
 	let mut j: i64 = 0;
