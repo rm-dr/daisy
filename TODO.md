@@ -13,7 +13,9 @@
  - Cleanup tests
    - Test commands
    - Test functions (nounit, tobase)
-
+ - Update README
+   - demo
+   - tricks (a = 2)
 
 ## Parser rework
  - Better error when `sin = 2`
