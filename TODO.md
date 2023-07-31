@@ -1,11 +1,9 @@
  - Minimize parenthesis when printing expressions
- - Consistent errors:
-   - Consistent look
-   - Undefined error?
-   - Better error when `sin = 2`
-   - Check syntax when parsing or when evaluating?
  - list and delete variables
  - sin() with units (rad and deg)
+ - Prettyprint: no space when implicit multiply?
+ - Fix printing 1/2pi, square root parenthesis
+ - Re-evaluate variables (a = q + 2, q = 3, a should evaluate to 5)
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
@@ -15,7 +13,12 @@
  - Cleanup tests
    - Test commands
    - Test functions (nounit, tobase)
- - Releases
+
+
+## Parser rework
+ - Better error when `sin = 2`
+ - Define functions (f(x) = ??)
+ - Should functions be operators?
 
 
 ## General
@@ -24,6 +27,7 @@
  - Compile to WASM, publish a webapp
  - CLI Options: evaluate, disable replacement, disable special characters
  - Trigonometry & function tests
+ - Auto-push to crates.io
 
 
 ## Internals
@@ -55,6 +59,7 @@
  - Numbered expressions, history recall
  - Better power printing
  - Color configuration
+ - Enable/disable unit sets (defaults?)
  - Show base units on error
 
 ## Units
