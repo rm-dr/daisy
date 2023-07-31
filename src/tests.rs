@@ -94,6 +94,9 @@ fn bad_expressions() {
 	bad_expr("3 - ");
 	bad_expr("()");
 	bad_expr("3+2)");
+	bad_expr("-");
+	bad_expr("*");
+	bad_expr("+");
 }
 
 #[test]
