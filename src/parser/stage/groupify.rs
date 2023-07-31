@@ -175,10 +175,7 @@ fn lookback(
 				// The following are syntax errors
 				(Token::Quantity(la,_), Token::Quantity(lb,_))
 				=> {
-					return Err((
-						LineLocation{pos: la.pos, len: lb.pos - la.pos + lb.len},
-						ParserError::Syntax
-					));
+					return Err((*la + *lb, ParserError::Syntax));
 				},
 				_ => {g.insert(i-1, b); g.insert(i-1, a);}
 			}

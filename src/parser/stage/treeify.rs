@@ -67,7 +67,7 @@ fn treeify_binary(
 			return Ok(false);
 		} else {
 			let tl = *this.get_line_location() + *l;
-			return Err((tl, ParserError::Syntax)); // left operator isn't valid
+			return Err((tl, ParserError::Syntax)); // left argument isn't valid
 		}
 	}
 
@@ -83,7 +83,7 @@ fn treeify_binary(
 			return Ok(false);
 		} else {
 			let tl = *this.get_line_location() + *l;
-			return Err((tl, ParserError::Syntax)); // right operator isn't valid (two operators next to each other)
+			return Err((tl, ParserError::Syntax)); // right argument isn't valid (two operators next to each other)
 		}
 	}
 
@@ -286,7 +286,6 @@ pub fn treeify(
 	mut g: Token,
 	context: &Context
 ) -> Result<Expression, (LineLocation, ParserError)> {
-
 	let (l, g_inner): (LineLocation, &mut VecDeque<Token>) = match g {
 		Token::Group(l, ref mut x) => (l, x),
 		_ => panic!()
