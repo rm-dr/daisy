@@ -65,6 +65,8 @@ pub fn do_command(
 					"\n",
 					" - Use Up/Down arrows to navigate history.\r\n",
 					" - Use Ctrl-C or Ctrl-D to quit.\r\n",
+					" - Use {c}ans{r} to reference the last result.\r\n",
+					" - Use {c}var = 1337{r} to define varibles.\r\n",
 					"\n",
 					"╞═══════════════ {t}Commands{r} ═══════════════╡\r\n",
 					"      {c}help{r}   Show this help\r\n",
