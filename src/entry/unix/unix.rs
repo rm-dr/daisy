@@ -16,7 +16,6 @@ use super::promptbuffer::PromptBuffer;
 use crate::parser;
 use crate::command;
 use crate::evaluate::evaluate;
-use crate::evaluate::EvalError;
 use crate::context::Context;
 
 
@@ -91,7 +90,7 @@ fn do_expression(
 		match g_evaluated {
 			Ok(_) => unreachable!(),
 
-			Err((l, EvalError::TooBig)) => {
+			Err((l, e)) => {
 				write!(
 					stdout, "{}{}{}{}{}{}\r\n",
 					color::Fg(color::Red),
@@ -103,90 +102,11 @@ fn do_expression(
 				).unwrap();
 
 				write!(
-					stdout, "  {}{}Mathematical Error: {}Number too big{}\r\n\n",
+					stdout, "  {}{}Evaluation Error: {}{}{}\r\n\n",
 					style::Bold,
 					color::Fg(color::Red),
 					style::Reset,
-					color::Fg(color::Reset),
-				).unwrap();
-			},
-
-			Err((l, EvalError::ZeroDivision)) => {
-				write!(
-					stdout, "{}{}{}{}{}{}\r\n",
-					color::Fg(color::Red),
-					style::Bold,
-					" ".repeat(l.pos + 4),
-					"^".repeat(l.len),
-					color::Fg(color::Reset),
-					style::Reset,
-				).unwrap();
-
-				write!(
-					stdout, "  {}{}Mathematical Error: {}Division by zero{}\r\n\n",
-					style::Bold,
-					color::Fg(color::Red),
-					style::Reset,
-					color::Fg(color::Reset),
-				).unwrap();
-			},
-
-			Err((l, EvalError::BadMath)) => {
-				write!(
-					stdout, "{}{}{}{}{}{}\r\n",
-					color::Fg(color::Red),
-					style::Bold,
-					" ".repeat(l.pos + 4),
-					"^".repeat(l.len),
-					color::Fg(color::Reset),
-					style::Reset,
-				).unwrap();
-
-				write!(
-					stdout, "  {}{}Mathematical Error: {}Failed to evaluate expression{}\r\n\n",
-					style::Bold,
-					color::Fg(color::Red),
-					style::Reset,
-					color::Fg(color::Reset),
-				).unwrap();
-			},
-
-			Err((l, EvalError::IncompatibleUnit)) => {
-				write!(
-					stdout, "{}{}{}{}{}{}\r\n",
-					color::Fg(color::Red),
-					style::Bold,
-					" ".repeat(l.pos + 4),
-					"^".repeat(l.len),
-					color::Fg(color::Reset),
-					style::Reset,
-				).unwrap();
-
-				write!(
-					stdout, "  {}{}Evaluation Error: {}Incompatible units{}\r\n\n",
-					style::Bold,
-					color::Fg(color::Red),
-					style::Reset,
-					color::Fg(color::Reset),
-				).unwrap();
-			},
-
-			Err((l, EvalError::BadDefineName)) => {
-				write!(
-					stdout, "{}{}{}{}{}{}\r\n",
-					color::Fg(color::Red),
-					style::Bold,
-					" ".repeat(l.pos + 4),
-					"^".repeat(l.len),
-					color::Fg(color::Reset),
-					style::Reset,
-				).unwrap();
-
-				write!(
-					stdout, "  {}{}Evaluation Error: {}Invalid variable name{}\r\n\n",
-					style::Bold,
-					color::Fg(color::Red),
-					style::Reset,
+					e.to_string(),
 					color::Fg(color::Reset),
 				).unwrap();
 			}
