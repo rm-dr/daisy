@@ -1,8 +1,9 @@
 [package]
 name = "daisycalc"
-version = "0.2.9"
+version = "0.2.10"
 edition = "2021"
 build = "buildscript/main.rs"
+license = "GPL-3.0-only"
 license-file = "LICENSE"
 description = "A high-precision terminal scientific calculator."
 repository = "https://git.betalupi.com/Mark/daisy"
