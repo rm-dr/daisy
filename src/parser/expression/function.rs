@@ -1,6 +1,9 @@
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 pub enum Function {
+	// When adding a function, don't forget to update help command text.
+	// It isn't automatically generated.
+
 	Abs,
 	Floor,
 	Ceil,

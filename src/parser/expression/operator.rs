@@ -11,13 +11,16 @@ use super::Function;
 #[derive(Copy)]
 #[repr(usize)]
 pub enum Operator {
+	// When adding operators, don't forget to update help command text.
+	// It isn't automatically generated.
+
 	Define = 0, // Variable and function definition
 	ModuloLong, // Mod invoked with "mod"
-	DivideLong,
+	DivideLong, // Division invoked with "per"
 	UnitConvert,
 	Subtract,
 	Add,
-	Divide,
+	Divide, // Division invoked with "/"
 	Multiply,
 	Modulo, // Mod invoked with %
 	Negative,
@@ -76,7 +79,7 @@ impl Operator {
 			"%"      => {Some( Operator::Modulo )},
 			"mod"    => {Some( Operator::ModuloLong )},
 			"per"    => {Some( Operator::DivideLong )},
-			"to"    => {Some( Operator::UnitConvert )},
+			"to"     => {Some( Operator::UnitConvert )},
 			"^"|"**" => {Some( Operator::Power )},
 			"!"      => {Some( Operator::Factorial )},
 			"sqrt"|"rt"|"√" => {Some( Operator::Sqrt )},
