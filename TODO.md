@@ -4,6 +4,7 @@
  - Prettyprint: no space when implicit multiply?
  - Fix printing 1/2pi, square root parenthesis
  - Re-evaluate variables (a = q + 2, q = 3, a should evaluate to 5)
+ - Remove rug dependency (too big, incompatible)
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
