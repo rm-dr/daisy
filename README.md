@@ -4,6 +4,7 @@ A high-precision scientific calculator with support for units, derivatives, and 
 
 Many features are missing, this is still under development.
 
+![](https://betalupi.com/static/git/daisy.png)
 
 # Features
  - Open-source
