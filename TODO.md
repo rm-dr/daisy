@@ -40,7 +40,6 @@
 ## Internals
  - Non-recursive treeify
  - Faster factorial function. Maybe use gamma instead?
- - Remove extra calls to `.clone()` in quantity module
  - Arbitrary precision float (rug doesn't offer arbitrary exponents)
  - Backend-independent colorful printing
 

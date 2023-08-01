@@ -82,7 +82,7 @@ impl PromptBuffer {
 	// Prompt methods
 	pub fn get_contents(&self) -> &String {&self.buffer}
 
-	pub fn enter(&mut self) -> String{
+	pub fn enter(&mut self) -> String {
 		let s = String::from(self.buffer.trim());
 		self.buffer.clear();
 		self.hist_cursor = 0;

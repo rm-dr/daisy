@@ -195,7 +195,7 @@ pub fn groupify(
 	(LineLocation, ParserError)
 > {
 
-	let last_linelocation = g.back().unwrap().get_line_location().clone();
+	let last_linelocation: LineLocation = *g.back().unwrap().get_line_location();
 
 	// Vector of grouping levels
 	let mut levels: Vec<(LineLocation, VecDeque<Token>)> = Vec::with_capacity(8);

@@ -38,7 +38,7 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 			let mut loc: LineLocation;
 			if let Expression::Quantity(l, s) = &args[0] {
 				sum = s.clone();
-				loc = l.clone();
+				loc = *l;
 			} else { return Ok(None); };
 
 
@@ -111,7 +111,7 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 			let mut loc: LineLocation;
 			if let Expression::Quantity(l, s) = &args[0] {
 				prod = s.clone();
-				loc = l.clone();
+				loc = *l;
 			} else { return Ok(None); };
 
 			let mut i: usize = 1;

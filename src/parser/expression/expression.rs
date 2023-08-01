@@ -127,7 +127,7 @@ impl Expression {
 			| Expression::Constant(l, _)
 			| Expression::Variable(l, _)
 			| Expression::Operator(l, _,_)
-			=> { l.clone() }
+			=> { *l }
 		}
 	}
 
