@@ -8,6 +8,7 @@ use super::Function;
 /// Operator types, in order of increasing priority.
 #[derive(Debug)]
 #[derive(Clone)]
+#[derive(Copy)]
 #[repr(usize)]
 pub enum Operator {
 	Define = 0, // Variable and function definition
@@ -107,11 +108,21 @@ impl Operator {
 		}
 	}
 
+	// When printing, remap some operators to fix priority.
+	// This ensures that odd expressions like 1/2pi = 1/(2pi) print properly.
+	#[inline(always)]
+	fn print_map(&self) -> Operator {
+		match self {
+			Operator::ImplicitMultiply => Operator::Multiply,
+			_ => *self
+		}
+	}
+
 	#[inline(always)]
 	fn add_parens_to_arg(&self, arg: &Expression) -> String {
 		let mut astr: String = arg.to_string();
 		if let Expression::Operator(_, o,_) = arg {
-			if o < self {
+			if o.print_map() < self.print_map() {
 				astr = format!("({})", astr);
 			}
 		}
@@ -122,7 +133,7 @@ impl Operator {
 	fn add_parens_to_arg_strict(&self, arg: &Expression) -> String {
 		let mut astr: String = arg.to_string();
 		if let Expression::Operator(_, o,_) = arg {
-			if o <= self {
+			if o.print_map() <= self.print_map() {
 				astr = format!("({})", astr);
 			}
 		}
@@ -192,11 +203,47 @@ impl Operator {
 			},
 
 			Operator::Power => {
-				return format!(
-					"{}^{}",
-					self.add_parens_to_arg_strict(&args[0]),
-					self.add_parens_to_arg_strict(&args[1])
-				);
+				if let Expression::Quantity(_, q) = &args[1] {
+					if q.unitless() && q.fract().is_zero() {
+
+						// Write integer powers as a superscript
+						let mut b = String::new();
+						for c in q.to_string().chars() {
+							b.push( match c {
+								'-' => '⁻',
+								'0' => '⁰',
+								'1' => '¹',
+								'2' => '²',
+								'3' => '³',
+								'4' => '⁴',
+								'5' => '⁵',
+								'6' => '⁶',
+								'7' => '⁷',
+								'8' => '⁸',
+								'9' => '⁹',
+								_ => unreachable!()
+							});
+						}
+
+						return format!(
+							"{}{}",
+							self.add_parens_to_arg_strict(&args[0]),
+							b
+						);
+					} else {
+						return format!(
+							"{}^{}",
+							self.add_parens_to_arg_strict(&args[0]),
+							self.add_parens_to_arg_strict(&args[1])
+						);
+					}
+				} else {
+					return format!(
+						"{}^{}",
+						self.add_parens_to_arg_strict(&args[0]),
+						self.add_parens_to_arg_strict(&args[1])
+					);
+				}
 			},
 
 			Operator::Factorial => {
@@ -223,23 +270,32 @@ impl Operator {
 					if let Expression::Quantity(_, p) = a {
 						if let Expression::Quantity(_, q) = b {
 							p.unitless() && !q.unitless()
+						} else if let Expression::Constant(_, _) = b {
+							true
 						} else {false}
 					} else {false}
 				};
 
 				if no_times {
-					let Expression::Quantity(_, u) = b else {panic!()};
-					if u.unit.no_space() {
+					if let Expression::Quantity(_, u) = b {
+						if u.unit.no_space() {
+							return format!("{}{}",
+								self.add_parens_to_arg_strict(a),
+								self.add_parens_to_arg_strict(b)
+							);
+						} else {
+							return format!("{} {}",
+								self.add_parens_to_arg_strict(a),
+								self.add_parens_to_arg_strict(b)
+							);
+						}
+					} else {
 						return format!("{}{}",
 							self.add_parens_to_arg_strict(a),
 							self.add_parens_to_arg_strict(b)
 						);
-					} else {
-						return format!("{} {}",
-							self.add_parens_to_arg_strict(a),
-							self.add_parens_to_arg_strict(b)
-						);
-					}
+					};
+
 				} else {
 					return format!("{} × {}",
 						self.add_parens_to_arg_strict(a),
@@ -251,6 +307,7 @@ impl Operator {
 			Operator::Divide => {
 				let a = &args[0];
 				let b = &args[1];
+
 
 				if let Expression::Quantity(_, q) = a {
 					if q.is_one() {
