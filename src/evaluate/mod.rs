@@ -10,6 +10,7 @@ pub enum EvalError {
 	TooBig,
 	ZeroDivision,
 	IncompatibleUnit,
+	IncompatibleUnits(String, String),
 	BadDefineName,
 	Undefined(String)
 }
@@ -28,7 +29,10 @@ impl ToString for EvalError {
 				String::from("Division by zero")
 			},
 			EvalError::IncompatibleUnit => {
-				String::from("Incompatible units")
+				String::from("Incompatible unit")
+			},
+			EvalError::IncompatibleUnits(a, b) => {
+				format!("Incompatible units ({} and {})", a, b)
 			},
 			EvalError::BadDefineName => {
 				String::from("Invalid variable name")

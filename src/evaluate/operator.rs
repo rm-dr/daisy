@@ -157,7 +157,13 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 				if let Expression::Quantity(lb, vb) = b {
 					let n = va.clone().convert_to(vb.clone());
 					if n.is_none() {
-						return Err((*la + *lb + *op_loc, EvalError::IncompatibleUnit));
+						return Err((
+							*la + *lb + *op_loc,
+							EvalError::IncompatibleUnits(
+								va.convert_to_base().unit.to_string(),
+								vb.convert_to_base().unit.to_string()
+							)
+						));
 					}
 					return Ok(Some(Expression::Quantity(*la + *lb, n.unwrap())));
 				} else { return Ok(None); }
