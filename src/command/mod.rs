@@ -112,6 +112,8 @@ pub fn do_command(
 					"  modulo (short)       {c}%{r}\r\n",
 					"  multiply, divide     {c}*, /, ×, ÷{r}\r\n",
 					"  add, subtract        {c}+, -{r}\r\n",
+					"  unit conversion      {c}to{r}\r\n",
+					"  division (long)      {c}per{r}\r\n",
 					"  modulo (long)        {c}mod{r}\r\n",
 					"\n"
 				),
