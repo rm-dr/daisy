@@ -1,6 +1,6 @@
 [package]
 name = "daisycalc"
-version = "0.2.12"
+version = "0.2.13"
 edition = "2021"
 build = "buildscript/main.rs"
 license = "GPL-3.0-only"
