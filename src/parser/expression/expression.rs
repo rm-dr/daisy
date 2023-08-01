@@ -46,6 +46,41 @@ impl Expression {
 		}
 	}
 
+	// True if this is a power operator applied to a constant or variable
+	// and an integer.
+	// Examples: pi^2, x ^ 3
+	pub fn is_poly_power(&self) -> bool {
+		match self {
+			Expression::Operator(_, Operator::Power, a) => {
+				// Assuming len(a) = 2, which should be true in this case
+				assert!(a.len() == 2);
+
+				let base = &a[0];
+				let power = &a[1];
+
+				// Make sure base ks const or variable
+				match base {
+					Expression::Constant(_, _)
+					| Expression::Variable(_, _)
+					=> {},
+
+					_ => { return false; }
+				};
+
+				// Make sure power is an integer
+				match power {
+					Expression::Quantity(_, q) => {
+						return q.unitless() && q.fract().is_zero();
+					},
+					_ => { return false; }
+				}
+
+
+			},
+			_ => { return false; }
+		};
+	}
+
 	#[inline(always)]
 	pub fn get_args_mut(&mut self) -> Option<&mut VecDeque<Expression>> {
 		match self {

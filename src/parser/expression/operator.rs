@@ -272,7 +272,11 @@ impl Operator {
 							p.unitless() && !q.unitless()
 						} else if let Expression::Constant(_, _) = b {
 							true
-						} else {false}
+						} else if let Expression::Variable(_, _) = b {
+							true
+						} else {
+							b.is_poly_power()
+						}
 					} else {false}
 				};
 
