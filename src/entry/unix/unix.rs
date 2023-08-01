@@ -17,6 +17,7 @@ use crate::parser;
 use crate::command;
 use crate::evaluate::evaluate;
 use crate::context::Context;
+use crate::parser::substitute;
 
 
 #[inline(always)]
@@ -57,7 +58,13 @@ fn do_expression(
 
 	let Ok(g) = g else {panic!()};
 
-
+	// Display parsed string
+	write!(
+		stdout, " {}{}=>{}{} {}\r\n",
+		style::Bold, color::Fg(color::Magenta),
+		style::Reset, color::Fg(color::Reset),
+		g.to_string()
+	).unwrap();
 
 	// Evaluate expression
 	#[cfg(debug_assertions)]
@@ -68,14 +75,6 @@ fn do_expression(
 
 	// Show output
 	if let Ok(q) = g_evaluated {
-		// Display parsed string
-		write!(
-			stdout, " {}{}=>{}{} {}\r\n",
-			style::Bold, color::Fg(color::Magenta),
-			style::Reset, color::Fg(color::Reset),
-			g.to_string()
-		).unwrap();
-
 		write!(
 			stdout, "\n  {}{}={} {}{}\r\n\n",
 			style::Bold,
@@ -91,6 +90,16 @@ fn do_expression(
 			Ok(_) => unreachable!(),
 
 			Err((l, e)) => {
+				// Display user input
+				let (_, s) = substitute(&s, s.len());
+				write!(
+					stdout, "\n{}{}==>{}{} {}\r\n",
+					style::Bold, color::Fg(color::Red),
+					style::Reset, color::Fg(color::Reset),
+					s
+				).unwrap();
+
+
 				write!(
 					stdout, "{}{}{}{}{}{}\r\n",
 					color::Fg(color::Red),
