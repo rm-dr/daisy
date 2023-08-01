@@ -1,10 +1,9 @@
- - Minimize parenthesis when printing expressions
  - list and delete variables
  - sin() with units (rad and deg)
  - Prettyprint: no space when implicit multiply?
- - Fix printing 1/2pi, square root parenthesis
  - Re-evaluate variables (a = q + 2, q = 3, a should evaluate to 5)
  - Remove rug dependency (too big, incompatible)
+ - 2x^-1 as superscript
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
@@ -28,7 +27,12 @@
  - Optional config file
  - Optional history file
  - Compile to WASM, publish a webapp
- - CLI Options: evaluate, disable replacement, disable special characters
+ - Options:
+   - disable replacement
+   - disable special characters
+   - 1/ as -1 power toggle
+   - powers as superscripts toggle
+ - evaluate straight from command line
  - Trigonometry & function tests
  - Auto-push to crates.io
 
