@@ -123,7 +123,9 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 						}
 					},
 
-					// This may be a negative or a subtraction
+					// This may be a negative or a subtraction.
+					// Multi-character operators with - and + are NOT supported!
+					// (for example, we can't use -> for unit conversion)
 					_ => {
 						push_token(&mut g, t, i);
 						t = Some(Token::Operator(
@@ -136,7 +138,9 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 
 			// Operator
 			'*'|'×'|'/'|'÷'|
-			'^'|'!'|'%'|'='
+			'^'|'!'|'%'|'='|
+			'>'|'<'|'?'|'@'|
+			'&'|'|'|'~'|'\\'
 			=> {
 				match &mut t {
 					Some(Token::Operator(_, val)) => { val.push(c); },
