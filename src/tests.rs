@@ -217,3 +217,10 @@ fn complex_units() {
 	good_expr("180", "1 Hz * 3 min");
 	good_expr("3600", "1 hour * 1 Hz");
 }
+
+#[test]
+fn functions() {
+	good_expr("2", "nounit(2 mm)");
+	good_expr("2", "nounit(2 meter * second)");
+	//good_expr("5000 m²·g/(s²·A²)", "tobase(5H)");
+}
