@@ -1,21 +1,17 @@
  - list and delete variables
  - sin() with units (rad and deg)
- - Prettyprint: no space when implicit multiply?
  - Re-evaluate variables (a = q + 2, q = 3, a should evaluate to 5)
  - Remove rug dependency (too big, incompatible)
  - 2x^-1 as superscript
+ - Celsius and Farenheit
+
 
 ## Pre-release
  - Commands to list constants, units, and substitutions
- - Documentation (usage)
- - Documentation (comments)
  - Print with highlighting
  - Cleanup tests
    - Test commands
-   - Test functions (nounit, tobase)
- - Update README
-   - demo
-   - tricks (a = 2)
+ - Demo in readme
 
 ## Parser rework
  - Better error when `sin = 2`
@@ -42,6 +38,7 @@
  - Faster factorial function. Maybe use gamma instead?
  - Arbitrary precision float (rug doesn't offer arbitrary exponents)
  - Backend-independent colorful printing
+   - Better colors in error texts
 
 ## Math Features
  - Function definitions
@@ -55,18 +52,17 @@
  - Binary, hex, octal numbers
  - Extra roots? (for convenience)
  - Sums and products
- - Unit info command
- - Constant info command
 
 ## Prompt
  - Live syntax/output (like firefox js terminal)
  - Syntax highlight input and output
  - fish-style tab completion
  - Numbered expressions, history recall
- - Better power printing
  - Color configuration
  - Enable/disable unit sets (defaults?)
- - Show base units on error
+ - Consistent unit ordering
+ - Better linelocation
+   - we shouldn't need to re-print user input on evaluation errors, red arrows should adjust themselves to the prettyprinted string
 
 ## Units
  - long prefixes (megatonne, etc)
