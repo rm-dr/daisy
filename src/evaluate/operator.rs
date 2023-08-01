@@ -29,7 +29,7 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 			let args = &args[0];
 
 			if let Expression::Quantity(l, v) = args {
-				return Ok(Some(Expression::Quantity(*l, -v.clone())));
+				return Ok(Some(Expression::Quantity(*l + *op_loc, -v.clone())));
 			} else { return Ok(None); }
 		},
 
@@ -81,7 +81,7 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 
 			if let Expression::Quantity(la, a) = a {
 				if let Expression::Quantity(lb, b) = b {
-					return Ok(Some(Expression::Quantity(*la + *lb, a.clone() - b.clone())));
+					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, a.clone() - b.clone())));
 				}
 			}
 
@@ -97,8 +97,8 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 
 			if let Expression::Quantity(la, a) = a {
 				if let Expression::Quantity(lb, b) = b {
-					if b.is_zero() { return Err((*la + *lb, EvalError::ZeroDivision)); }
-					return Ok(Some(Expression::Quantity(*la + *lb, a.clone() / b.clone())));
+					if b.is_zero() { return Err((*la + *lb + *op_loc, EvalError::ZeroDivision)); }
+					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, a.clone() / b.clone())));
 				}
 			}
 
@@ -165,7 +165,7 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 							)
 						));
 					}
-					return Ok(Some(Expression::Quantity(*la + *lb, n.unwrap())));
+					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, n.unwrap())));
 				} else { return Ok(None); }
 			} else { return Ok(None); }
 		},
