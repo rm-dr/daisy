@@ -38,14 +38,21 @@ pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, (Li
 			(coords.len() != 0 && (*coords.last().unwrap() >= g.get_args().unwrap().len()))
 		} {
 
+			// If true, move to the next node
+			let mut move_up = true;
 
 			let new = match g {
 				Expression::Quantity(_, _) => None,
 
 				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context).unwrap()) },
 				Expression::Variable(l, s) => {
+					move_up = false; // Don't move up, re-evaluate
 					let v = context.get_variable(&s);
+
+					// Error if variable is undefined.
+					// Comment this to allow floating varables.
 					if v.is_none() { return Err((*l, EvalError::Undefined(s.clone()))); }
+
 					v
 				},
 				Expression::Operator(_, Operator::Function(_), _) => { Some(eval_function(g)?) },
@@ -60,14 +67,19 @@ pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, (Li
 					new.set_linelocation(&g.get_linelocation());
 				}
 				*g = new;
+			} else {
+				// Always move up if we couldn't evaluate this node.
+				move_up = true;
 			}
 
 
-			// Move up the tree
-			coords.pop();
-			if coords.len() != 0 {
-				*coords.last_mut().unwrap() += 1;
-			} else { break; }
+			if move_up {
+				// Move up the tree
+				coords.pop();
+				if coords.len() != 0 {
+					*coords.last_mut().unwrap() += 1;
+				} else { break; }
+			}
 
 		} else {
 			// Move down the tree

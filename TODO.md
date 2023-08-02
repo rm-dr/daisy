@@ -1,12 +1,6 @@
 ## Pre-release
  - Commands to list constants, units, and substitutions
  - list and delete variables
- - Re-evaluate variables (a = q + 2, q = 3, a should evaluate to 5)
-
-
-
-
-
 
 ## Parser
  - Better error when `sin = 2`
