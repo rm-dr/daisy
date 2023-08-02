@@ -3,7 +3,6 @@
  - list and delete variables
  - Re-evaluate variables (a = q + 2, q = 3, a should evaluate to 5)
  - 2x^-1 as superscript
- - Celsius and Farenheit
 
 
 

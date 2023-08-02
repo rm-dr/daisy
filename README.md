@@ -54,10 +54,18 @@ All documentation is built into the prompt. Use the `help` command to view it.
 The conversion operator `to` converts its left argument to the *unit* of its right argument, ignoring its value. For example, `5m to mi` and `5m to 10mi` are identical.
 
 
+## Celsius and Fahrenheit
+
+Celsius and Fahrenheit are not supported as first-class units because they require an offset when converting from other temperature units. This leads to ambiguity when adding units, since one temperature must be seen as a *difference* rather than an absolute temperature.
+
+Daisy instead provides four functions (`fromCelsius`, `toCelsius`, `fromFahrenheit`, `toFahrenheit`) which convert between scalars and Kelvin.
+ - "from" functions take a scalar and return a value in Kelvin: `fromCelsius(0) = 273.15K`
+ - "to" functions take a value in Kelvin and return a scalar: `toCelsius(273.15 K) = 0`
+
+
 ## Multiplication Order
 
 Implicit multiplication has a higher priority than division. `pi/2 radians` will parse as `pi/(2 radians)`. Type `(pi/2) radians` or `pi/2 * radians` to get 90 degrees.
-
 
 
 ## Inline Assignment
