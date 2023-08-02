@@ -46,7 +46,10 @@ pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, (Li
 
 				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context).unwrap()) },
 				Expression::Variable(l, s) => {
-					move_up = false; // Don't move up, re-evaluate
+					// Don't move up, re-evaluate
+					// This makes variables containing floating variables work properly
+					// (For example, try x = a + 2, a = 2, x. x should evaluate to 4.)
+					move_up = false;
 					let v = context.get_variable(&s);
 
 					// Error if variable is undefined.
