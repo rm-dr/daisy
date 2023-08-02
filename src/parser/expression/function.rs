@@ -112,16 +112,19 @@ impl Function {
 			"tobase" => {Some(Function::ToBase)},
 
 			"toC"            => {Some(Function::ToCelsius)},
-			"fromC"          => {Some(Function::FromCelsius)},
-			"toF"            => {Some(Function::ToFahrenheit)},
-			"fromF"          => {Some(Function::FromFahrenheit)},
 			"tocelsius"      => {Some(Function::ToCelsius)},
-			"fromcelsius"    => {Some(Function::FromCelsius)},
-			"tofahrenheit"   => {Some(Function::ToFahrenheit)},
-			"fromfahrenheit" => {Some(Function::FromFahrenheit)},
 			"toCelsius"      => {Some(Function::ToCelsius)},
+
+			"fromC"          => {Some(Function::FromCelsius)},
+			"fromcelsius"    => {Some(Function::FromCelsius)},
 			"fromCelsius"    => {Some(Function::FromCelsius)},
+
 			"toFahrenheit"   => {Some(Function::ToFahrenheit)},
+			"tofahrenheit"   => {Some(Function::ToFahrenheit)},
+			"toF"            => {Some(Function::ToFahrenheit)},
+
+			"fromF"          => {Some(Function::FromFahrenheit)},
+			"fromfahrenheit" => {Some(Function::FromFahrenheit)},
 			"fromFahrenheit" => {Some(Function::FromFahrenheit)},
 			_ => None
 		}
