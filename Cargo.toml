@@ -1,6 +1,6 @@
 [package]
 name = "daisycalc"
-version = "0.2.14"
+version = "0.2.15"
 edition = "2021"
 build = "buildscript/main.rs"
 license = "GPL-3.0-only"
@@ -8,6 +8,10 @@ description = "A high-precision terminal scientific calculator."
 repository = "https://git.betalupi.com/Mark/daisy"
 homepage = "https://git.betalupi.com/Mark/daisy"
 readme = "README.md"
+
+[[bin]]
+name = "daisy"
+path = "src/main.rs"
 
 [profile.release]
 opt-level = 3
