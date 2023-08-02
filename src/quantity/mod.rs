@@ -16,12 +16,13 @@ cross-compilation to other systems. RUG does not work on all systems.
 */
 
 mod scalar;
-pub(in crate::quantity) use crate::quantity::scalar::Scalar;
+pub use crate::quantity::scalar::Scalar;
 
 
 mod unit;
 pub use crate::quantity::unit::Unit;
 pub use crate::quantity::unit::FreeUnit;
+pub use crate::quantity::unit::WholeUnit;
 
 mod quantity;
 pub use crate::quantity::quantity::Quantity;

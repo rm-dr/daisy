@@ -220,6 +220,11 @@ fn complex_units() {
 
 #[test]
 fn functions() {
+	good_expr("1", "sin(90 deg)");
+	good_expr("-1", "cos(180 deg)");
+	good_expr("0.70711", "sin(pi/4)");
+	good_expr("0.70711", "sin((pi/4) r)");
+
 	good_expr("2", "nounit(2 mm)");
 	good_expr("2", "nounit(2 meter * second)");
 	//good_expr("5000 m²·g/(s²·A²)", "tobase(5H)");
