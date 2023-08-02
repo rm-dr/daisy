@@ -90,6 +90,16 @@ impl Quantity {
 		});
 	}
 
+	pub fn new_rational_from_frac(a: i64, b: i64) -> Option<Quantity> {
+		let v = Scalar::new_rational_from_frac(a, b);
+		if v.is_none() { return None; }
+
+		return Some(Quantity{
+			scalar: v.unwrap(),
+			unit: Unit::new()
+		});
+	}
+
 	pub fn from_scalar(s: Scalar) -> Quantity {
 		return Quantity{
 			scalar: s,

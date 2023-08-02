@@ -33,7 +33,11 @@ pub enum Function {
 	Coth,
 
 	NoUnit,
-	ToBase
+	ToBase,
+	FromCelsius,
+	ToCelsius,
+	FromFahrenheit,
+	ToFahrenheit
 }
 
 
@@ -66,6 +70,10 @@ impl ToString for Function {
 			Function::Coth => { String::from("coth") },
 			Function::NoUnit => { String::from("nounit") },
 			Function::ToBase => { String::from("tobase") },
+			Function::FromCelsius => { String::from("fromcelsius") },
+			Function::ToCelsius => {String::from("tocelsius") },
+			Function::FromFahrenheit => { String::from("fromfahrenheit") },
+			Function::ToFahrenheit => { String::from("tofahrenheit") },
 		}
 	}
 
@@ -101,7 +109,20 @@ impl Function {
 			"coth"    => {Some(Function::Coth)},
 
 			"nounit" => {Some(Function::NoUnit)},
-			"tobase" => {Some(Function::ToBase)}
+			"tobase" => {Some(Function::ToBase)},
+
+			"toC"            => {Some(Function::ToCelsius)},
+			"fromC"          => {Some(Function::FromCelsius)},
+			"toF"            => {Some(Function::ToFahrenheit)},
+			"fromF"          => {Some(Function::FromFahrenheit)},
+			"tocelsius"      => {Some(Function::ToCelsius)},
+			"fromcelsius"    => {Some(Function::FromCelsius)},
+			"tofahrenheit"   => {Some(Function::ToFahrenheit)},
+			"fromfahrenheit" => {Some(Function::FromFahrenheit)},
+			"toCelsius"      => {Some(Function::ToCelsius)},
+			"fromCelsius"    => {Some(Function::FromCelsius)},
+			"toFahrenheit"   => {Some(Function::ToFahrenheit)},
+			"fromFahrenheit" => {Some(Function::FromFahrenheit)},
 			_ => None
 		}
 	}
