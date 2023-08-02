@@ -74,6 +74,9 @@ pub fn find_subs(
 					"g_zero"       => {Some("g₀")},
 					"mu_zero"      => {Some("μ₀")},
 					"h_bar"        => {Some("ℏ")},
+
+					// Misc
+					"deg" => {Some("°")}
 					_ => {None}
 				};
 
