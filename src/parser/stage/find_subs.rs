@@ -67,6 +67,13 @@ pub fn find_subs(
 					"chi"     => {Some("χ")},
 					//"psi"     => {Some("ψ")},  Conflict with pound / square inch
 					"omega"   => {Some("ω")},
+
+					// Constants
+					"epsilon_zero" => {Some("ε₀")},
+					"eps_zero"     => {Some("ε₀")},
+					"g_zero"       => {Some("g₀")},
+					"mu_zero"      => {Some("μ₀")},
+					"h_bar"        => {Some("ℏ")},
 					_ => {None}
 				};
 
