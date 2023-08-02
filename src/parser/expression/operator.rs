@@ -206,40 +206,34 @@ impl Operator {
 			},
 
 			Operator::Power => {
-				if let Expression::Quantity(_, q) = &args[1] {
-					if q.unitless() && q.fract().is_zero() {
 
-						// Write integer powers as a superscript
-						let mut b = String::new();
-						for c in q.to_string().chars() {
-							b.push( match c {
-								'-' => '⁻',
-								'0' => '⁰',
-								'1' => '¹',
-								'2' => '²',
-								'3' => '³',
-								'4' => '⁴',
-								'5' => '⁵',
-								'6' => '⁶',
-								'7' => '⁷',
-								'8' => '⁸',
-								'9' => '⁹',
-								_ => unreachable!()
-							});
-						}
+				let q = &args[1];
 
-						return format!(
-							"{}{}",
-							self.add_parens_to_arg_strict(&args[0]),
-							b
-						);
-					} else {
-						return format!(
-							"{}^{}",
-							self.add_parens_to_arg_strict(&args[0]),
-							self.add_parens_to_arg_strict(&args[1])
-						);
+				if q.is_unitless_integer() {
+					// Write integer powers as a superscript
+					let mut b = String::new();
+					for c in q.to_string().chars() {
+						b.push( match c {
+							'-' => '⁻',
+							'0' => '⁰',
+							'1' => '¹',
+							'2' => '²',
+							'3' => '³',
+							'4' => '⁴',
+							'5' => '⁵',
+							'6' => '⁶',
+							'7' => '⁷',
+							'8' => '⁸',
+							'9' => '⁹',
+							_ => unreachable!()
+						});
 					}
+
+					return format!(
+						"{}{}",
+						self.add_parens_to_arg_strict(&args[0]),
+						b
+					);
 				} else {
 					return format!(
 						"{}^{}",

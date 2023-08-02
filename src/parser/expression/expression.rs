@@ -46,8 +46,22 @@ impl Expression {
 		}
 	}
 
-	// True if this is a power operator applied to a constant or variable
-	// and an integer.
+	// True if this is a unitless integer
+	pub fn is_unitless_integer(&self) -> bool {
+		match self {
+			Expression::Quantity(_, q) => {
+				return q.unitless() && q.fract().is_zero();
+			},
+			Expression::Operator(_, Operator::Negative, q) => {
+				assert!(q.len() == 1);
+				let Expression::Quantity(_, q) = &q[0] else { return false };
+				return q.unitless() && q.fract().is_zero();
+			}
+			_ => { return false; }
+		}
+	}
+
+	// True if this is a integer power operator applied to a constant or variable.
 	// Examples: pi^2, x ^ 3
 	pub fn is_poly_power(&self) -> bool {
 		match self {
@@ -58,7 +72,7 @@ impl Expression {
 				let base = &a[0];
 				let power = &a[1];
 
-				// Make sure base ks const or variable
+				// Make sure base is const or variable
 				match base {
 					Expression::Constant(_, _)
 					| Expression::Variable(_, _)
@@ -68,14 +82,7 @@ impl Expression {
 				};
 
 				// Make sure power is an integer
-				match power {
-					Expression::Quantity(_, q) => {
-						return q.unitless() && q.fract().is_zero();
-					},
-					_ => { return false; }
-				}
-
-
+				return power.is_unitless_integer();
 			},
 			_ => { return false; }
 		};
