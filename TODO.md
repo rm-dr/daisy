@@ -1,6 +1,6 @@
 ## Pre-release
- - Commands to list constants, units, and substitutions
- - list and delete variables
+ - Commands to list units and substitutions
+ - delete variables
 
 ## Parser
  - Better error when `sin = 2`
