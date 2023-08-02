@@ -5,6 +5,7 @@
  - Re-evaluate variables (a = q + 2, q = 3, a should evaluate to 5)
  - 2x^-1 as superscript
  - Celsius and Farenheit
+ - Fix tobase(hbar)
 
 
 
@@ -70,4 +71,3 @@
  - Exact radians, using pi constant?
  - Weird units: flops, lumen, lux, bel
  - Plural unit names
- - More constants
