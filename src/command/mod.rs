@@ -138,9 +138,14 @@ pub fn do_command(
 					"  hyperbolic sin, etc      {c}sinh, asinh, csch{r}\r\n",
 					"  hyperbolic cos, etc      {c}cosh, acosh, sech{r}\r\n",
 					"  hyperbolic tan, etc      {c}tanh, atanh, coth{r}\r\n",
-					"\r\n",
-					"  convert to base unit     {c}tobase(quantity){r}\r\n",
-					"  remove units             {c}nounit(quantity){r}\r\n",
+					"\n",
+					"  Celsius to Kelvin        {c}fromC, fromCelsius{r}\r\n",
+					"  Kelvin to Celsius        {c}toC,   toCelsius{r}\r\n",
+					"  Fahrenheit to Kelvin     {c}fromF, fromFahrenheit{r}\r\n",
+					"  Kelvin to Fahrenheit     {c}toF,   toFahrenheit{r}\r\n",
+					"\n",
+					"  convert to base unit     {c}tobase{r}\r\n",
+					"  remove units             {c}nounit{r}\r\n",
 					"\n"
 				),
 
