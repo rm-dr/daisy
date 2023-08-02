@@ -56,7 +56,9 @@ The conversion operator `to` converts its left argument to the *unit* of its rig
 
 ## Multiplication Order
 
-Implicit multiplication has a higher priority than division. `1/2 pi` will parse as `1/(2pi)`. Type `(1/2) pi` or `1/2 * pi` to get half of pi.
+Implicit multiplication has a higher priority than division. `pi/2 radians` will parse as `pi/(2 radians)`. Type `(pi/2) radians` or `pi/2 * radians` to get 90 degrees.
+
+
 
 ## Inline Assignment
 
