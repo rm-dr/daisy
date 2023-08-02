@@ -52,11 +52,11 @@ impl FreeUnit {
 
 	// Get this unit in terms of base units
 	pub fn to_base(&self) -> Quantity {
-		let q = self.whole.base_factor();
-		let mut q = q.unwrap_or(Quantity::new_rational_from_string("1").unwrap());
+		let f = self.to_base_factor();
 
-		// Don't divide by self
+		let mut q = Quantity::new_rational_from_string("1").unwrap();
 		q.insert_unit(FreeUnit::from_whole_prefix(self.whole, self.prefix), Scalar::new_rational(1f64).unwrap());
+		q.mul_assign_no_convert(f);
 
 		return q;
 	}
