@@ -4,9 +4,19 @@ A high-precision scientific calculator with support for units, derivatives, and 
 
 Many features are missing, this is still under development.
 
+# 📦 Installation
+ - **Arch:** `yay -S daisy`
+ - **Debian:** coming soon
+
+From source: `cargo build --release` \
+Binary will be in `target/release/daisy`
+
+
+# 📹 Screenshot
+
 ![](https://betalupi.com/static/git/daisy.png)
 
-# Features
+# 🛠️ Features
  - Open-source
  - Extremely high precision
    - Uses a rational datatype when possible, and a high-precision float when not.
@@ -17,7 +27,7 @@ Many features are missing, this is still under development.
  - Useful, detailed error messages
 
 
-# Usage
+# 📑 Usage
 
 All documentation is built into the prompt. Use the `help` command to view it.
 
@@ -37,7 +47,7 @@ All documentation is built into the prompt. Use the `help` command to view it.
  - Variable assignment: `a = 143`
 
 
-# Notes and Tricks
+# 🌹 Additional Notes
 
 ## Unit Conversion
 
