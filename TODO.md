@@ -1,7 +1,6 @@
 ## Pre-release
  - Commands to list constants, units, and substitutions
  - list and delete variables
- - sin() with units (rad and deg)
  - Re-evaluate variables (a = q + 2, q = 3, a should evaluate to 5)
  - 2x^-1 as superscript
  - Celsius and Farenheit
