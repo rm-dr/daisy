@@ -129,12 +129,14 @@ fn do_expression(
 #[inline(always)]
 pub fn main() -> Result<(), std::io::Error> {
 	let mut stdout = stdout().into_raw_mode().unwrap();
+	let mut pb: PromptBuffer = PromptBuffer::new(64);
+	let mut context: Context = Context::new();
 
-	let args: Vec<String> = env::args().collect();
 
 	// Handle command-line arguments
+	let args: Vec<String> = env::args().collect();
 	if args.iter().any(|s| s == "--help") {
-		command::do_command(&mut stdout, &String::from("help"))?;
+		command::do_command(&mut stdout, &String::from("help"), &mut context)?;
 		return Ok(());
 	} else if args.iter().any(|s| s == "--version") {
 		write!(stdout, "Daisy v{}\r\n", env!("CARGO_PKG_VERSION"))?;
@@ -145,8 +147,6 @@ pub fn main() -> Result<(), std::io::Error> {
 	//let size = termion::terminal_size().unwrap();
 	//write!(stdout, "{:?}", size).unwrap();
 
-	let mut pb: PromptBuffer = PromptBuffer::new(64);
-	let mut context: Context = Context::new();
 
 
 	'outer: loop {
@@ -165,7 +165,7 @@ pub fn main() -> Result<(), std::io::Error> {
 						if in_str.trim() == "quit" {
 							break 'outer;
 						} else if command::is_command(&in_str) {
-							command::do_command(&mut stdout, &in_str)?;
+							command::do_command(&mut stdout, &in_str, &mut context)?;
 						} else {
 							let r = do_expression(&mut stdout, &in_str, &mut context);
 							if let Ok(t) = r { context.push_hist(t); }

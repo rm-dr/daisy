@@ -38,4 +38,8 @@ impl Context {
 		}
 	}
 
+	pub fn get_variables(&self) -> &HashMap<String, Expression> {
+		return &self.variables
+	}
+
 }

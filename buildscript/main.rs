@@ -16,6 +16,7 @@ fn main() -> Result<(), ()>{
 
 	units::write(&Path::new(&out_dir).join("units.rs"));
 	constants::write(&Path::new(&out_dir).join("constants.rs"));
+	//constants::write(&Path::new("constants.rs"));
 
 	return Ok(());
 }

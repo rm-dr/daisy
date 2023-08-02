@@ -1,4 +1,6 @@
 use std::io::Write;
+use crate::context::Context;
+use crate::parser::Constant;
 
 use termion::{
 	raw::RawTerminal,
@@ -15,11 +17,12 @@ pub fn is_command(
 		"help" | "clear"
 		| "ops" | "operators"
 		| "fns" | "functions"
+		| "vars"
+		| "consts" | "constants"
 		=> true,
 		_ => false
 	}
 }
-
 
 #[inline(always)]
 fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
@@ -51,7 +54,8 @@ fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io
 #[inline(always)]
 pub fn do_command(
 	stdout: &mut RawTerminal<std::io::Stdout>,
-	s: &String
+	s: &String,
+	context: &mut Context
 ) -> Result<(), std::io::Error> {
 
 	match &s[..] {
@@ -73,16 +77,15 @@ pub fn do_command(
 					"      {c}clear{r}  Clear the terminal\r\n",
 					"      {c}quit{r}   Exit daisy\r\n",
 					//"      {c}units{r}  List available units\r\n",
-					//"      {c}const{r}  List available constants\r\n",
+					"      {c}consts{r} List built-in constants\r\n",
 					"      {c}ops{r}    List built-in operators\r\n",
 					"      {c}fns{r}    List built-in functions\r\n",
-					"\n",
+					"      {c}vars{r}   List user-defined variables\r\n",
+					"\n\n",
 				),
 
 				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-
 				c = format!("{}{}", color::Fg(color::LightBlack), style::Italic),
-
 				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
 			)?;
 		},
@@ -115,7 +118,7 @@ pub fn do_command(
 					"  unit conversion      {c}to{r}\r\n",
 					"  division (long)      {c}per{r}\r\n",
 					"  modulo (long)        {c}mod{r}\r\n",
-					"\n"
+					"\n\n"
 				),
 
 				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
@@ -146,7 +149,7 @@ pub fn do_command(
 					"\n",
 					"  convert to base unit     {c}tobase{r}\r\n",
 					"  remove units             {c}nounit{r}\r\n",
-					"\n"
+					"\n\n"
 				),
 
 				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
@@ -154,6 +157,85 @@ pub fn do_command(
 				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
 			)?;
 		},
+
+		"vars" => {
+			let v = context.get_variables();
+
+			if v.len() == 0 {
+				write!(stdout,
+					"You have not defined any variables.\r\n\n",
+				)?;
+				return Ok(());
+			}
+
+			write!(stdout,
+				"\r\n╞═══ {t}User-Defined Variables{r} ═══╡\r\n",
+				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
+			)?;
+
+
+
+			let mut longest = 0;
+			for (key, _) in v {
+				if key.len() > longest {
+					longest = key.len();
+				}
+			}
+
+			for (key, value) in v {
+				let padding = " ".repeat(longest - key.len());
+
+				write!(stdout,
+					concat!(
+						"  {k}{p} = {c}{v}{r}\r\n",
+					),
+					k = key, v = value.to_string(),
+					p = padding,
+					r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+					c = format!("{}{}", color::Fg(color::LightBlack), style::Italic),
+				)?;
+			}
+
+			write!(stdout,
+				"\r\n\n",
+			)?;
+		},
+
+		"consts" | "constants" => {
+			let a = Constant::all_consts();
+
+			write!(stdout,
+				"\r\n╞═══ {t}Built-in Constants{r} ═══╡\r\n",
+				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
+			)?;
+
+			for c in a {
+				let Some(p) = c.pretty_name() else { continue };
+
+				// If you subtract with overflow here,
+				// your padding length is too short.
+				let padding = " ".repeat(25 - p.chars().count());
+
+				write!(stdout,
+					"  {n}{p}: {c}{s}{r}",
+					p = padding,
+					n = p,
+					s = c.source_strings().join(", "),
+
+					r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+					c = format!("{}{}", color::Fg(color::LightBlack), style::Italic),
+				)?;
+
+				write!(stdout, "\r\n")?;
+			}
+
+			write!(stdout,
+				"\r\n\n",
+			)?;
+		},
+
 		_ => unreachable!("Bad command!")
 	};
 
