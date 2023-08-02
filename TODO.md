@@ -1,22 +1,22 @@
+## Pre-release
+ - Commands to list constants, units, and substitutions
  - list and delete variables
  - sin() with units (rad and deg)
  - Re-evaluate variables (a = q + 2, q = 3, a should evaluate to 5)
- - Remove rug dependency (too big, incompatible)
  - 2x^-1 as superscript
  - Celsius and Farenheit
 
 
-## Pre-release
- - Commands to list constants, units, and substitutions
- - Print with highlighting
- - Cleanup tests
-   - Test commands
- - Demo in readme
 
-## Parser rework
+
+
+
+
+## Parser
  - Better error when `sin = 2`
  - Define functions (f(x) = ??)
  - Should functions be operators?
+ - Multi-argument functions
 
 
 ## General
@@ -29,7 +29,6 @@
    - 1/ as -1 power toggle
    - powers as superscripts toggle
  - evaluate straight from command line
- - Trigonometry & function tests
  - Auto-push to crates.io
 
 
@@ -37,13 +36,12 @@
  - Non-recursive treeify
  - Faster factorial function. Maybe use gamma instead?
  - Arbitrary precision float (rug doesn't offer arbitrary exponents)
- - Backend-independent colorful printing
-   - Better colors in error texts
+ - Remove rug dependency (too big, incompatible)
 
 ## Math Features
  - Function definitions
  - Dice
- - Mean, Median, Min, Max: arrays and multi-argument functions
+ - Mean, Median, Min
  - Arbitrary base logarithm
  - Derivatives
  - CAS features (trig, roots and powers)
@@ -51,7 +49,7 @@
  - acot/acoth functions
  - Binary, hex, octal numbers
  - Extra roots? (for convenience)
- - Sums and products
+ - Sums and products with functional arguments
 
 ## Prompt
  - Live syntax/output (like firefox js terminal)
@@ -63,6 +61,8 @@
  - Consistent unit ordering
  - Better linelocation
    - we shouldn't need to re-print user input on evaluation errors, red arrows should adjust themselves to the prettyprinted string
+ - Backend-independent colorful printing
+   - Better colors in error texts
 
 ## Units
  - long prefixes (megatonne, etc)
@@ -70,3 +70,4 @@
  - Exact radians, using pi constant?
  - Weird units: flops, lumen, lux, bel
  - Plural unit names
+ - More constants
