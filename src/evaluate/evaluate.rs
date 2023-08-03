@@ -7,7 +7,7 @@ use super::operator::eval_operator;
 use super::function::eval_function;
 use super::EvalError;
 
-pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, (LineLocation, EvalError)> {
+pub fn evaluate(t: &Expression, context: &mut Context, allow_incomplete: bool) -> Result<Expression, (LineLocation, EvalError)> {
 
 	// Keeps track of our position in the expression tree.
 	// For example, the coordinates [0, 2, 1] are interpreted as follows:
@@ -44,7 +44,7 @@ pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, (Li
 			let new = match g {
 				Expression::Quantity(_, _) => None,
 
-				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context).unwrap()) },
+				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context, false).unwrap()) },
 				Expression::Variable(l, s) => {
 					// Don't move up, re-evaluate
 					// This makes variables containing floating variables work properly
@@ -71,6 +71,15 @@ pub fn evaluate(t: &Expression, context: &mut Context) -> Result<Expression, (Li
 				}
 				*g = new;
 			} else {
+
+				if !allow_incomplete {
+					if let Expression::Quantity(_, _) = g {}
+					else {
+						let l = g.get_linelocation();
+						return Err((l, EvalError::EvaluationError))
+					}
+				}
+
 				// Always move up if we couldn't evaluate this node.
 				move_up = true;
 			}

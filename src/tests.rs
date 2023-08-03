@@ -10,7 +10,7 @@ fn eval_to_str(s: &str) -> Result<String, ()> {
 	};
 	//let out_str = g.print();
 
-	return match evaluate(&g, &mut Context::new()) {
+	return match evaluate(&g, &mut Context::new(), false) {
 		Ok(x) => Ok(x.to_string_outer()),
 		Err(_) => Err(())
 	};

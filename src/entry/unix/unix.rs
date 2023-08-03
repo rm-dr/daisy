@@ -15,7 +15,7 @@ use termion::{
 use super::promptbuffer::PromptBuffer;
 use crate::parser;
 use crate::command;
-use crate::evaluate::evaluate;
+use crate::evaluate;
 use crate::context::Context;
 use crate::parser::substitute;
 
@@ -69,7 +69,7 @@ fn do_expression(
 	// Evaluate expression
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g_evaluated = evaluate(&g, context);
+	let g_evaluated = evaluate::evaluate(&g, context, false);
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
