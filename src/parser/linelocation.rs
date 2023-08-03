@@ -15,12 +15,20 @@ impl LineLocation {
 	pub fn zero(&self) -> bool {
 		return self.pos == 0 && self.len == 0
 	}
+
+	pub fn new_zero() -> LineLocation {
+		return LineLocation { pos: 0, len: 0}
+	}
+
+	pub fn cut_string<'a>(&self, s: &'a String) -> &'a str {
+		&s[self.pos..self.pos+self.len]
+	}
 }
 
 impl PartialEq for LineLocation {
 	fn eq(&self, other: &Self) -> bool {
 		self.pos == other.pos &&
-		self.len ==other.len
+		self.len == other.len
 	}
 }
 
