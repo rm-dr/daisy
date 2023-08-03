@@ -1,6 +1,7 @@
 use std::io::Write;
 use crate::context::Context;
 use crate::parser::Constant;
+use crate::parser::substitute;
 
 use termion::{
 	raw::RawTerminal,
@@ -13,12 +14,16 @@ use termion::{
 pub fn is_command(
 	s: &String
 ) -> bool {
-	match &s.trim()[..] {
+	let args: Vec<&str> = s.split(" ").collect();
+	let first = args[0];
+
+	match first {
 		"help" | "clear"
 		| "ops" | "operators"
 		| "fns" | "functions"
 		| "vars"
 		| "consts" | "constants"
+		| "del" | "delete"
 		=> true,
 		_ => false
 	}
@@ -57,8 +62,10 @@ pub fn do_command(
 	s: &String,
 	context: &mut Context
 ) -> Result<(), std::io::Error> {
+	let args: Vec<&str> = s.split(" ").collect();
+	let first = args[0];
 
-	match &s[..] {
+	match first {
 		"help" => {
 			draw_greeter(stdout)?;
 
@@ -81,6 +88,7 @@ pub fn do_command(
 					"      {c}ops{r}    List built-in operators\r\n",
 					"      {c}fns{r}    List built-in functions\r\n",
 					"      {c}vars{r}   List user-defined variables\r\n",
+					"      {c}del{r}    Delete a variable\r\n",
 					"\n\n",
 				),
 
@@ -234,6 +242,46 @@ pub fn do_command(
 			write!(stdout,
 				"\r\n\n",
 			)?;
+		},
+
+		"del" | "delete" => {
+			if args.len() != 2 {
+				write!(stdout,
+					"{c}{cmd}{r} {t}takes exactly two arguments.{r}\r\n\n",
+					cmd = first,
+					r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+					t = format!("{}{}", color::Fg(color::Red), style::Bold),
+					c = format!("{}{}", color::Fg(color::LightBlack), style::Italic)
+				)?;
+				return Ok(());
+			}
+
+			let v = args[1].to_string();
+			let (_, v) = substitute(&v, v.len());
+			let r = context.delete_variable(&v);
+
+			match r {
+				Ok(()) => {
+					/*write!(stdout,
+						"Deleted variable {c}{v}{r}\r\n\n",
+						v = v,
+						r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+						c = format!("{}{}", color::Fg(color::LightBlack), style::Italic)
+					)?;*/
+				},
+
+				Err(()) => {
+					write!(stdout,
+						"{c}{v}{r} {t}isn't a variable.{r}\r\n\n",
+						v = v,
+						r = format!("{}{}", color::Fg(color::Reset), style::Reset),
+						t = format!("{}{}", color::Fg(color::Red), style::Bold),
+						c = format!("{}{}", color::Fg(color::LightBlack), style::Italic)
+					)?;
+				}
+			}
+
+			return Ok(());
 		},
 
 		_ => unreachable!("Bad command!")

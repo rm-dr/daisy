@@ -19,7 +19,6 @@ impl Context {
 			return Ok(());
 		} else { return Err(()); }
 	}
-	pub fn del_var(&mut self, s: &String) { self.variables.remove(s); }
 
 	pub fn get_variable(&self, s: &String) -> Option<Expression> {
 		let v: Option<&Expression>;
@@ -31,11 +30,21 @@ impl Context {
 		if v.is_some() { Some(v.unwrap().clone()) } else { None }
 	}
 
+	pub fn delete_variable(&mut self, s: &String) -> Result<(), ()> {
+		if !self.is_varible(s) { return Err(()) };
+		self.variables.remove(s);
+		return Ok(());
+	}
+
 	pub fn valid_varible(&self, s: &str) -> bool {
 		return match s {
 			"ans" => false,
 			_ => true
 		}
+	}
+
+	pub fn is_varible(&self, s: &str) -> bool {
+		return self.valid_varible(s) && self.variables.contains_key(s);
 	}
 
 	pub fn get_variables(&self) -> &HashMap<String, Expression> {
