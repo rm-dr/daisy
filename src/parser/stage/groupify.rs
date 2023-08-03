@@ -111,39 +111,41 @@ fn lookback(
 
 			match (&a, &b) {
 				// Insert ImplicitMultiply
-				(Token::Group(_,_), Token::Group(l ,_))
-				| (Token::Group(_,_), Token::Quantity(l,_))
-				| (Token::Quantity(_,_), Token::Group(l,_))
-				| (Token::Group(_,_), Token::Word(l,_))
-				| (Token::Word(_,_), Token::Group(l,_))
-				| (Token::Quantity(_,_), Token::Word(l,_))
-				| (Token::Word(_,_), Token::Quantity(l,_))
-				| (Token::Word(_,_), Token::Word(l,_))
+				(Token::Group(la,_), Token::Group(lb,_))
+				| (Token::Group(la,_), Token::Quantity(lb,_))
+				| (Token::Quantity(la,_), Token::Group(lb,_))
+				| (Token::Group(la,_), Token::Word(lb,_))
+				| (Token::Word(la,_), Token::Group(lb,_))
+				| (Token::Quantity(la,_), Token::Word(lb,_))
+				| (Token::Word(la,_), Token::Quantity(lb,_))
+				| (Token::Word(la,_), Token::Word(lb,_))
 				=> {
-					let loc = LineLocation{pos: l.pos-1, len: 0};
+					let la = la.clone();
+					let lb = lb.clone();
 
 					g.insert(i-1, b);
 					g.insert(i-1, Token::Operator(
-						loc,
+						la + lb,
 						String::from("i*")
 					));
 					g.insert(i-1, a);
 				},
 
 				// Insert implicit multiplications for right-unary operators
-				(Token::Quantity(_,_), Token::Operator(l,s))
-				| (Token::Group(_,_), Token::Operator(l,s))
-				| (Token::Word(_,_), Token::Operator(l,s))
+				(Token::Quantity(la,_), Token::Operator(lb,s))
+				| (Token::Group(la,_), Token::Operator(lb,s))
+				| (Token::Word(la,_), Token::Operator(lb,s))
 				=> {
+					let la = la.clone();
+					let lb = lb.clone();
 					let o = Operator::from_string(s);
-					let loc = LineLocation{pos: l.pos-1, len: 0};
 
 					g.insert(i-1, b);
 					if o.is_some() {
 						let o = o.unwrap();
 						if (!o.is_binary()) && (!o.is_left_associative()) {
 							g.insert(i-1, Token::Operator(
-								loc,
+								la + lb,
 								String::from("i*")
 							));
 						}
@@ -152,19 +154,20 @@ fn lookback(
 				},
 
 				// Insert implicit multiplications for left-unary operators.
-				(Token::Operator(_,s), Token::Quantity(l,_))
-				| (Token::Operator(_,s), Token::Group(l,_))
-				| (Token::Operator(_,s), Token::Word(l,_))
+				(Token::Operator(la,s), Token::Quantity(lb,_))
+				| (Token::Operator(la,s), Token::Group(lb,_))
+				| (Token::Operator(la,s), Token::Word(lb,_))
 				=> {
+					let la = la.clone();
+					let lb = lb.clone();
 					let o = Operator::from_string(s);
-					let loc = LineLocation{pos: l.pos-1, len: 0};
 
 					g.insert(i-1, b);
 					if o.is_some() {
 						let o = o.unwrap();
 						if (!o.is_binary()) && o.is_left_associative() {
 							g.insert(i-1, Token::Operator(
-								loc,
+								la + lb,
 								String::from("i*")
 							));
 						}
