@@ -95,15 +95,6 @@ pub fn evaluate(t: &Expression, context: &mut Context, allow_incomplete: bool) -
 
 		} else {
 			// Move down the tree
-
-			// Don't evaluate the first argument of a define.
-			// This prevents variables from being expanded before a re-assignment.
-			if let Expression::Operator(_, Operator::Define, _) = g {
-				*coords.last_mut().unwrap() += 1;
-				coords.push(0);
-				continue;
-			}
-
 			coords.push(0);
 		}
 	}

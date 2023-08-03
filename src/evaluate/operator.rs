@@ -6,23 +6,12 @@ use super::EvalError;
 use crate::context::Context;
 
 
-pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Expression>, (LineLocation, EvalError)> {
+pub fn eval_operator(g: &Expression, _context: &mut Context) -> Result<Option<Expression>, (LineLocation, EvalError)> {
 
 	let Expression::Operator(op_loc, op, args) = g else {panic!()};
 
 	match op {
 		Operator::Function(_) => unreachable!("Functions are handled seperately."),
-
-		Operator::Define => {
-			if args.len() != 2 { panic!() };
-			let b = &args[1];
-
-			if let Expression::Variable(l, s) = &args[0] {
-				let r = context.push_var(s.clone(), b.clone());
-				if r.is_err() { return Err((*l, EvalError::BadDefineName)); }
-				return Ok(Some(b.clone()));
-			} else { return Err((args[0].get_linelocation(), EvalError::BadDefineName)); }
-		},
 
 		Operator::Negative => {
 			if args.len() != 1 { panic!() };

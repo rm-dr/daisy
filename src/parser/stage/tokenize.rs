@@ -68,9 +68,8 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 
 	for (i, c) in input.chars().enumerate() {
 		match c {
-			// Number
-			// Commas act just like dots.
-			',' | '.' | '0'..='9' => {
+			// Numbers
+			'.' | '0'..='9' => {
 				match &mut t {
 					// If we're already building a number,
 					// append.
@@ -137,10 +136,10 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 			},
 
 			// Operator
+			'^'|'!'|'%'|'\\'|
 			'*'|'×'|'/'|'÷'|
-			'^'|'!'|'%'|'='|
 			'>'|'<'|'?'|'@'|
-			'&'|'|'|'~'|'\\'
+			'&'|'|'|'~'
 			=> {
 				match &mut t {
 					Some(Token::Operator(_, val)) => { val.push(c); },
