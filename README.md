@@ -66,8 +66,3 @@ Daisy instead provides four functions (`fromCelsius`, `toCelsius`, `fromFahrenhe
 ## Multiplication Order
 
 Implicit multiplication has a higher priority than division. `pi/2 radians` will parse as `pi/(2 radians)`. Type `(pi/2) radians` or `pi/2 * radians` to get 90 degrees.
-
-
-## Inline Assignment
-
-The assignment operator `=` returns its value, and can thus be used inside of an expression. For example, `(a = 2) + 2` assigns `a` to `2` and returns `4`. This only works for variable assignment.
