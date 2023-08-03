@@ -1,12 +1,13 @@
 ## Pre-release
  - Commands to list units and substitutions
- - delete variables
+ - Fix large power printing (superscript exponential notation)
 
 ## Parser
  - Better error when `sin = 2`
  - Define functions (f(x) = ??)
  - Should functions be operators?
  - Multi-argument functions
+ - Binary, hex, octal numbers
 
 
 ## General
@@ -20,6 +21,8 @@
    - powers as superscripts toggle
  - evaluate straight from command line
  - Auto-push to crates.io
+ - When should we subsitute? Should variables like "tau" be stored as unicode internally?
+   - Make sure unicode variable deletion works!
 
 
 ## Internals
@@ -29,7 +32,6 @@
  - Remove rug dependency (too big, incompatible)
 
 ## Math Features
- - Function definitions
  - Dice
  - Mean, Median, Min
  - Arbitrary base logarithm
@@ -37,8 +39,6 @@
  - CAS features (trig, roots and powers)
  - Complex numbers
  - acot/acoth functions
- - Binary, hex, octal numbers
- - Extra roots? (for convenience)
  - Sums and products with functional arguments
 
 ## Prompt
