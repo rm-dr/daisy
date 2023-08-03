@@ -209,11 +209,11 @@ impl Operator {
 
 				let q = &args[1];
 
-				if q.is_unitless_integer() {
+				if q.is_unitless_integer() && !q.to_string().contains("e") {
 					// Write integer powers as a superscript
 					let mut b = String::new();
 					for c in q.to_string().chars() {
-						b.push( match c {
+						b.push(match c {
 							'-' => '⁻',
 							'0' => '⁰',
 							'1' => '¹',
