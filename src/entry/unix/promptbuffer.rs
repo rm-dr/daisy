@@ -3,8 +3,7 @@ use std::io::Write;
 use termion::raw::RawTerminal;
 use termion::color;
 use termion::style;
-
-use crate::parser::substitute;
+use crate::parser::substitute_cursor;
 
 
 #[derive(Debug)]
@@ -43,7 +42,7 @@ impl PromptBuffer {
 		let i = if l == 0 {0} else {l - self.cursor};
 
 		// Draw prettyprinted expression
-		let (display_cursor, s) = substitute(&self.get_contents(), i);
+		let (display_cursor, s) = substitute_cursor(&self.get_contents(), i);
 
 		write!(
 			stdout, "\r{}{}==>{}{} {}",

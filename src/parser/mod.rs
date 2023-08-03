@@ -37,8 +37,12 @@ pub fn parse_no_context(s: &String) -> Result<Expression, (LineLocation, ParserE
 	parse(s, &Context::new())
 }
 
+pub fn substitute(s: &String) -> String {
+	let (_, s) = substitute_cursor(s, s.chars().count());
+	return s;
+}
 
-pub fn substitute(
+pub fn substitute_cursor(
 	s: &String, // The string to substitute
 	c: usize    // Location of the cursor right now
 ) -> (

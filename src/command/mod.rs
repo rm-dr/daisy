@@ -257,7 +257,7 @@ pub fn do_command(
 			}
 
 			let v = args[1].to_string();
-			let (_, v) = substitute(&v, v.len());
+			let v = substitute(&v);
 			let r = context.delete_variable(&v);
 
 			match r {

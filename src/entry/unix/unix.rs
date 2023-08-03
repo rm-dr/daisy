@@ -91,7 +91,7 @@ fn do_expression(
 
 			Err((l, e)) => {
 				// Display user input
-				let (_, s) = substitute(&s, s.len());
+				let s = substitute(&s);
 				write!(
 					stdout, "\n{}{}==>{}{} {}\r\n",
 					style::Bold, color::Fg(color::Red),
