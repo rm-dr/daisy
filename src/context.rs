@@ -37,6 +37,18 @@ impl Context {
 	}
 
 	pub fn valid_varible(&self, s: &str) -> bool {
+
+		if {
+			Function::from_string(s).is_some() ||
+			Constant::from_string(s).is_some()
+		} { return false }
+
+		for c in s.to_lowercase().chars() {
+			if !"abcdefghijklmnopqrtstuvwxyz_".contains(c) {
+				return false;
+			}
+		}
+
 		return match s {
 			"ans" => false,
 			_ => true

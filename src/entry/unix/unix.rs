@@ -127,6 +127,129 @@ fn do_expression(
 
 
 #[inline(always)]
+fn do_assignment(
+	stdout: &mut RawTerminal<std::io::Stdout>,
+	s: &String,
+	context: &mut Context
+) {
+
+	let parts = s.split("=").collect::<Vec<&str>>();
+	if parts.len() != 2 {
+		write!(
+			stdout, "  {}{}Parse Error: {}Syntax{}\r\n\n",
+			style::Bold,
+			color::Fg(color::Red),
+			style::Reset,
+			color::Fg(color::Reset),
+		).unwrap();
+		return;
+	}
+
+	let offset = parts[0].chars().count() + 1;
+	let left = parts[0].trim().to_string();
+	let right = parts[1].trim().to_string();
+	let right = substitute(&right);
+	let left = substitute(&left);
+
+	#[cfg(debug_assertions)]
+	RawTerminal::suspend_raw_mode(&stdout).unwrap();
+	let g = parser::parse(&right, context);
+	#[cfg(debug_assertions)]
+	RawTerminal::activate_raw_mode(&stdout).unwrap();
+
+	// Check for parse errors
+	if let Err((l, e)) = g {
+		write!(
+			stdout, "{}{}{}{}{}{}\r\n",
+			color::Fg(color::Red),
+			style::Bold,
+			" ".repeat(l.pos + offset + 4),
+			"^".repeat(l.len),
+			color::Fg(color::Reset),
+			style::Reset,
+		).unwrap();
+
+		write!(
+			stdout, "  {}{}Parse Error: {}{}{}\r\n\n",
+			style::Bold,
+			color::Fg(color::Red),
+			style::Reset,
+			e.to_string(),
+			color::Fg(color::Reset),
+		).unwrap();
+
+		return;
+	}
+
+	let Ok(g) = g else {panic!()};
+
+	// Display parsed string
+	write!(
+		stdout, " {}{}=>{}{} {left} = {}\r\n\n",
+		style::Bold, color::Fg(color::Magenta),
+		style::Reset, color::Fg(color::Reset),
+		g.to_string()
+	).unwrap();
+
+	// Evaluate expression
+	#[cfg(debug_assertions)]
+	RawTerminal::suspend_raw_mode(&stdout).unwrap();
+	let g_evaluated = evaluate::evaluate(&g, context, true);
+	#[cfg(debug_assertions)]
+	RawTerminal::activate_raw_mode(&stdout).unwrap();
+
+	// Show output
+	if let Ok(q) = g_evaluated {
+		let r = context.push_var(left.to_string(), q);
+		if r.is_err() {
+			write!(
+				stdout, "  {}{}Definition failed: {}bad variable name{}\r\n\n",
+				style::Bold,
+				color::Fg(color::Red),
+				style::Reset,
+				color::Fg(color::Reset),
+			).unwrap();
+		}
+		return;
+
+	} else {
+		match g_evaluated {
+			Ok(_) => unreachable!(),
+
+			Err((l, e)) => {
+				// Display user input
+				let s = substitute(&s);
+				write!(
+					stdout, "\n{}{}==>{}{} {}\r\n",
+					style::Bold, color::Fg(color::Red),
+					style::Reset, color::Fg(color::Reset),
+					s
+				).unwrap();
+
+
+				write!(
+					stdout, "{}{}{}{}{}{}\r\n",
+					color::Fg(color::Red),
+					style::Bold,
+					" ".repeat(l.pos + offset + 4),
+					"^".repeat(l.len),
+					color::Fg(color::Reset),
+					style::Reset,
+				).unwrap();
+
+				write!(
+					stdout, "  {}{}Evaluation Error: {}{}{}\r\n\n",
+					style::Bold,
+					color::Fg(color::Red),
+					style::Reset,
+					e.to_string(),
+					color::Fg(color::Reset),
+				).unwrap();
+			}
+		}
+	}
+}
+#[inline(always)]
 pub fn main() -> Result<(), std::io::Error> {
 	let mut stdout = stdout().into_raw_mode().unwrap();
 	let mut pb: PromptBuffer = PromptBuffer::new(64);
@@ -166,6 +289,8 @@ pub fn main() -> Result<(), std::io::Error> {
 							break 'outer;
 						} else if command::is_command(&in_str) {
 							command::do_command(&mut stdout, &in_str, &mut context)?;
+						} else if in_str.contains("=") {
+							do_assignment(&mut stdout, &in_str, &mut context);
 						} else {
 							let r = do_expression(&mut stdout, &in_str, &mut context);
 							if let Ok(t) = r { context.push_hist(t); }
