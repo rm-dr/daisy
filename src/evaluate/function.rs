@@ -28,7 +28,7 @@ fn to_radians(q: Quantity) -> Result<Quantity, ()> {
 
 pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, EvalError)> {
 
-	let Expression::Operator(loc, Operator::Function(f), args) = g else {panic!()};
+	let Expression::Operator(loc, Operator::Function(f), args) = g else {unreachable!()};
 
 	if args.len() != 1 {panic!()};
 	let a = &args[0];

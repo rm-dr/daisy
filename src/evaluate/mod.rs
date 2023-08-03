@@ -11,8 +11,8 @@ pub enum EvalError {
 	ZeroDivision,
 	IncompatibleUnit,
 	IncompatibleUnits(String, String),
-	BadDefineName,
-	Undefined(String)
+	Undefined(String),
+	EvaluationError,
 }
 
 
@@ -32,13 +32,13 @@ impl ToString for EvalError {
 				String::from("Incompatible unit")
 			},
 			EvalError::IncompatibleUnits(a, b) => {
-				format!("Incompatible units ({} and {})", a, b)
-			},
-			EvalError::BadDefineName => {
-				String::from("Invalid variable name")
+				format!("Incompatible units ({a} and {b})")
 			},
 			EvalError::Undefined(s) => {
-				format!("{} is undefined", s)
+				format!("{s} is undefined")
+			},
+			EvalError::EvaluationError => {
+				String::from("Could not evaluate")
 			}
 		}
 	}
