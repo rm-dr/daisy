@@ -14,6 +14,7 @@ pub enum Expression {
 	Quantity(LineLocation, Quantity),
 	Constant(LineLocation, Constant),
 	Operator(LineLocation, Operator, VecDeque<Expression>),
+	Tuple(LineLocation, VecDeque<Expression>),
 }
 
 impl ToString for Expression {
@@ -22,7 +23,15 @@ impl ToString for Expression {
 			Expression::Quantity(_, v) => v.to_string(),
 			Expression::Constant(_, c) => c.to_string(),
 			Expression::Variable(_, s) => s.clone(),
-			Expression::Operator(_, o,a) => o.print(a)
+			Expression::Operator(_, o,a) => o.print(a),
+			Expression::Tuple(_, v) => {
+				format!("({})",
+					v.iter()
+						.map(|x| x.to_string())
+						.collect::<Vec<String>>()
+						.join(", ")
+				)
+			}
 		}
 	}
 }
@@ -35,7 +44,15 @@ impl Expression {
 			Expression::Quantity(_, v) => v.to_string_outer(),
 			Expression::Constant(_, c) => c.to_string(),
 			Expression::Variable(_, s) => s.clone(),
-			Expression::Operator(_, o,a) => o.print(a)
+			Expression::Operator(_, o,a) => o.print(a),
+			Expression::Tuple(_, v) => {
+				format!("({})",
+					v.iter()
+						.map(|x| x.to_string())
+						.collect::<Vec<String>>()
+						.join(", ")
+				)
+			}
 		}
 	}
 
@@ -92,6 +109,7 @@ impl Expression {
 	pub fn get_args_mut(&mut self) -> Option<&mut VecDeque<Expression>> {
 		match self {
 			Expression::Operator(_, _, ref mut a) => Some(a),
+			Expression::Tuple(_, ref mut a) => Some(a),
 			_ => None
 		}
 	}
@@ -100,6 +118,7 @@ impl Expression {
 	pub fn get_args(&self) -> Option<&VecDeque<Expression>> {
 		match self {
 			Expression::Operator(_, _, ref a) => Some(a),
+			Expression::Tuple(_, ref a) => Some(a),
 			_ => None
 		}
 	}
@@ -134,6 +153,7 @@ impl Expression {
 			| Expression::Constant(l, _)
 			| Expression::Variable(l, _)
 			| Expression::Operator(l, _,_)
+			| Expression::Tuple(l, _)
 			=> { *l }
 		}
 	}
@@ -144,6 +164,7 @@ impl Expression {
 			Expression::Constant(l, _) => { *l = *loc },
 			Expression::Variable(l, _) => { *l = *loc },
 			Expression::Operator(l, _,_) => { *l = *loc },
+			Expression::Tuple(l, _) => { *l = *loc },
 		}
 	}
 }

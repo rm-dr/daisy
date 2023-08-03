@@ -13,6 +13,7 @@ pub enum EvalError {
 	IncompatibleUnits(String, String),
 	Undefined(String),
 	EvaluationError,
+	BadArguments(String, usize, usize)
 }
 
 
@@ -39,6 +40,11 @@ impl ToString for EvalError {
 			},
 			EvalError::EvaluationError => {
 				String::from("Could not evaluate")
+			},
+			EvalError::BadArguments(s, want, got) => {
+				format!("{s} takes {want} argument{}, got {got}",
+					if *want == 1 {""} else {"s"},
+				)
 			}
 		}
 	}

@@ -135,6 +135,14 @@ pub fn tokenize(input: &String) -> VecDeque<Token> {
 				};
 			},
 
+			',' => {
+				push_token(&mut g, t, i);
+				t = Some(Token::Operator(
+					LineLocation{pos: i, len: 1},
+					String::from(c)
+				));
+			},
+
 			// Operator
 			'^'|'!'|'%'|'\\'|
 			'*'|'×'|'/'|'÷'|

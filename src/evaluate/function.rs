@@ -32,6 +32,15 @@ pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, EvalEr
 
 	if args.len() != 1 {panic!()};
 	let a = &args[0];
+
+	// All the functions below take only one argument
+	if let Expression::Tuple(l, v) = a {
+		return Err((
+			*l + *loc,
+			EvalError::BadArguments(f.to_string(), 1, v.len())
+		))
+	};
+
 	let Expression::Quantity(l, q) = a else {panic!()};
 
 

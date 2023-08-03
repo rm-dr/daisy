@@ -43,7 +43,7 @@ pub fn evaluate(t: &Expression, context: &mut Context, allow_incomplete: bool) -
 
 			let new = match g {
 				Expression::Quantity(_, _) => None,
-
+				Expression::Tuple(_, _) => None,
 				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context, false).unwrap()) },
 				Expression::Variable(l, s) => {
 					// Don't move up, re-evaluate

@@ -13,7 +13,9 @@ use super::Function;
 pub enum Operator {
 	// When adding operators, don't forget to update help command text.
 	// It isn't automatically generated.
-	ModuloLong = 0, // Mod invoked with "mod"
+	Tuple = 0,
+
+	ModuloLong, // Mod invoked with "mod"
 	DivideLong, // Division invoked with "per"
 	UnitConvert,
 	Subtract,
@@ -67,6 +69,7 @@ impl Operator {
 		}
 
 		return match s {
+			","      => {Some( Operator::Tuple )},
 			"+"      => {Some( Operator::Add )},
 			"-"      => {Some( Operator::Subtract )},
 			"neg"    => {Some( Operator::Negative )},
@@ -143,6 +146,14 @@ impl Operator {
 
 	pub fn print(&self, args: &VecDeque<Expression>) -> String {
 		match self {
+			Operator::Tuple => {
+				return format!(
+					"{}, {}",
+					self.add_parens_to_arg(&args[0]),
+					self.add_parens_to_arg(&args[1])
+				);
+			},
+
 			Operator::Negative => {
 				return format!("-{}", self.add_parens_to_arg(&args[0]));
 			},

@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use crate::parser::LineLocation;
 use crate::quantity::Quantity;
 use crate::parser::Operator;
@@ -12,6 +13,31 @@ pub fn eval_operator(g: &Expression, _context: &mut Context) -> Result<Option<Ex
 
 	match op {
 		Operator::Function(_) => unreachable!("Functions are handled seperately."),
+		Operator::Tuple => {
+			if args.len() != 2 { panic!() };
+			let a = &args[0];
+			let b = &args[1];
+
+			let mut loc = *op_loc;
+			let mut vec: VecDeque<Expression> = VecDeque::new();
+			if let Expression::Tuple(l, v) = a {
+				loc += *l;
+				for i in v { vec.push_back(i.clone()) }
+			} else {
+				loc += a.get_linelocation();
+				vec.push_back(a.clone())
+			}
+
+			if let Expression::Tuple(l, v) = b {
+				loc += *l;
+				for i in v { vec.push_back(i.clone()) }
+			} else {
+				loc += b.get_linelocation();
+				vec.push_back(b.clone())
+			}
+
+			return Ok(Some(Expression::Tuple(loc, vec)))
+		}
 
 		Operator::Negative => {
 			if args.len() != 1 { panic!() };
