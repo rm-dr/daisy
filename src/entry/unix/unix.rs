@@ -13,10 +13,13 @@ use termion::{
 };
 
 use super::promptbuffer::PromptBuffer;
+use crate::errors::DaisyError;
+use crate::formattedtext::FormattedText;
 use crate::parser;
 use crate::command;
 use crate::evaluate;
 use crate::context::Context;
+use crate::parser::LineLocation;
 use crate::parser::substitute;
 
 
@@ -25,38 +28,21 @@ fn do_expression(
 	stdout: &mut RawTerminal<std::io::Stdout>,
 	s: &String,
 	context: &mut Context
-) -> Result<parser::Expression, ()> {
+) -> Result<parser::Expression, (LineLocation, DaisyError)> {
+
+	// Parse string
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g = parser::parse(&s, context);
+	let g = parser::parse(&s, context)?;
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
-	// Check for parse errors
-	if let Err((l, e)) = g {
-		write!(
-			stdout, "{}{}{}{}{}{}\r\n",
-			color::Fg(color::Red),
-			style::Bold,
-			" ".repeat(l.pos + 4),
-			"^".repeat(l.len),
-			color::Fg(color::Reset),
-			style::Reset,
-		).unwrap();
-
-		write!(
-			stdout, "  {}{}Parse Error: {}{}{}\r\n\n",
-			style::Bold,
-			color::Fg(color::Red),
-			style::Reset,
-			e.to_string(),
-			color::Fg(color::Reset),
-		).unwrap();
-
-		return Err(());
-	}
-
-	let Ok(g) = g else {panic!()};
+	// Evaluate expression
+	#[cfg(debug_assertions)]
+	RawTerminal::suspend_raw_mode(&stdout).unwrap();
+	let g_evaluated = evaluate::evaluate(&g, context, false)?;
+	#[cfg(debug_assertions)]
+	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
 	// Display parsed string
 	write!(
@@ -66,29 +52,20 @@ fn do_expression(
 		g.to_string()
 	).unwrap();
 
-	// Evaluate expression
-	#[cfg(debug_assertions)]
-	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g_evaluated = evaluate::evaluate(&g, context, false);
-	#[cfg(debug_assertions)]
-	RawTerminal::activate_raw_mode(&stdout).unwrap();
-
-	// Show output
-	if let Ok(q) = g_evaluated {
+	// Display result
 		write!(
 			stdout, "\n  {}{}={} {}{}\r\n\n",
 			style::Bold,
 			color::Fg(color::Green),
 			style::Reset,
-			q.to_string_outer(),
+		g_evaluated.to_string_outer(),
 			color::Fg(color::Reset)
 		).unwrap();
-		return Ok(q);
 
-	} else {
-		match g_evaluated {
-			Ok(_) => unreachable!(),
+	return Ok(g_evaluated);
 
+
+/*
 			Err((l, e)) => {
 				// Display user input
 				let s = substitute(&s);
@@ -98,7 +75,6 @@ fn do_expression(
 					style::Reset, color::Fg(color::Reset),
 					s
 				).unwrap();
-
 
 				write!(
 					stdout, "{}{}{}{}{}{}\r\n",
@@ -111,7 +87,7 @@ fn do_expression(
 				).unwrap();
 
 				write!(
-					stdout, "  {}{}Evaluation Error: {}{}{}\r\n\n",
+					stdout, "  {}{}Error: {}{}{}\r\n\n",
 					style::Bold,
 					color::Fg(color::Red),
 					style::Reset,
@@ -121,8 +97,7 @@ fn do_expression(
 			}
 		}
 	}
-
-	return Err(());
+	*/
 }
 
 
@@ -131,57 +106,34 @@ fn do_assignment(
 	stdout: &mut RawTerminal<std::io::Stdout>,
 	s: &String,
 	context: &mut Context
-) {
+) -> Result<(), (LineLocation, DaisyError)> {
 
 	let parts = s.split("=").collect::<Vec<&str>>();
 	if parts.len() != 2 {
-		write!(
-			stdout, "  {}{}Parse Error: {}Syntax{}\r\n\n",
-			style::Bold,
-			color::Fg(color::Red),
-			style::Reset,
-			color::Fg(color::Reset),
-		).unwrap();
-		return;
+		return Err((
+			LineLocation::new_zero(),
+			DaisyError::Syntax
+		));
 	}
 
-	let offset = parts[0].chars().count() + 1;
+	//let offset = parts[0].chars().count() + 1;
 	let left = parts[0].trim().to_string();
 	let right = parts[1].trim().to_string();
 	let right = substitute(&right);
 	let left = substitute(&left);
 
+
+	if !context.valid_varible(&left) {
+		return Err((
+			LineLocation::new_zero(),
+			DaisyError::Syntax
+		));
+	}
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g = parser::parse(&right, context);
+	let g = parser::parse(&right, context)?;
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
-
-	// Check for parse errors
-	if let Err((l, e)) = g {
-		write!(
-			stdout, "{}{}{}{}{}{}\r\n",
-			color::Fg(color::Red),
-			style::Bold,
-			" ".repeat(l.pos + offset + 4),
-			"^".repeat(l.len),
-			color::Fg(color::Reset),
-			style::Reset,
-		).unwrap();
-
-		write!(
-			stdout, "  {}{}Parse Error: {}{}{}\r\n\n",
-			style::Bold,
-			color::Fg(color::Red),
-			style::Reset,
-			e.to_string(),
-			color::Fg(color::Reset),
-		).unwrap();
-
-		return;
-	}
-
-	let Ok(g) = g else {panic!()};
 
 	// Display parsed string
 	write!(
@@ -194,61 +146,15 @@ fn do_assignment(
 	// Evaluate expression
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g_evaluated = evaluate::evaluate(&g, context, true);
+	let g_evaluated = evaluate::evaluate(&g, context, false)?;
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
-	// Show output
-	if let Ok(q) = g_evaluated {
-		let r = context.push_var(left.to_string(), q);
-		if r.is_err() {
-			write!(
-				stdout, "  {}{}Definition failed: {}bad variable name{}\r\n\n",
-				style::Bold,
-				color::Fg(color::Red),
-				style::Reset,
-				color::Fg(color::Reset),
-			).unwrap();
-		}
-		return;
-
-	} else {
-		match g_evaluated {
-			Ok(_) => unreachable!(),
-
-			Err((l, e)) => {
-				// Display user input
-				let s = substitute(&s);
-				write!(
-					stdout, "\n{}{}==>{}{} {}\r\n",
-					style::Bold, color::Fg(color::Red),
-					style::Reset, color::Fg(color::Reset),
-					s
-				).unwrap();
-
-
-				write!(
-					stdout, "{}{}{}{}{}{}\r\n",
-					color::Fg(color::Red),
-					style::Bold,
-					" ".repeat(l.pos + offset + 4),
-					"^".repeat(l.len),
-					color::Fg(color::Reset),
-					style::Reset,
-				).unwrap();
-
-				write!(
-					stdout, "  {}{}Evaluation Error: {}{}{}\r\n\n",
-					style::Bold,
-					color::Fg(color::Red),
-					style::Reset,
-					e.to_string(),
-					color::Fg(color::Reset),
-				).unwrap();
-			}
-		}
-	}
+	context.push_var(left.to_string(), g_evaluated).unwrap();
+	return Ok(());
 }
+
+
 #[inline(always)]
 pub fn main() -> Result<(), std::io::Error> {
 	let mut stdout = stdout().into_raw_mode().unwrap();
@@ -259,7 +165,8 @@ pub fn main() -> Result<(), std::io::Error> {
 	// Handle command-line arguments
 	let args: Vec<String> = env::args().collect();
 	if args.iter().any(|s| s == "--help") {
-		command::do_command(&mut stdout, &String::from("help"), &mut context)?;
+		let t = command::do_command(&String::from("help"), &mut context);
+		t.write(&mut stdout)?;
 		return Ok(());
 	} else if args.iter().any(|s| s == "--version") {
 		write!(stdout, "Daisy v{}\r\n", env!("CARGO_PKG_VERSION"))?;
@@ -288,12 +195,47 @@ pub fn main() -> Result<(), std::io::Error> {
 						if in_str.trim() == "quit" {
 							break 'outer;
 						} else if command::is_command(&in_str) {
-							command::do_command(&mut stdout, &in_str, &mut context)?;
+							let t = command::do_command(&in_str, &mut context);
+							t.write(&mut stdout)?;
 						} else if in_str.contains("=") {
-							do_assignment(&mut stdout, &in_str, &mut context);
+							let r = do_assignment(&mut stdout, &in_str, &mut context);
+							if let Err((l, e)) = r {
+
+								let t = FormattedText::new(
+									format!(
+										concat!(
+											"{}[e]{}[n]\n",
+											"  {}\n"
+										),
+										" ".repeat(l.pos + 4),
+										"^".repeat(l.len),
+										e.text().to_string(),
+									)
+								);
+
+								t.write(&mut stdout).unwrap();
+							}
 						} else {
 							let r = do_expression(&mut stdout, &in_str, &mut context);
-							if let Ok(t) = r { context.push_hist(t); }
+							if let Ok(t) = r {
+								context.push_hist(t);
+							} else {
+								let Err((l, e)) = r else { unreachable!() };
+
+								let t = FormattedText::new(
+									format!(
+										concat!(
+											"{}[e]{}[n]\n",
+											"  {}\n"
+										),
+										" ".repeat(l.pos + 4),
+										"^".repeat(l.len),
+										e.text().to_string(),
+									)
+								);
+
+								t.write(&mut stdout).unwrap();
+							}
 						}
 
 						break;

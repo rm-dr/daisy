@@ -1,15 +1,7 @@
-use std::io::Write;
 use crate::context::Context;
 use crate::parser::Constant;
 use crate::parser::substitute;
-
-use termion::{
-	raw::RawTerminal,
-	color,
-	style,
-	clear,
-	cursor
-};
+use crate::formattedtext::FormattedText;
 
 pub fn is_command(
 	s: &String
@@ -30,159 +22,132 @@ pub fn is_command(
 }
 
 #[inline(always)]
-fn draw_greeter(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
-	write!(
-		stdout,
-		concat!(
-			"{a}              ###### {b} @@@@@@\r\n",
-			"{a}             #     ##{b}@@     @\r\n",
-			"{a}             ##     #{b}@     @@\r\n",
-			"{a}               {b}@@@@@@@@@@@@@{a}\r\n",
-			"{b}             @@     @{a}#     ##\r\n",
-			"{b}             @     @@{a}##     #\r\n",
-			"{b}              @@@@@@ {a} ###### {r}\r\n",
-			"               {t}Daisy{r}  {v}v{ver}{r}\r\n",
-			"\n"
-		),
-		r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-		a = color::Fg(color::Magenta),
-		b = color::Fg(color::White),
-		t = format!("{}{}", color::Fg(color::White), style::Bold),
-		v = format!("{}{}", color::Fg(color::White), style::Italic),
-		ver = env!("CARGO_PKG_VERSION"),
-	)?;
-
-	return Ok(());
+fn greeter() -> FormattedText {
+	return FormattedText::new(
+		format!(
+			concat!(
+				"[a]              ###### [n] @@@@@@\r\n",
+				"[a]             #     ##[n]@@     @\r\n",
+				"[a]             ##     #[n]@     @@\r\n",
+				"[a]               [n]@@@@@@@@@@@@@[a]\r\n",
+				"[n]             @@     @[a]#     ##\r\n",
+				"[n]             @     @@[a]##     #\r\n",
+				"[n]              @@@@@@ [a] ###### [n]\r\n",
+				"               [t]Daisy[n]  [i]v{ver}[n]\r\n",
+				"\n"
+			),
+			ver = env!("CARGO_PKG_VERSION")
+		)
+	);
 }
 
 
 #[inline(always)]
 pub fn do_command(
-	stdout: &mut RawTerminal<std::io::Stdout>,
 	s: &String,
 	context: &mut Context
-) -> Result<(), std::io::Error> {
+) -> FormattedText {
 	let args: Vec<&str> = s.split(" ").collect();
 	let first = args[0];
 
 	match first {
 		"help" => {
-			draw_greeter(stdout)?;
+			let mut t = greeter();
 
-			write!(stdout,
+			t.push(
 				concat!(
 					"Daisy is a high-precision, general-purpose\r\n",
 					"scientific calculator.\r\n",
 					"\n",
 					" - Use Up/Down arrows to navigate history.\r\n",
 					" - Use Ctrl-C or Ctrl-D to quit.\r\n",
-					" - Use {c}ans{r} to reference the last result.\r\n",
-					" - Use {c}var = 1337{r} to define varibles.\r\n",
+					" - Use [c]ans[n] to reference the last result.\r\n",
+					" - Use [c]var = 1337[n] to define varibles.\r\n",
 					"\n",
-					"╞═══════════════ {t}Commands{r} ═══════════════╡\r\n",
-					"      {c}help{r}   Show this help\r\n",
-					"      {c}clear{r}  Clear the terminal\r\n",
-					"      {c}quit{r}   Exit daisy\r\n",
-					//"      {c}units{r}  List available units\r\n",
-					"      {c}consts{r} List built-in constants\r\n",
-					"      {c}ops{r}    List built-in operators\r\n",
-					"      {c}fns{r}    List built-in functions\r\n",
-					"      {c}vars{r}   List user-defined variables\r\n",
-					"      {c}del{r}    Delete a variable\r\n",
+					"╞═══════════════ [t]Commands[n] ═══════════════╡\r\n",
+					"      [c]help[n]   Show this help\r\n",
+					"      [c]clear[n]  Clear the terminal\r\n",
+					"      [c]quit[n]   Exit daisy\r\n",
+					//"      [c]units[n]  List available units\r\n",
+					"      [c]consts[n] List built-in constants\r\n",
+					"      [c]ops[n]    List built-in operators\r\n",
+					"      [c]fns[n]    List built-in functions\r\n",
+					"      [c]vars[n]   List user-defined variables\r\n",
+					"      [c]del[n]    Delete a variable\r\n",
 					"\n\n",
-				),
+				)
+			);
 
-				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-				c = format!("{}{}", color::Fg(color::LightBlack), style::Italic),
-				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
-			)?;
+			return t;
 		},
 
 		"clear" => {
-			write!(
-				stdout,
-				"{}{}",
-				clear::All,
-				cursor::Goto(1, 1)
-			)?;
+			return FormattedText::new("[clear]".to_string());
 		},
 
 		"ops" | "operators" => {
-			write!(stdout,
+			return FormattedText::new(
 				concat!(
 					"\r\n",
 					"Operators, sorted by priority (high to low).\r\n",
 					"High-piority operators are applied first.\r\n\n",
-					"╞═════ {t}Operator{r} ═════╪═════ {t}Syntax{r} ═════╡\r\n",
-					"  function             {c}sin, cos, etc{r}\r\n",
-					"  factorial            {c}!{r}\r\n",
-					"  powers               {c}^, **{r}\r\n",
-					"  implicit multiply    {c}3π, 3(2+1), etc{r}\r\n",
-					"  square root          {c}sqrt, rt, √{r}\r\n",
-					"  negate               {c}-3, -(1 + 2){r}\r\n",
-					"  modulo (short)       {c}%{r}\r\n",
-					"  multiply, divide     {c}*, /, ×, ÷{r}\r\n",
-					"  add, subtract        {c}+, -{r}\r\n",
-					"  unit conversion      {c}to{r}\r\n",
-					"  division (long)      {c}per{r}\r\n",
-					"  modulo (long)        {c}mod{r}\r\n",
+					"╞═════ [t]Operator[n] ═════╪═════ [t]Syntax[n] ═════╡\r\n",
+					"  function             [c]sin, cos, etc[n]\r\n",
+					"  factorial            [c]![n]\r\n",
+					"  powers               [c]^, **[n]\r\n",
+					"  implicit multiply    [c]3π, 3(2+1), etc[n]\r\n",
+					"  square root          [c]sqrt, rt, √[n]\r\n",
+					"  negate               [c]-3, -(1 + 2)[n]\r\n",
+					"  modulo (short)       [c]%[n]\r\n",
+					"  multiply, divide     [c]*, /, ×, ÷[n]\r\n",
+					"  add, subtract        [c]+, -[n]\r\n",
+					"  unit conversion      [c]to[n]\r\n",
+					"  division (long)      [c]per[n]\r\n",
+					"  modulo (long)        [c]mod[n]\r\n",
 					"\n\n"
-				),
-
-				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-				c = format!("{}{}", color::Fg(color::LightBlack), style::Italic),
-				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
-			)?;
+				).to_string()
+			);
 		},
 
 		"fns" | "functions" => {
-			write!(stdout,
+			return FormattedText::new(
 				concat!(
-					"\r\n╞═══════ {t}Function{r} ═══════╪══════ {t}Syntax{r} ══════╡\r\n",
-					"  absolute value           {c}abs{r}\r\n",
-					"  floor, ceiling, round    {c}floor, ceil, round{r}\r\n",
-					"  log base e               {c}ln{r}\r\n",
-					"  log base 10              {c}log{r}\r\n",
-					"  sin, arcsin, cosecant    {c}sin, asin, csc{r}\r\n",
-					"  cos, arccos, secant      {c}cos, acos, secant{r}\r\n",
-					"  tan, arctan, cotan       {c}tan, atan, cot{r}\r\n",
-					"  hyperbolic sin, etc      {c}sinh, asinh, csch{r}\r\n",
-					"  hyperbolic cos, etc      {c}cosh, acosh, sech{r}\r\n",
-					"  hyperbolic tan, etc      {c}tanh, atanh, coth{r}\r\n",
+					"\r\n╞═══════ [t]Function[n] ═══════╪══════ [t]Syntax[n] ══════╡\r\n",
+					"  absolute value           [c]abs[n]\r\n",
+					"  floor, ceiling, round    [c]floor, ceil, round[n]\r\n",
+					"  log base e               [c]ln[n]\r\n",
+					"  log base 10              [c]log[n]\r\n",
+					"  sin, arcsin, cosecant    [c]sin, asin, csc[n]\r\n",
+					"  cos, arccos, secant      [c]cos, acos, secant[n]\r\n",
+					"  tan, arctan, cotan       [c]tan, atan, cot[n]\r\n",
+					"  hyperbolic sin, etc      [c]sinh, asinh, csch[n]\r\n",
+					"  hyperbolic cos, etc      [c]cosh, acosh, sech[n]\r\n",
+					"  hyperbolic tan, etc      [c]tanh, atanh, coth[n]\r\n",
 					"\n",
-					"  Celsius to Kelvin        {c}fromC, fromCelsius{r}\r\n",
-					"  Kelvin to Celsius        {c}toC,   toCelsius{r}\r\n",
-					"  Fahrenheit to Kelvin     {c}fromF, fromFahrenheit{r}\r\n",
-					"  Kelvin to Fahrenheit     {c}toF,   toFahrenheit{r}\r\n",
+					"  Celsius to Kelvin        [c]fromC, fromCelsius[n]\r\n",
+					"  Kelvin to Celsius        [c]toC,   toCelsius[n]\r\n",
+					"  Fahrenheit to Kelvin     [c]fromF, fromFahrenheit[n]\r\n",
+					"  Kelvin to Fahrenheit     [c]toF,   toFahrenheit[n]\r\n",
 					"\n",
-					"  convert to base unit     {c}tobase{r}\r\n",
-					"  remove units             {c}nounit{r}\r\n",
+					"  convert to base unit     [c]tobase[n]\r\n",
+					"  remove units             [c]nounit[n]\r\n",
 					"\n\n"
-				),
-
-				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-				c = format!("{}{}", color::Fg(color::LightBlack), style::Italic),
-				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
-			)?;
+				).to_string()
+			);
 		},
 
 		"vars" => {
 			let v = context.get_variables();
 
 			if v.len() == 0 {
-				write!(stdout,
-					"You have not defined any variables.\r\n\n",
-				)?;
-				return Ok(());
+				return FormattedText::new(
+					"You have not defined any variables\r\n\n".to_string()
+				);
 			}
 
-			write!(stdout,
-				"\r\n╞═══ {t}User-Defined Variables{r} ═══╡\r\n",
-				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
-			)?;
-
-
+			let mut t = FormattedText::new(
+				"\r\n╞═══ [t]User-Defined Variables[n] ═══╡\r\n".to_string()
+			);
 
 			let mut longest = 0;
 			for (key, _) in v {
@@ -194,30 +159,23 @@ pub fn do_command(
 			for (key, value) in v {
 				let padding = " ".repeat(longest - key.len());
 
-				write!(stdout,
-					concat!(
-						"  {k}{p} = {c}{v}{r}\r\n",
-					),
-					k = key, v = value.to_string(),
-					p = padding,
-					r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-					c = format!("{}{}", color::Fg(color::LightBlack), style::Italic),
-				)?;
+				t.push(&format!(
+					"  {key}{padding} = [c]{v}[n]\r\n",
+					v = value.to_string(),
+				));
 			}
 
-			write!(stdout,
-				"\r\n\n",
-			)?;
+			t.push("\r\n\n");
+			return t;
 		},
 
 		"consts" | "constants" => {
 			let a = Constant::all_consts();
 
-			write!(stdout,
-				"\r\n╞═══ {t}Built-in Constants{r} ═══╡\r\n",
-				r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-				t = format!("{}{}", color::Fg(color::Magenta), style::Bold)
-			)?;
+			let mut t = FormattedText::new(
+				"\r\n╞═══ [t]Built-in Constants[n] ═══╡\r\n".to_string()
+			);
+
 
 			for c in a {
 				let Some(p) = c.pretty_name() else { continue };
@@ -226,66 +184,43 @@ pub fn do_command(
 				// your padding length is too short.
 				let padding = " ".repeat(25 - p.chars().count());
 
-				write!(stdout,
-					"  {n}{p}: {c}{s}{r}",
-					p = padding,
-					n = p,
+				t.push(&format!(
+					"  {p}{padding}: [c]{s}[n]",
 					s = c.source_strings().join(", "),
+				));
 
-					r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-					c = format!("{}{}", color::Fg(color::LightBlack), style::Italic),
-				)?;
-
-				write!(stdout, "\r\n")?;
+				t.push(&"\n");
 			}
 
-			write!(stdout,
-				"\r\n\n",
-			)?;
+			t.push(&"\n\n");
+			return t;
 		},
 
 		"del" | "delete" => {
 			if args.len() != 2 {
-				write!(stdout,
-					"{c}{cmd}{r} {t}takes exactly two arguments.{r}\r\n\n",
-					cmd = first,
-					r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-					t = format!("{}{}", color::Fg(color::Red), style::Bold),
-					c = format!("{}{}", color::Fg(color::LightBlack), style::Italic)
-				)?;
-				return Ok(());
+				return FormattedText::new(
+					format!(
+						"[c]{first}[n] [t]takes exactly two arguments.[n]\r\n\n",
+					)
+				);
 			}
 
 			let v = args[1].to_string();
 			let v = substitute(&v);
 			let r = context.delete_variable(&v);
 
-			match r {
-				Ok(()) => {
-					/*write!(stdout,
-						"Deleted variable {c}{v}{r}\r\n\n",
-						v = v,
-						r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-						c = format!("{}{}", color::Fg(color::LightBlack), style::Italic)
-					)?;*/
-				},
-
+			return match r {
+				Ok(()) => { FormattedText::new("".to_string()) },
 				Err(()) => {
-					write!(stdout,
-						"{c}{v}{r} {t}isn't a variable.{r}\r\n\n",
-						v = v,
-						r = format!("{}{}", color::Fg(color::Reset), style::Reset),
-						t = format!("{}{}", color::Fg(color::Red), style::Bold),
-						c = format!("{}{}", color::Fg(color::LightBlack), style::Italic)
-					)?;
+					FormattedText::new(
+						format!(
+							"[c]{v}[n] [t]isn't a variable.[n]\r\n\n",
+						)
+					)
 				}
-			}
-
-			return Ok(());
+			};
 		},
 
 		_ => unreachable!("Bad command!")
 	};
-
-	return Ok(());
 }

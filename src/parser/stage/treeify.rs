@@ -1,9 +1,9 @@
 use std::collections::VecDeque;
 use crate::context::Context;
+use crate::errors::DaisyError;
 
 use super::super::{
 	Token,
-	ParserError,
 	LineLocation,
 	Expression,
 	Operator
@@ -13,7 +13,7 @@ fn treeify_binary(
 	i: usize,
 	g_inner: &mut VecDeque<Token>,
 	context: &Context
-) -> Result<bool, (LineLocation, ParserError)> {
+) -> Result<bool, (LineLocation, DaisyError)> {
 
 	let this: &Token = &g_inner[i];
 
@@ -23,7 +23,7 @@ fn treeify_binary(
 			Token::Operator(l, _) => l,
 			_ => panic!()
 		};
-		return Err((*l, ParserError::Syntax)); // left argument is empty
+		return Err((*l, DaisyError::Syntax)); // left argument is empty
 	}
 
 
@@ -35,7 +35,7 @@ fn treeify_binary(
 				Token::Operator(l, _) => l,
 				_ => panic!()
 			};
-			return Err((*l, ParserError::Syntax)); // Left argument is empty
+			return Err((*l, DaisyError::Syntax)); // Left argument is empty
 		}
 	};
 
@@ -47,7 +47,7 @@ fn treeify_binary(
 				Token::Operator(l, _) => l,
 				_ => panic!()
 			};
-			return Err((*l, ParserError::Syntax)); // right argument is empty
+			return Err((*l, DaisyError::Syntax)); // right argument is empty
 		}
 	};
 
@@ -57,7 +57,7 @@ fn treeify_binary(
 
 	if let Token::Operator(l, s) = left {
 		let o = Operator::from_string(s);
-		if o.is_none() { return Err((*l, ParserError::Syntax)); } // Bad string
+		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 		let o = o.unwrap();
 
 		if {
@@ -67,13 +67,13 @@ fn treeify_binary(
 			return Ok(false);
 		} else {
 			let tl = *this.get_line_location() + *l;
-			return Err((tl, ParserError::Syntax)); // left argument isn't valid
+			return Err((tl, DaisyError::Syntax)); // left argument isn't valid
 		}
 	}
 
 	if let Token::Operator(l, s) = right {
 		let o = Operator::from_string(s);
-		if o.is_none() { return Err((*l, ParserError::Syntax)); } // Bad string
+		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 		let o = o.unwrap();
 
 		if {
@@ -83,7 +83,7 @@ fn treeify_binary(
 			return Ok(false);
 		} else {
 			let tl = *this.get_line_location() + *l;
-			return Err((tl, ParserError::Syntax)); // right argument isn't valid (two operators next to each other)
+			return Err((tl, DaisyError::Syntax)); // right argument isn't valid (two operators next to each other)
 		}
 	}
 
@@ -92,7 +92,7 @@ fn treeify_binary(
 	let this_op = {
 		let Token::Operator(l, s) = this else {panic!()};
 		let o = Operator::from_string(s);
-		if o.is_none() { return Err((*l, ParserError::Syntax)); } // bad operator string
+		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // bad operator string
 		o.unwrap()
 	};
 
@@ -100,14 +100,14 @@ fn treeify_binary(
 	let left_op = if i > 1 {
 		let Token::Operator(l, s) = &g_inner[i-2] else {panic!()};
 		let o = Operator::from_string(s);
-		if o.is_none() { return Err((*l, ParserError::Syntax)); } // Bad operator string
+		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad operator string
 		Some(o.unwrap())
 	} else { None };
 
 	let right_op = if i < g_inner.len()-2 {
 		let Token::Operator(l, s) = &g_inner[i+2] else {panic!()};
 		let o = Operator::from_string(s);
-		if o.is_none() { return Err((*l, ParserError::Syntax)); } // Bad operator string
+		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad operator string
 		Some(o.unwrap())
 	} else { None };
 
@@ -159,7 +159,7 @@ fn treeify_unary(
 	g_inner: &mut VecDeque<Token>,
 	left_associative: bool,
 	context: &Context
-) -> Result<bool, (LineLocation, ParserError)> {
+) -> Result<bool, (LineLocation, DaisyError)> {
 
 	let this: &Token = &g_inner[i];
 	let next: &Token;
@@ -172,7 +172,7 @@ fn treeify_unary(
 					Token::Operator(l, _) => l,
 					_ => panic!()
 				};
-				return Err((*l, ParserError::Syntax)); // argument is missing
+				return Err((*l, DaisyError::Syntax)); // argument is missing
 			}
 		};
 	} else {
@@ -184,7 +184,7 @@ fn treeify_unary(
 					Token::Operator(l, _) => l,
 					_ => panic!()
 				};
-				return Err((*l, ParserError::Syntax)); // argument is missing
+				return Err((*l, DaisyError::Syntax)); // argument is missing
 			}
 		};
 	}
@@ -204,7 +204,7 @@ fn treeify_unary(
 			// Previous operator is invalid
 			return Err((
 				*this.get_line_location(),
-				ParserError::Syntax
+				DaisyError::Syntax
 			));
 		}
 	}
@@ -212,14 +212,14 @@ fn treeify_unary(
 	if let Token::Operator(l, _) = next {
 		let tl = *this.get_line_location() + *l;
 		// Argument is invalid
-		return Err((tl, ParserError::Syntax));
+		return Err((tl, DaisyError::Syntax));
 	} else {
 
 		// This operator
 		let this_op = {
 			let Token::Operator(l, s) = this else {panic!()};
 			let o = Operator::from_string(s);
-				if o.is_none() { return Err((*l, ParserError::Syntax)); } // Bad string
+				if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 			o.unwrap()
 		};
 
@@ -228,14 +228,14 @@ fn treeify_unary(
 			if i > 1 {
 				let Token::Operator(l, s) = &g_inner[i-2] else {panic!()};
 				let o = Operator::from_string(s);
-				if o.is_none() { return Err((*l, ParserError::Syntax)); } // Bad string
+				if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 				Some(o.unwrap())
 			} else { None }
 		} else {
 			if i < g_inner.len()-2 {
 				let Token::Operator(l, s) = &g_inner[i+2] else {panic!()};
 				let o = Operator::from_string(s);
-				if o.is_none() { return Err((*l, ParserError::Syntax)); } // Bad string
+				if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 				Some(o.unwrap())
 			} else { None }
 		};
@@ -285,7 +285,7 @@ fn treeify_unary(
 pub fn treeify(
 	mut g: Token,
 	context: &Context
-) -> Result<Expression, (LineLocation, ParserError)> {
+) -> Result<Expression, (LineLocation, DaisyError)> {
 	let (l, g_inner): (LineLocation, &mut VecDeque<Token>) = match g {
 		Token::Group(l, ref mut x) => (l, x),
 		_ => panic!()
@@ -293,7 +293,7 @@ pub fn treeify(
 
 	if g_inner.len() == 0 {
 		// This shouldn't ever happen.
-		return Err((l, ParserError::EmptyGroup));
+		return Err((l, DaisyError::EmptyGroup));
 	}
 
 	let mut left_associative = true;
@@ -315,7 +315,7 @@ pub fn treeify(
 		let this_op = match &g_inner[i] {
 			Token::Operator(l, s) => {
 				let o = Operator::from_string(&s);
-				if o.is_none() { return Err((*l, ParserError::Syntax)); }
+				if o.is_none() { return Err((*l, DaisyError::Syntax)); }
 				o.unwrap()
 			},
 			_ => {
@@ -356,7 +356,7 @@ pub fn treeify(
 	return match g {
 		// Catch edge cases
 		Token::Operator(l, _) => {
-			Err((l, ParserError::Syntax))
+			Err((l, DaisyError::Syntax))
 		},
 		Token::Group(_,_) => {
 			treeify(g, context)

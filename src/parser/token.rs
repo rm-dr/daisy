@@ -2,10 +2,10 @@ use std::collections::VecDeque;
 use crate::quantity::Unit;
 use crate::quantity::Quantity;
 use crate::context::Context;
+use crate::errors::DaisyError;
 
 use super::{
 	LineLocation,
-	ParserError,
 	Expression,
 	Constant
 };
@@ -57,7 +57,7 @@ impl Token {
 	}
 
 	#[inline(always)]
-	pub fn to_expression(self, context: &Context) -> Result<Expression, (LineLocation, ParserError)>{
+	pub fn to_expression(self, context: &Context) -> Result<Expression, (LineLocation, DaisyError)>{
 		match self {
 			Token::Quantity(l, mut s) => {
 
@@ -71,7 +71,7 @@ impl Token {
 				let r = Quantity::new_rational_from_string(&s);
 
 				if r.is_none() {
-					return Err((l, ParserError::BadNumber))
+					return Err((l, DaisyError::BadNumber))
 				}
 
 				return Ok(Expression::Quantity(l, r.unwrap()));

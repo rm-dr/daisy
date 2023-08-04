@@ -6,7 +6,7 @@ use crate::quantity::FreeUnit;
 use crate::quantity::WholeUnit;
 use crate::quantity::Quantity;
 use crate::quantity::Scalar;
-use super::EvalError;
+use crate::errors::DaisyError;
 
 
 // If unitless, do nothing
@@ -26,7 +26,7 @@ fn to_radians(q: Quantity) -> Result<Quantity, ()> {
 
 
 
-pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, EvalError)> {
+pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, DaisyError)> {
 
 	let Expression::Operator(loc, Operator::Function(f), args) = g else {unreachable!()};
 
@@ -37,7 +37,7 @@ pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, EvalEr
 	if let Expression::Tuple(l, v) = a {
 		return Err((
 			*l + *loc,
-			EvalError::BadArguments(f.to_string(), 1, v.len())
+			DaisyError::BadArguments(f.to_string(), 1, v.len())
 		))
 	};
 
@@ -51,102 +51,102 @@ pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, EvalEr
 
 
 		Function::Abs => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.abs()));
 		},
 		Function::Floor => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.floor()));
 		},
 		Function::Ceil => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.ceil()));
 		},
 		Function::Round => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.round()));
 		},
 		Function::NaturalLog => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.ln()));
 		},
 		Function::TenLog => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.log10()));
 		},
 
 
 
 		Function::Sin => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.sin()));
 		},
 		Function::Cos => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.cos()));
 		},
 		Function::Tan => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.tan()));
 		},
 		Function::Csc => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.csc()));
 		},
 		Function::Sec => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.sec()));
 		},
 		Function::Cot => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.cot()));
 		},
 		Function::Sinh => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.sinh()));
 		},
 		Function::Cosh => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.cosh()));
 		},
 		Function::Tanh => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.tanh()));
 		},
 		Function::Csch => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.csch()));
 		},
 		Function::Sech => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.sech()));
 		},
 		Function::Coth => {
-			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, EvalError::IncompatibleUnit)); };
+			let Ok(q) = to_radians(q.clone()) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)); };
 			return Ok(Expression::Quantity(*loc + *l, q.coth()));
 		},
 		Function::Asin => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.asin()));
 		},
 		Function::Acos => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.acos()));
 		},
 		Function::Atan => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.atan()));
 		},
 		Function::Asinh => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.asinh()));
 		},
 		Function::Acosh => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.acosh()));
 		},
 		Function::Atanh => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 			return Ok(Expression::Quantity(*loc + *l, q.atanh()));
 		},
 
@@ -155,7 +155,7 @@ pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, EvalEr
 		Function::ToCelsius => {
 			let mut k = Quantity::new_rational(1f64).unwrap();
 			k.insert_unit(FreeUnit::from_whole(WholeUnit::Kelvin), Scalar::new_rational(1f64).unwrap());
-			let Some(q) = q.convert_to(k) else { return Err((*loc + *l, EvalError::IncompatibleUnit)) };
+			let Some(q) = q.convert_to(k) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)) };
 
 			let mut r = q.without_unit();
 			r += Quantity::new_rational(-273.15f64).unwrap();
@@ -165,7 +165,7 @@ pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, EvalEr
 		Function::ToFahrenheit => {
 			let mut k = Quantity::new_rational(1f64).unwrap();
 			k.insert_unit(FreeUnit::from_whole(WholeUnit::Kelvin), Scalar::new_rational(1f64).unwrap());
-			let Some(q) = q.convert_to(k) else { return Err((*loc + *l, EvalError::IncompatibleUnit)) };
+			let Some(q) = q.convert_to(k) else { return Err((*loc + *l, DaisyError::IncompatibleUnit)) };
 
 			let mut r = q.without_unit();
 			r *= Quantity::new_rational_from_frac(9i64, 5i64).unwrap();
@@ -175,7 +175,7 @@ pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, EvalEr
 			return Ok(Expression::Quantity(*loc + *l, r));
 		},
 		Function::FromCelsius => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 
 			let mut r = Quantity::new_rational(273.15f64).unwrap();
 			r += q.clone();
@@ -184,7 +184,7 @@ pub fn eval_function(g: &Expression) -> Result<Expression, (LineLocation, EvalEr
 			return Ok(Expression::Quantity(*loc + *l, r));
 		},
 		Function::FromFahrenheit => {
-			if !q.unitless() { return Err((*loc + *l, EvalError::IncompatibleUnit));}
+			if !q.unitless() { return Err((*loc + *l, DaisyError::IncompatibleUnit));}
 
 			let mut r = q.clone();
 			r += Quantity::new_rational(459.67).unwrap();

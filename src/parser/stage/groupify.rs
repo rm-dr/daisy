@@ -3,14 +3,15 @@ use std::collections::VecDeque;
 use super::super::{
 	Token,
 	LineLocation,
-	ParserError,
 	Operator
 };
+
+use crate::errors::DaisyError;
 
 
 fn lookback_signs(
 	g: &mut VecDeque<Token>
-) -> Result<(), (LineLocation, ParserError)> {
+) -> Result<(), (LineLocation, DaisyError)> {
 
 	// Convert `-` operators to `neg` operators
 	// Delete `+`s that mean "positive" instead of "add"
@@ -99,7 +100,7 @@ fn lookback_signs(
 // Inserts implicit operators
 fn lookback(
 	g: &mut VecDeque<Token>
-) -> Result<(), (LineLocation, ParserError)> {
+) -> Result<(), (LineLocation, DaisyError)> {
 
 	lookback_signs(g)?;
 
@@ -178,7 +179,7 @@ fn lookback(
 				// The following are syntax errors
 				(Token::Quantity(la,_), Token::Quantity(lb,_))
 				=> {
-					return Err((*la + *lb, ParserError::Syntax));
+					return Err((*la + *lb, DaisyError::Syntax));
 				},
 				_ => {g.insert(i-1, b); g.insert(i-1, a);}
 			}
@@ -195,7 +196,7 @@ pub fn groupify(
 	mut g: VecDeque<Token>
 ) -> Result<
 	Token,
-	(LineLocation, ParserError)
+	(LineLocation, DaisyError)
 > {
 
 	let last_linelocation: LineLocation = *g.back().unwrap().get_line_location();
@@ -220,8 +221,8 @@ pub fn groupify(
 			Token::GroupEnd(l) => {
 				let l = *l_now + l;
 
-				if i_level == 0 { return Err((l, ParserError::ExtraCloseParen)) }
-				if v_now.len() == 0 { return Err((l, ParserError::EmptyGroup)) }
+				if i_level == 0 { return Err((l, DaisyError::ExtraCloseParen)) }
+				if v_now.len() == 0 { return Err((l, DaisyError::EmptyGroup)) }
 
 				i_level -= 1;
 
@@ -243,7 +244,7 @@ pub fn groupify(
 	// Error on missing parenthesis
 	if levels.len() != 1 {
 		let (l, _) = levels.pop().unwrap();
-		return Err((l, ParserError::MissingCloseParen))
+		return Err((l, DaisyError::MissingCloseParen))
 	}
 	*/
 
@@ -252,7 +253,7 @@ pub fn groupify(
 		let (l, mut v) = levels.pop().unwrap();
 		let (_, v_now) = levels.last_mut().unwrap();
 
-		if v.len() == 0 { return Err((l, ParserError::EmptyGroup)) }
+		if v.len() == 0 { return Err((l, DaisyError::EmptyGroup)) }
 		lookback(&mut v)?;
 
 		v_now.push_back(Token::Group(l, v));

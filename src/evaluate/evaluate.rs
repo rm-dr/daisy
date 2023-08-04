@@ -2,12 +2,20 @@ use crate::parser::Expression;
 use crate::parser::Operator;
 use crate::context::Context;
 use crate::parser::LineLocation;
+use crate::errors::DaisyError;
 
 use super::operator::eval_operator;
 use super::function::eval_function;
-use super::EvalError;
 
-pub fn evaluate(t: &Expression, context: &mut Context, allow_incomplete: bool) -> Result<Expression, (LineLocation, EvalError)> {
+
+pub fn evaluate(
+	t: &Expression,
+	context: &mut Context,
+	allow_incomplete: bool
+) -> Result<
+	Expression,
+	(LineLocation, DaisyError)
+> {
 
 	// Keeps track of our position in the expression tree.
 	// For example, the coordinates [0, 2, 1] are interpreted as follows:
@@ -54,7 +62,7 @@ pub fn evaluate(t: &Expression, context: &mut Context, allow_incomplete: bool) -
 
 					// Error if variable is undefined.
 					// Comment this to allow floating varables.
-					if v.is_none() { return Err((*l, EvalError::Undefined(s.clone()))); }
+					if v.is_none() { return Err((*l, DaisyError::Undefined(s.clone()))); }
 
 					v
 				},
@@ -76,7 +84,7 @@ pub fn evaluate(t: &Expression, context: &mut Context, allow_incomplete: bool) -
 					if let Expression::Quantity(_, _) = g {}
 					else {
 						let l = g.get_linelocation();
-						return Err((l, EvalError::EvaluationError))
+						return Err((l, DaisyError::EvaluationError))
 					}
 				}
 

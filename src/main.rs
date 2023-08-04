@@ -3,6 +3,8 @@ pub mod command;
 pub mod quantity;
 pub mod evaluate;
 pub mod context;
+pub mod errors;
+pub mod formattedtext;
 
 mod entry;
 use crate::entry::main_e;

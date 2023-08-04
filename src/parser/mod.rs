@@ -1,14 +1,10 @@
 mod stage;
 
 mod token;
-mod parsererror;
 mod expression;
 mod linelocation;
 
-use self::{
-	token::Token,
-	parsererror::ParserError,
-};
+use self::token::Token;
 
 pub use self::{
 	expression::Expression,
@@ -19,11 +15,11 @@ pub use self::{
 };
 
 use crate::context::Context;
-
+use crate::errors::DaisyError;
 
 pub fn parse(
 	s: &String, context: &Context
-) -> Result<Expression, (LineLocation, ParserError)> {
+) -> Result<Expression, (LineLocation, DaisyError)> {
 
 	let expressions = stage::tokenize(s);
 	let (_, expressions) = stage::find_subs(expressions);
@@ -33,7 +29,7 @@ pub fn parse(
 	return Ok(g);
 }
 
-pub fn parse_no_context(s: &String) -> Result<Expression, (LineLocation, ParserError)> {
+pub fn parse_no_context(s: &String) -> Result<Expression, (LineLocation, DaisyError)> {
 	parse(s, &Context::new())
 }
 
