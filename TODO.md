@@ -1,6 +1,11 @@
 ## Pre-release
  - Commands to list units and substitutions
- - Fix large power printing (superscript exponential notation)
+ - Fix linelocation (consistent)
+ - Better substitution. Consistent: when ascii, when unicode?
+ - better "=" parsing
+ - better tuples
+ - we don't need vectors as arguments to operators
+ - Assignment tests
 
 ## Parser
  - Better error when `sin = 2`
@@ -21,8 +26,7 @@
    - powers as superscripts toggle
  - evaluate straight from command line
  - Auto-push to crates.io
- - When should we subsitute? Should variables like "tau" be stored as unicode internally?
-   - Make sure unicode variable deletion works!
+
 
 
 ## Internals
