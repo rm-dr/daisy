@@ -40,7 +40,8 @@ impl Context {
 
 		if {
 			Function::from_string(s).is_some() ||
-			Constant::from_string(s).is_some()
+			Constant::from_string(s).is_some() ||
+			freeunit_from_string(s).is_some()
 		} { return false }
 
 		for c in s.to_lowercase().chars() {

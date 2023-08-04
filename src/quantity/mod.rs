@@ -23,6 +23,7 @@ mod unit;
 pub use crate::quantity::unit::Unit;
 pub use crate::quantity::unit::FreeUnit;
 pub use crate::quantity::unit::WholeUnit;
+pub use crate::quantity::unit::freeunit_from_string;
 
 mod quantity;
 pub use crate::quantity::quantity::Quantity;
