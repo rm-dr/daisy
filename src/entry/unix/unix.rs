@@ -106,40 +106,8 @@ fn do_assignment(
 
 	let is_function = left.contains("(");
 
-	// Parse right hand side
-	#[cfg(debug_assertions)]
-	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g = parser::parse(&right, context);
-	#[cfg(debug_assertions)]
-	RawTerminal::activate_raw_mode(&stdout).unwrap();
-
-	let Ok(g) = g else {
-		let Err((l, e)) = g else { unreachable!() };
-		return Err((
-			LineLocation{ pos: l.pos + starting_right, len: l.len},
-			e
-		));
-	};
 
 
-
-	// Evaluate expression
-	#[cfg(debug_assertions)]
-	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g_evaluated = evaluate::evaluate(&g, context, false);
-	#[cfg(debug_assertions)]
-	RawTerminal::activate_raw_mode(&stdout).unwrap();
-
-	let Ok(g_evaluated) = g_evaluated else {
-		let Err((l, e)) = g_evaluated else { unreachable!() };
-		return Err((
-			LineLocation{ pos: l.pos + starting_right, len: l.len},
-			e
-		));
-	};
-
-
-	// Read and check function or variable name.
 	if is_function {
 		let mut mode = 0;
 		let mut name = String::new();
@@ -209,6 +177,21 @@ fn do_assignment(
 			}
 		}
 
+		// Parse right hand side
+		#[cfg(debug_assertions)]
+		RawTerminal::suspend_raw_mode(&stdout).unwrap();
+		let g = parser::parse(&right, context);
+		#[cfg(debug_assertions)]
+		RawTerminal::activate_raw_mode(&stdout).unwrap();
+
+		let Ok(g) = g else {
+			let Err((l, e)) = g else { unreachable!() };
+			return Err((
+				LineLocation{ pos: l.pos + starting_right, len: l.len},
+				e
+			));
+		};
+
 		// Display parsed string
 		write!(
 			stdout, " {}{}=>{}{} {left} = {}\r\n\n",
@@ -217,8 +200,32 @@ fn do_assignment(
 			g.to_string()
 		).unwrap();
 
+
+		for a in &args {
+			context.add_shadow(a.to_string(), None);
+		}
+
+		// Evaluate expression
+		#[cfg(debug_assertions)]
+		RawTerminal::suspend_raw_mode(&stdout).unwrap();
+		let g_evaluated = evaluate::evaluate(&g, context);
+		#[cfg(debug_assertions)]
+		RawTerminal::activate_raw_mode(&stdout).unwrap();
+
+		context.clear_shadow();
+
+		let Ok(g_evaluated) = g_evaluated else {
+			let Err((l, e)) = g_evaluated else { unreachable!() };
+			return Err((
+				LineLocation{ pos: l.pos + starting_right, len: l.len},
+				e
+			));
+		};
+
 		context.push_function(name, args, g_evaluated).unwrap();
+
 	} else {
+
 		if !context.valid_varible(&left) {
 			return Err((
 				LineLocation{ pos: starting_left, len: left.chars().count() },
@@ -226,6 +233,21 @@ fn do_assignment(
 			));
 		}
 
+		// Parse right hand side
+		#[cfg(debug_assertions)]
+		RawTerminal::suspend_raw_mode(&stdout).unwrap();
+		let g = parser::parse(&right, context);
+		#[cfg(debug_assertions)]
+		RawTerminal::activate_raw_mode(&stdout).unwrap();
+
+		let Ok(g) = g else {
+			let Err((l, e)) = g else { unreachable!() };
+			return Err((
+				LineLocation{ pos: l.pos + starting_right, len: l.len},
+				e
+			));
+		};
+
 		// Display parsed string
 		write!(
 			stdout, " {}{}=>{}{} {left} = {}\r\n\n",
@@ -233,6 +255,21 @@ fn do_assignment(
 			style::Reset, color::Fg(color::Reset),
 			g.to_string()
 		).unwrap();
+
+		// Evaluate expression
+		#[cfg(debug_assertions)]
+		RawTerminal::suspend_raw_mode(&stdout).unwrap();
+		let g_evaluated = evaluate::evaluate(&g, context);
+		#[cfg(debug_assertions)]
+		RawTerminal::activate_raw_mode(&stdout).unwrap();
+
+		let Ok(g_evaluated) = g_evaluated else {
+			let Err((l, e)) = g_evaluated else { unreachable!() };
+			return Err((
+				LineLocation{ pos: l.pos + starting_right, len: l.len},
+				e
+			));
+		};
 
 		context.push_variable(left.to_string(), g_evaluated).unwrap();
 	}
