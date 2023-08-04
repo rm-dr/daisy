@@ -1,20 +1,42 @@
-use crate::parser::Expression;
+use crate::parser::{Expression, Function, Constant};
+use crate::quantity::freeunit_from_string;
 use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Context {
 	history: Vec<Expression>,
-	variables: HashMap<String, Expression>
+	variables: HashMap<String, Expression>,
+	functions: HashMap<String, (Vec<String>, Expression)>
 }
 
+// General functions
 impl Context {
 	pub fn new() -> Context {
-		Context{ history: Vec::new(), variables: HashMap::new() }
+		Context{
+			history: Vec::new(),
+			variables: HashMap::new(),
+			functions: HashMap::new(),
+		}
 	}
 
 	pub fn push_hist(&mut self, t: Expression) { self.history.push(t); }
-	pub fn push_var(&mut self, s: String, t: Expression) -> Result<(), ()> {
+
+
+	pub fn delete(&mut self, s: &String) -> Result<(), ()> {
+		if !(self.is_varible(s) || self.is_function(s)) { return Err(()) };
+		if self.is_varible(s) { self.variables.remove(s); }
+		if self.is_function(s) { self.functions.remove(s); }
+		return Ok(());
+	}
+}
+
+
+
+// Variable manipulation
+impl Context {
+	pub fn push_variable(&mut self, s: String, t: Expression) -> Result<(), ()> {
 		if self.valid_varible(&s) {
+			self.functions.remove(&s);
 			self.variables.insert(s, t);
 			return Ok(());
 		} else { return Err(()); }
@@ -30,14 +52,7 @@ impl Context {
 		if v.is_some() { Some(v.unwrap().clone()) } else { None }
 	}
 
-	pub fn delete_variable(&mut self, s: &String) -> Result<(), ()> {
-		if !self.is_varible(s) { return Err(()) };
-		self.variables.remove(s);
-		return Ok(());
-	}
-
 	pub fn valid_varible(&self, s: &str) -> bool {
-
 		if {
 			Function::from_string(s).is_some() ||
 			Constant::from_string(s).is_some() ||
@@ -64,4 +79,31 @@ impl Context {
 		return &self.variables
 	}
 
+}
+
+
+// Function manipulation
+impl Context {
+	pub fn valid_function(&self, s: &str) -> bool {
+		return self.valid_varible(s);
+	}
+
+	pub fn push_function(&mut self, s: String, a: Vec<String>, t: Expression) -> Result<(), ()> {
+		if self.valid_function(&s) {
+			self.variables.remove(&s);
+			self.functions.insert(s, (a, t));
+			return Ok(());
+		} else { return Err(()); }
+	}
+
+	pub fn get_function(&self, s: &String) -> Option<(Vec<String>, Expression)> {
+		return Some(self.functions.get(s).unwrap().clone());
+	}
+
+	pub fn is_function(&self, s: &str) -> bool {
+		return self.valid_function(s) && self.functions.contains_key(s);
+	}
+	pub fn get_functions(&self) -> &HashMap<String, (Vec<String>, Expression)> {
+		return &self.functions
+	}
 }
