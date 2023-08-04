@@ -6,7 +6,10 @@ use std::collections::HashMap;
 pub struct Context {
 	history: Vec<Expression>,
 	variables: HashMap<String, Expression>,
-	functions: HashMap<String, (Vec<String>, Expression)>
+	functions: HashMap<String, (Vec<String>, Expression)>,
+
+	// Shadow variables, for function evaluation.
+	shadow: HashMap<String, Option<Expression>>
 }
 
 // General functions
@@ -16,6 +19,7 @@ impl Context {
 			history: Vec::new(),
 			variables: HashMap::new(),
 			functions: HashMap::new(),
+			shadow: HashMap::new(),
 		}
 	}
 
@@ -42,14 +46,22 @@ impl Context {
 		} else { return Err(()); }
 	}
 
+	// Returns None if this is a "floating" variable
 	pub fn get_variable(&self, s: &String) -> Option<Expression> {
+		if self.shadow.contains_key(s) {
+			return self.shadow.get(s).unwrap().clone();
+		}
+
 		let v: Option<&Expression>;
 		if s == "ans" {
 			v = self.history.last();
 		} else {
 			v = self.variables.get(s);
 		}
-		if v.is_some() { Some(v.unwrap().clone()) } else { None }
+
+		if v.is_some() {
+			return Some(v.unwrap().clone());
+		} else { panic!() }
 	}
 
 	pub fn valid_varible(&self, s: &str) -> bool {
@@ -72,11 +84,23 @@ impl Context {
 	}
 
 	pub fn is_varible(&self, s: &str) -> bool {
-		return self.valid_varible(s) && self.variables.contains_key(s);
+		return self.valid_varible(s) && (
+			self.variables.contains_key(s) ||
+			self.shadow.contains_key(s)
+		);
 	}
 
 	pub fn get_variables(&self) -> &HashMap<String, Expression> {
 		return &self.variables
+	}
+
+	pub fn add_shadow(&mut self, s: String, v: Option<Expression>) {
+		if !self.valid_varible(&s) { panic!() }
+		self.shadow.insert(s, v);
+	}
+
+	pub fn clear_shadow(&mut self) {
+		self.shadow = HashMap::new();
 	}
 
 }

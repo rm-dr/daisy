@@ -10,8 +10,7 @@ use super::function::eval_function;
 
 pub fn evaluate(
 	t: &Expression,
-	context: &mut Context,
-	allow_incomplete: bool
+	context: &mut Context
 ) -> Result<
 	Expression,
 	(LineLocation, DaisyError)
@@ -52,19 +51,17 @@ pub fn evaluate(
 			let new = match g {
 				Expression::Quantity(_, _) => None,
 				Expression::Tuple(_, _) => None,
-				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context, false).unwrap()) },
+				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context).unwrap()) },
 				Expression::Variable(l, s) => {
 					// Don't move up, re-evaluate
 					// This makes variables containing floating variables work properly
 					// (For example, try x = a + 2, a = 2, x. x should evaluate to 4.)
 					move_up = false;
-					let v = context.get_variable(&s);
+					if !context.is_varible(&s) {
+						return Err((*l, DaisyError::Undefined(s.clone())));
+					}
 
-					// Error if variable is undefined.
-					// Comment this to allow floating varables.
-					if v.is_none() { return Err((*l, DaisyError::Undefined(s.clone()))); }
-
-					v
+					context.get_variable(&s)
 				},
 				Expression::Operator(_, Operator::Function(_), _) => { Some(eval_function(g)?) },
 				Expression::Operator(_, _, _) => { eval_operator(g, context)? },
@@ -80,13 +77,13 @@ pub fn evaluate(
 				*g = new;
 			} else {
 
-				if !allow_incomplete {
-					if let Expression::Quantity(_, _) = g {}
-					else {
-						let l = g.get_linelocation();
-						return Err((l, DaisyError::EvaluationError))
-					}
+				/*
+				if let Expression::Quantity(_, _) = g {}
+				else {
+					let l = g.get_linelocation();
+					return Err((l, DaisyError::EvaluationError))
 				}
+				*/
 
 				// Always move up if we couldn't evaluate this node.
 				move_up = true;

@@ -78,15 +78,13 @@ impl Token {
 			},
 
 			Token::Word(l, s) => {
-
 				let c = Constant::from_string(&s);
 				if c.is_some() { return Ok(Expression::Constant(l, c.unwrap())); }
 
 				let c = Unit::from_string(&s);
 				if c.is_some() { return Ok(Expression::Quantity(l, c.unwrap())); }
 
-				let c = context.get_variable(&s);
-				if c.is_some() { return Ok(Expression::Variable(l, s)); }
+				if context.is_varible(&s) { return Ok(Expression::Variable(l, s)); }
 				return Ok(Expression::Variable(l, s));
 			}
 

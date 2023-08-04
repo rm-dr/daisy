@@ -40,7 +40,7 @@ fn do_expression(
 	// Evaluate expression
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g_evaluated = evaluate::evaluate(&g, context, false)?;
+	let g_evaluated = evaluate::evaluate(&g, context)?;
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
