@@ -63,41 +63,6 @@ fn do_expression(
 		).unwrap();
 
 	return Ok(g_evaluated);
-
-
-/*
-			Err((l, e)) => {
-				// Display user input
-				let s = substitute(&s);
-				write!(
-					stdout, "\n{}{}==>{}{} {}\r\n",
-					style::Bold, color::Fg(color::Red),
-					style::Reset, color::Fg(color::Reset),
-					s
-				).unwrap();
-
-				write!(
-					stdout, "{}{}{}{}{}{}\r\n",
-					color::Fg(color::Red),
-					style::Bold,
-					" ".repeat(l.pos + 4),
-					"^".repeat(l.len),
-					color::Fg(color::Reset),
-					style::Reset,
-				).unwrap();
-
-				write!(
-					stdout, "  {}{}Error: {}{}{}\r\n\n",
-					style::Bold,
-					color::Fg(color::Red),
-					style::Reset,
-					e.to_string(),
-					color::Fg(color::Reset),
-				).unwrap();
-			}
-		}
-	}
-	*/
 }
 
 
