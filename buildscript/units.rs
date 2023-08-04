@@ -164,7 +164,7 @@ fn write_freeunit_from_string(mut file: &File, units: &Vec<Value>) {
 	writeln!(file,
 		concat!(
 			"#[inline(always)]\n",
-			"fn freeunit_from_string(s: &str) -> Option<FreeUnit> {{\n",
+			"pub fn freeunit_from_string(s: &str) -> Option<FreeUnit> {{\n",
 			"\tmatch s {{"
 		),
 	).unwrap();
