@@ -86,7 +86,7 @@ impl DaisyError {
 			},
 			DaisyError::BadArguments(s, want, got) => {
 				return FormattedText::new(format!(
-					"[e]Evaluation Error:[n] [c]{s}[n] takes {want} argument{}, got {got}",
+					"[e]Evaluation Error:[n] [c]{s}[n] takes {want} argument{}, but it got {got}",
 					if *want == 1 {""} else {"s"},
 				));
 			}
