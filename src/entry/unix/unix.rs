@@ -188,6 +188,9 @@ pub fn main() -> Result<(), std::io::Error> {
 			if let Key::Char(q) = c.as_ref().unwrap() {
 				match q {
 					'\n' => {
+						// Print again without cursor, in case we pressed enter
+						// while inside a substitution
+						pb.write_prompt_nocursor(&mut stdout)?;
 						let in_str = pb.enter();
 						write!(stdout, "\r\n")?;
 						if in_str == "" { break; }
