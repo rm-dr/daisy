@@ -203,6 +203,7 @@ fn basic_units() {
 
 	bad_expr("m + s");
 	bad_expr("m ^ s");
+	bad_expr("m - s");
 	//bad_expr("m ^ pi");
 }
 
