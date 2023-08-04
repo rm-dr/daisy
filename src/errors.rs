@@ -9,6 +9,8 @@ pub enum DaisyError {
 	EmptyGroup,
 	Syntax,
 	BadNumber,
+	BadVariable,
+	BadFunction,
 
 	// Evaluation errors
 	BadMath,
@@ -46,7 +48,18 @@ impl DaisyError {
 				return FormattedText::new(
 					"[e]Syntax Error:[n] Invalid number".to_string()
 				);
+			},
+			DaisyError::BadVariable => {
+				return FormattedText::new(
+					"[e]Syntax Error:[n] Bad variable name".to_string()
+				);
+			},
+			DaisyError::BadFunction => {
+				return FormattedText::new(
+					"[e]Syntax Error:[n] Bad function name".to_string()
+				);
 			}
+
 
 			DaisyError::BadMath => {
 				return FormattedText::new(
@@ -57,7 +70,6 @@ impl DaisyError {
 				return FormattedText::new(
 					"[e]Evaluation Error:[n] Number too big".to_string()
 				);
-
 			},
 			DaisyError::ZeroDivision => {
 				return FormattedText::new(
