@@ -53,14 +53,14 @@ fn do_expression(
 	).unwrap();
 
 	// Display result
-		write!(
-			stdout, "\n  {}{}={} {}{}\r\n\n",
-			style::Bold,
-			color::Fg(color::Green),
-			style::Reset,
+	write!(
+		stdout, "\n  {}{}={} {}{}\r\n\n",
+		style::Bold,
+		color::Fg(color::Green),
+		style::Reset,
 		g_evaluated.to_string_outer(),
-			color::Fg(color::Reset)
-		).unwrap();
+		color::Fg(color::Reset)
+	).unwrap();
 
 	return Ok(g_evaluated);
 }
@@ -81,42 +81,164 @@ fn do_assignment(
 		));
 	}
 
-	//let offset = parts[0].chars().count() + 1;
+	// Index of first non-whitespace character in left
+	// (relative to whole prompt)
+	let starting_left = parts[0]
+		.char_indices()
+		.find(|(_, ch)| !(ch.is_whitespace() && *ch != '\n'))
+		.map(|(i, _)| i)
+		.unwrap_or_else(|| parts[0].len());
+
+	// Index of first non-whitespace character in right
+	// (relative to whole prompt)
+	// +1 accounts for equals sign
+	let starting_right = parts[0].chars().count() + 1 +
+		parts[1]
+			.char_indices()
+			.find(|(_, ch)| !(ch.is_whitespace() && *ch != '\n'))
+			.map(|(i, _)| i)
+			.unwrap_or_else(|| parts[0].len());
+
 	let left = parts[0].trim().to_string();
 	let right = parts[1].trim().to_string();
 	let right = substitute(&right);
 	let left = substitute(&left);
 
+	let is_function = left.contains("(");
 
-	if !context.valid_varible(&left) {
-		return Err((
-			LineLocation::new_zero(),
-			DaisyError::Syntax
-		));
-	}
+	// Parse right hand side
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g = parser::parse(&right, context)?;
+	let g = parser::parse(&right, context);
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
-	// Display parsed string
-	write!(
-		stdout, " {}{}=>{}{} {left} = {}\r\n\n",
-		style::Bold, color::Fg(color::Magenta),
-		style::Reset, color::Fg(color::Reset),
-		g.to_string()
-	).unwrap();
+	let Ok(g) = g else {
+		let Err((l, e)) = g else { unreachable!() };
+		return Err((
+			LineLocation{ pos: l.pos + starting_right, len: l.len},
+			e
+		));
+	};
+
+
 
 	// Evaluate expression
 	#[cfg(debug_assertions)]
 	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-	let g_evaluated = evaluate::evaluate(&g, context, false)?;
+	let g_evaluated = evaluate::evaluate(&g, context, false);
 	#[cfg(debug_assertions)]
 	RawTerminal::activate_raw_mode(&stdout).unwrap();
 
-	context.push_var(left.to_string(), g_evaluated).unwrap();
+	let Ok(g_evaluated) = g_evaluated else {
+		let Err((l, e)) = g_evaluated else { unreachable!() };
+		return Err((
+			LineLocation{ pos: l.pos + starting_right, len: l.len},
+			e
+		));
+	};
+
+
+	// Read and check function or variable name.
+	if is_function {
+		let mut mode = 0;
+		let mut name = String::new();
+		let mut args = String::new();
+		for c in left.chars() {
+			match mode {
+
+				// Mode 0: reading function name
+				0 => {
+					if c == '(' {
+						mode = 1; continue;
+					} else { name.push(c); }
+				},
+
+				// Mode 1: reading arguments
+				1 => {
+					if c == ')' {
+						mode = 2; continue;
+					} else { args.push(c); }
+				},
+
+				// Mode 2: we should be done by now.
+				// That close paren should've been the last character.
+				2 => {
+					return Err((
+						LineLocation{ pos: starting_left, len: left.chars().count() },
+						DaisyError::Syntax
+					));
+				},
+
+				_ => unreachable!()
+			}
+		}
+
+
+		let args = args
+			.split(",").collect::<Vec<&str>>()
+			.iter().map(|x| x.trim().to_string()).collect::<Vec<String>>();
+
+		if name.len() == 0 {
+			return Err((
+				LineLocation{ pos: starting_left, len: left.chars().count() },
+				DaisyError::Syntax
+			));
+		};
+
+		if !context.valid_function(&name) {
+			return Err((
+				LineLocation{ pos: starting_left, len: left.chars().count() },
+				DaisyError::BadFunction
+			));
+		};
+
+		if args.iter().find(|x| &x[..] == "").is_some() {
+			return Err((
+				LineLocation{ pos: starting_left, len: left.chars().count() },
+				DaisyError::Syntax
+			));
+		};
+
+		for a in &args {
+			if !context.valid_varible(a) {
+				return Err((
+					LineLocation{ pos: starting_left, len: left.chars().count() },
+					DaisyError::BadVariable
+				));
+			}
+		}
+
+		// Display parsed string
+		write!(
+			stdout, " {}{}=>{}{} {left} = {}\r\n\n",
+			style::Bold, color::Fg(color::Magenta),
+			style::Reset, color::Fg(color::Reset),
+			g.to_string()
+		).unwrap();
+
+		context.push_function(name, args, g_evaluated).unwrap();
+	} else {
+		if !context.valid_varible(&left) {
+			return Err((
+				LineLocation{ pos: starting_left, len: left.chars().count() },
+				DaisyError::BadVariable
+			));
+		}
+
+		// Display parsed string
+		write!(
+			stdout, " {}{}=>{}{} {left} = {}\r\n\n",
+			style::Bold, color::Fg(color::Magenta),
+			style::Reset, color::Fg(color::Reset),
+			g.to_string()
+		).unwrap();
+
+		context.push_variable(left.to_string(), g_evaluated).unwrap();
+	}
+
 	return Ok(());
+
 }
 
 
