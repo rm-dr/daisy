@@ -26,14 +26,14 @@ fn greeter() -> FormattedText {
 	return FormattedText::new(
 		format!(
 			concat!(
-				"[a]              ###### [n] @@@@@@\r\n",
-				"[a]             #     ##[n]@@     @\r\n",
-				"[a]             ##     #[n]@     @@\r\n",
-				"[a]               [n]@@@@@@@@@@@@@[a]\r\n",
-				"[n]             @@     @[a]#     ##\r\n",
-				"[n]             @     @@[a]##     #\r\n",
-				"[n]              @@@@@@ [a] ###### [n]\r\n",
-				"               [t]Daisy[n]  [i]v{ver}[n]\r\n",
+				"[a]              ###### [n] @@@@@@\n",
+				"[a]             #     ##[n]@@     @\n",
+				"[a]             ##     #[n]@     @@\n",
+				"[a]               [n]@@@@@@@@@@@@@[a]\n",
+				"[n]             @@     @[a]#     ##\n",
+				"[n]             @     @@[a]##     #\n",
+				"[n]              @@@@@@ [a] ###### [n]\n",
+				"               [t]Daisy[n]  [i]v{ver}[n]\n",
 				"\n"
 			),
 			ver = env!("CARGO_PKG_VERSION")
@@ -56,24 +56,24 @@ pub fn do_command(
 
 			t.push(
 				concat!(
-					"Daisy is a high-precision, general-purpose\r\n",
-					"scientific calculator.\r\n",
+					"Daisy is a high-precision, general-purpose\n",
+					"scientific calculator.\n",
 					"\n",
-					" - Use Up/Down arrows to navigate history.\r\n",
-					" - Use Ctrl-C or Ctrl-D to quit.\r\n",
-					" - Use [c]ans[n] to reference the last result.\r\n",
-					" - Use [c]var = 1337[n] to define varibles.\r\n",
+					" - Use Up/Down arrows to navigate history.\n",
+					" - Use Ctrl-C or Ctrl-D to quit.\n",
+					" - Use [c]ans[n] to reference the last result.\n",
+					" - Use [c]var = 1337[n] to define varibles.\n",
 					"\n",
-					"╞═══════════════ [t]Commands[n] ═══════════════╡\r\n",
-					"      [c]help[n]   Show this help\r\n",
-					"      [c]clear[n]  Clear the terminal\r\n",
-					"      [c]quit[n]   Exit daisy\r\n",
-					//"      [c]units[n]  List available units\r\n",
-					"      [c]consts[n] List built-in constants\r\n",
-					"      [c]ops[n]    List built-in operators\r\n",
-					"      [c]fns[n]    List built-in functions\r\n",
-					"      [c]vars[n]   List user-defined variables\r\n",
-					"      [c]del[n]    Delete a variable\r\n",
+					"╞═══════════════ [t]Commands[n] ═══════════════╡\n",
+					"      [c]help[n]   Show this help\n",
+					"      [c]clear[n]  Clear the terminal\n",
+					"      [c]quit[n]   Exit daisy\n",
+					//"      [c]units[n]  List available units\n",
+					"      [c]consts[n] List built-in constants\n",
+					"      [c]ops[n]    List built-in operators\n",
+					"      [c]fns[n]    List built-in functions\n",
+					"      [c]vars[n]   List user-defined variables\n",
+					"      [c]del[n]    Delete a variable\n",
 					"\n\n",
 				)
 			);
@@ -88,22 +88,22 @@ pub fn do_command(
 		"ops" | "operators" => {
 			return FormattedText::new(
 				concat!(
-					"\r\n",
-					"Operators, sorted by priority (high to low).\r\n",
-					"High-piority operators are applied first.\r\n\n",
-					"╞═════ [t]Operator[n] ═════╪═════ [t]Syntax[n] ═════╡\r\n",
-					"  function             [c]sin, cos, etc[n]\r\n",
-					"  factorial            [c]![n]\r\n",
-					"  powers               [c]^, **[n]\r\n",
-					"  implicit multiply    [c]3π, 3(2+1), etc[n]\r\n",
-					"  square root          [c]sqrt, rt, √[n]\r\n",
-					"  negate               [c]-3, -(1 + 2)[n]\r\n",
-					"  modulo (short)       [c]%[n]\r\n",
-					"  multiply, divide     [c]*, /, ×, ÷[n]\r\n",
-					"  add, subtract        [c]+, -[n]\r\n",
-					"  unit conversion      [c]to[n]\r\n",
-					"  division (long)      [c]per[n]\r\n",
-					"  modulo (long)        [c]mod[n]\r\n",
+					"\n",
+					"Operators, sorted by priority (high to low).\n",
+					"High-piority operators are applied first.\n\n",
+					"╞═════ [t]Operator[n] ═════╪═════ [t]Syntax[n] ═════╡\n",
+					"  function             [c]sin, cos, etc[n]\n",
+					"  factorial            [c]![n]\n",
+					"  powers               [c]^, **[n]\n",
+					"  implicit multiply    [c]3π, 3(2+1), etc[n]\n",
+					"  square root          [c]sqrt, rt, √[n]\n",
+					"  negate               [c]-3, -(1 + 2)[n]\n",
+					"  modulo (short)       [c]%[n]\n",
+					"  multiply, divide     [c]*, /, ×, ÷[n]\n",
+					"  add, subtract        [c]+, -[n]\n",
+					"  unit conversion      [c]to[n]\n",
+					"  division (long)      [c]per[n]\n",
+					"  modulo (long)        [c]mod[n]\n",
 					"\n\n"
 				).to_string()
 			);
@@ -112,25 +112,25 @@ pub fn do_command(
 		"fns" | "functions" => {
 			return FormattedText::new(
 				concat!(
-					"\r\n╞═══════ [t]Function[n] ═══════╪══════ [t]Syntax[n] ══════╡\r\n",
-					"  absolute value           [c]abs[n]\r\n",
-					"  floor, ceiling, round    [c]floor, ceil, round[n]\r\n",
-					"  log base e               [c]ln[n]\r\n",
-					"  log base 10              [c]log[n]\r\n",
-					"  sin, arcsin, cosecant    [c]sin, asin, csc[n]\r\n",
-					"  cos, arccos, secant      [c]cos, acos, secant[n]\r\n",
-					"  tan, arctan, cotan       [c]tan, atan, cot[n]\r\n",
-					"  hyperbolic sin, etc      [c]sinh, asinh, csch[n]\r\n",
-					"  hyperbolic cos, etc      [c]cosh, acosh, sech[n]\r\n",
-					"  hyperbolic tan, etc      [c]tanh, atanh, coth[n]\r\n",
+					"\n╞═══════ [t]Function[n] ═══════╪══════ [t]Syntax[n] ══════╡\n",
+					"  absolute value           [c]abs[n]\n",
+					"  floor, ceiling, round    [c]floor, ceil, round[n]\n",
+					"  log base e               [c]ln[n]\n",
+					"  log base 10              [c]log[n]\n",
+					"  sin, arcsin, cosecant    [c]sin, asin, csc[n]\n",
+					"  cos, arccos, secant      [c]cos, acos, secant[n]\n",
+					"  tan, arctan, cotan       [c]tan, atan, cot[n]\n",
+					"  hyperbolic sin, etc      [c]sinh, asinh, csch[n]\n",
+					"  hyperbolic cos, etc      [c]cosh, acosh, sech[n]\n",
+					"  hyperbolic tan, etc      [c]tanh, atanh, coth[n]\n",
 					"\n",
-					"  Celsius to Kelvin        [c]fromC, fromCelsius[n]\r\n",
-					"  Kelvin to Celsius        [c]toC,   toCelsius[n]\r\n",
-					"  Fahrenheit to Kelvin     [c]fromF, fromFahrenheit[n]\r\n",
-					"  Kelvin to Fahrenheit     [c]toF,   toFahrenheit[n]\r\n",
+					"  Celsius to Kelvin        [c]fromC, fromCelsius[n]\n",
+					"  Kelvin to Celsius        [c]toC,   toCelsius[n]\n",
+					"  Fahrenheit to Kelvin     [c]fromF, fromFahrenheit[n]\n",
+					"  Kelvin to Fahrenheit     [c]toF,   toFahrenheit[n]\n",
 					"\n",
-					"  convert to base unit     [c]tobase[n]\r\n",
-					"  remove units             [c]nounit[n]\r\n",
+					"  convert to base unit     [c]tobase[n]\n",
+					"  remove units             [c]nounit[n]\n",
 					"\n\n"
 				).to_string()
 			);
@@ -138,34 +138,59 @@ pub fn do_command(
 
 		"vars" => {
 			let v = context.get_variables();
+			let f = context.get_functions();
 
-			if v.len() == 0 {
+			if v.len() + f.len() == 0 {
 				return FormattedText::new(
-					"You have not defined any variables\r\n\n".to_string()
+					"You have not defined any variables\n\n".to_string()
 				);
 			}
 
-			let mut t = FormattedText::new(
-				"\r\n╞═══ [t]User-Defined Variables[n] ═══╡\r\n".to_string()
-			);
+			let mut t = FormattedText::new("".to_string());
 
-			let mut longest = 0;
-			for (key, _) in v {
-				if key.len() > longest {
-					longest = key.len();
+			if v.len() != 0 {
+				t.push("\n╞═══ [t]User-Defined Variables[n] ═══╡\n");
+
+				let mut longest = 0;
+				for (key, _) in v {
+					if key.len() > longest {
+						longest = key.len();
+					}
+				}
+
+				for (key, value) in v {
+					let padding = " ".repeat(longest - key.len());
+
+					t.push(&format!(
+						"  {key}{padding} = [c]{v}[n]\n",
+						v = value.to_string(),
+					));
 				}
 			}
 
-			for (key, value) in v {
-				let padding = " ".repeat(longest - key.len());
+			if f.len() != 0 {
+				t.push("\n╞═══ [t]User-Defined Functions[n] ═══╡\n");
 
-				t.push(&format!(
-					"  {key}{padding} = [c]{v}[n]\r\n",
-					v = value.to_string(),
-				));
+				let mut longest = 0;
+				for (key, (args, _exp)) in f {
+					let s = format!("{key}({})", args.join(", "));
+					if s.len() > longest {
+						longest = s.len();
+					}
+				}
+
+				for (key, (args, exp)) in f {
+					let padding = " ".repeat(longest - key.len());
+
+					t.push(&format!(
+						"  {key}({}){padding} = [c]{v}[n]\n",
+						args.join(", "),
+						v = exp.to_string(),
+					));
+				}
 			}
 
-			t.push("\r\n\n");
+			t.push("\n\n");
 			return t;
 		},
 
@@ -173,7 +198,7 @@ pub fn do_command(
 			let a = Constant::all_consts();
 
 			let mut t = FormattedText::new(
-				"\r\n╞═══ [t]Built-in Constants[n] ═══╡\r\n".to_string()
+				"\n╞═══ [t]Built-in Constants[n] ═══╡\n".to_string()
 			);
 
 
@@ -200,21 +225,21 @@ pub fn do_command(
 			if args.len() != 2 {
 				return FormattedText::new(
 					format!(
-						"[c]{first}[n] [t]takes exactly two arguments.[n]\r\n\n",
+						"[c]{first}[n] [t]takes exactly two arguments.[n]\n\n",
 					)
 				);
 			}
 
 			let v = args[1].to_string();
 			let v = substitute(&v);
-			let r = context.delete_variable(&v);
+			let r = context.delete(&v);
 
 			return match r {
 				Ok(()) => { FormattedText::new("".to_string()) },
 				Err(()) => {
 					FormattedText::new(
 						format!(
-							"[c]{v}[n] [t]isn't a variable.[n]\r\n\n",
+							"[c]{v}[n] [t]isn't a variable.[n]\n\n",
 						)
 					)
 				}
