@@ -36,6 +36,33 @@ impl PromptBuffer {
 		};
 	}
 
+	// Same as write_primpt, but pretends there is no cursor
+	pub fn write_prompt_nocursor(&mut self, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
+		// Draw prettyprinted expression
+		let (_, s) = substitute_cursor(&self.get_contents(), self.buffer.chars().count());
+
+		write!(
+			stdout, "\r{}{}==>{}{} {}",
+			style::Bold,
+			color::Fg(color::Blue),
+			color::Fg(color::Reset),
+			style::Reset,
+			s
+		)?;
+
+		// If this string is shorter, clear the remaining old one.
+		if s.chars().count() < self.last_print_len {
+			write!(
+				stdout, "{}{}",
+				" ".repeat(self.last_print_len - s.chars().count()),
+				termion::cursor::Left((self.last_print_len - s.chars().count()) as u16)
+			)?;
+		}
+
+		self.last_print_len = s.chars().count();
+		stdout.flush()?;
+		return Ok(());
+	}
 
 	pub fn write_prompt(&mut self, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
 		let l = self.buffer.chars().count();
@@ -82,7 +109,9 @@ impl PromptBuffer {
 	pub fn get_contents(&self) -> &String {&self.buffer}
 
 	pub fn enter(&mut self) -> String {
-		let s = String::from(self.buffer.trim());
+		// Don't trim input string so that linelocations are correct
+		//let s = String::from(self.buffer.trim());
+		let s = self.buffer.clone();
 		self.buffer.clear();
 		self.hist_cursor = 0;
 		self.cursor = 0;
