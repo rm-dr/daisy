@@ -3,7 +3,8 @@
  - run cargo test
  - commit
  - git tag -a v1.0.0 -m "Version 1.0.0"
- - push
+ - git push
+ - git push origin v1.0.0
  - cargo publish
  - Update packages
 
