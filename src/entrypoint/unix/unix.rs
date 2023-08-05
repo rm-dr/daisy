@@ -13,17 +13,6 @@ use super::promptbuffer::PromptBuffer;
 use crate::command;
 use crate::context::Context;
 
-/*
-Make this a macro:
-	#[cfg(debug_assertions)]
-	RawTerminal::suspend_raw_mode(&stdout).unwrap();
-
-	code
-
-	#[cfg(debug_assertions)]
-	RawTerminal::activate_raw_mode(&stdout).unwrap();
-*/
-
 
 #[inline(always)]
 pub fn main() -> Result<(), std::io::Error> {
@@ -42,12 +31,6 @@ pub fn main() -> Result<(), std::io::Error> {
 		write!(stdout, "Daisy v{}\r\n", env!("CARGO_PKG_VERSION"))?;
 		return Ok(());
 	}
-
-
-	//let size = termion::terminal_size().unwrap();
-	//write!(stdout, "{:?}", size).unwrap();
-
-
 
 	'outer: loop {
 

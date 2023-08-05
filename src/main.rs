@@ -6,14 +6,16 @@ pub mod context;
 pub mod errors;
 pub mod formattedtext;
 
-mod entry;
-use crate::entry::main_e;
-
 use crate::parser::substitute;
 use crate::errors::DaisyError;
 use crate::formattedtext::FormattedText;
 use crate::context::Context;
 use crate::parser::LineLocation;
+
+
+// Run main script for target system
+mod entrypoint;
+use crate::entrypoint::main_e;
 
 #[cfg(test)]
 mod tests;
