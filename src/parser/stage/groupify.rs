@@ -203,7 +203,7 @@ pub fn groupify(
 	(LineLocation, DaisyError)
 > {
 
-	let last_linelocation: LineLocation = *g.back().unwrap().get_line_location();
+	let last_linelocation: LineLocation = g.back().unwrap().get_linelocation();
 
 	// Vector of grouping levels
 	let mut levels: Vec<(LineLocation, VecDeque<Token>)> = Vec::with_capacity(8);

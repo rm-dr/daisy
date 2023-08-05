@@ -66,7 +66,7 @@ fn treeify_binary(
 		} {
 			return Ok(false);
 		} else {
-			let tl = *this.get_line_location() + *l;
+			let tl = this.get_linelocation() + *l;
 			return Err((tl, DaisyError::Syntax)); // left argument isn't valid
 		}
 	}
@@ -82,7 +82,7 @@ fn treeify_binary(
 		} {
 			return Ok(false);
 		} else {
-			let tl = *this.get_line_location() + *l;
+			let tl = this.get_linelocation() + *l;
 			return Err((tl, DaisyError::Syntax)); // right argument isn't valid (two operators next to each other)
 		}
 	}
@@ -203,14 +203,14 @@ fn treeify_unary(
 		} else {
 			// Previous operator is invalid
 			return Err((
-				*this.get_line_location(),
+				this.get_linelocation(),
 				DaisyError::Syntax
 			));
 		}
 	}
 
 	if let Token::Operator(l, _) = next {
-		let tl = *this.get_line_location() + *l;
+		let tl = this.get_linelocation() + *l;
 		// Argument is invalid
 		return Err((tl, DaisyError::Syntax));
 	} else {

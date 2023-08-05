@@ -27,7 +27,7 @@ pub enum Token {
 
 impl Token {
 	#[inline(always)]
-	pub fn get_line_location(&self) -> &LineLocation {
+	pub fn get_linelocation(&self) -> LineLocation {
 		match self {
 			Token::Quantity(l, _)
 			| Token::Word(l, _)
@@ -35,14 +35,14 @@ impl Token {
 			| Token::GroupStart(l)
 			| Token::GroupEnd(l)
 			| Token::Group(l, _)
-			=> l,
+			=> l.clone(),
 
 			Token::Container(_) => panic!("Containers do not have a linelocation.")
 		}
 	}
 
 	#[inline(always)]
-	pub fn get_mut_line_location(&mut self) -> &mut LineLocation {
+	pub fn get_mut_linelocation(&mut self) -> &mut LineLocation {
 		match self {
 			Token::Quantity(l, _)
 			| Token::Word(l, _)

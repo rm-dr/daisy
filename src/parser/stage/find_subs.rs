@@ -89,11 +89,11 @@ pub fn find_subs(
 
 		if target.is_none() {
 			// Even if nothing changed, we need to update token location
-			let l = t.get_mut_line_location();
+			let l = t.get_mut_linelocation();
 			*l = LineLocation{pos: l.pos - offset, len: l.len};
 		} else {
 			let target = target.unwrap();
-			let l = t.get_mut_line_location();
+			let l = t.get_mut_linelocation();
 			r.push_back((*l, String::from(target)));
 
 			let old_len = l.len;
