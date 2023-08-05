@@ -102,6 +102,7 @@ impl Operator {
 			| Operator::Factorial
 			| Operator::Sqrt
 			| Operator::Function(_)
+			| Operator::UserFunction(_)
 			=> false,
 			_ => true
 		}
@@ -113,6 +114,7 @@ impl Operator {
 			Operator::Negative
 			| Operator::Sqrt
 			| Operator::Function(_)
+			| Operator::UserFunction(_)
 			=> false,
 			_ => true
 		}
