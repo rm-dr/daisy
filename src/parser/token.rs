@@ -17,9 +17,11 @@ pub enum Token {
 	Word(LineLocation, String),
 	Operator(LineLocation, String),
 
+	TupleDelim(LineLocation),
 	GroupStart(LineLocation),
 	GroupEnd(LineLocation),
 	Group(LineLocation, VecDeque<Token>),
+	Tuple(LineLocation, VecDeque<Token>),
 
 	// Never parsed from input, used to build a tree.
 	Container(Expression)
@@ -32,9 +34,11 @@ impl Token {
 			Token::Quantity(l, _)
 			| Token::Word(l, _)
 			| Token::Operator(l, _)
+			| Token::TupleDelim(l)
 			| Token::GroupStart(l)
 			| Token::GroupEnd(l)
 			| Token::Group(l, _)
+			| Token::Tuple(l, _)
 			=> l.clone(),
 
 			Token::Container(_) => panic!("Containers do not have a linelocation.")
@@ -47,9 +51,11 @@ impl Token {
 			Token::Quantity(l, _)
 			| Token::Word(l, _)
 			| Token::Operator(l, _)
+			| Token::TupleDelim(l)
 			| Token::GroupStart(l)
 			| Token::GroupEnd(l)
 			| Token::Group(l, _)
+			| Token::Tuple(l, _)
 			=> l,
 
 			Token::Container(_) => panic!("Containers do not have a linelocation.")
@@ -93,9 +99,49 @@ impl Token {
 			Token::Operator(_,_)
 			| Token::GroupStart(_)
 			| Token::GroupEnd(_)
-			| Token::Group(_, _)
+			| Token::Group(_,_)
+			| Token::TupleDelim(_)
+			| Token::Tuple(_,_)
 			=> panic!("This token cannot be converted to an expression")
 		};
+	}
+
+
+	pub fn new_tuple(l: LineLocation, v: VecDeque<Token>) -> Result<Token, (LineLocation, DaisyError)> {
+		let mut parts: VecDeque<Token> = VecDeque::new();
+		let mut now: VecDeque<Token> = VecDeque::new();
+
+		let mut loc = LineLocation::new_zero();
+
+		for t in v {
+			match t {
+				Token::TupleDelim(_) => {
+					if now.len() == 0 {
+						return Err((l, DaisyError::BadTuple))
+					}
+
+					let g = Token::Group(loc, now);
+					parts.push_back(g);
+
+					loc = LineLocation::new_zero();
+					now = VecDeque::new();
+				},
+
+				_ => {
+					loc += t.get_linelocation();
+					now.push_back(t);
+				}
+			}
+		}
+
+		// Push last group
+		if now.len() == 0 {
+			return Err((l, DaisyError::BadTuple))
+		}
+		let g = Token::Group(loc, now);
+		parts.push_back(g);
+
+		return Ok(Token::Tuple(l, parts));
 	}
 
 }

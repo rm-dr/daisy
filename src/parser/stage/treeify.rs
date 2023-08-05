@@ -124,11 +124,17 @@ fn treeify_binary(
 		if let Token::Group(l, _) = right_pre {
 			right = treeify(right_pre, context)?;
 			right.set_linelocation(&(right.get_linelocation() + l));
+		} else if let Token::Tuple(l, _) = right_pre {
+			right = treeify(right_pre, context)?;
+			right.set_linelocation(&(right.get_linelocation() + l));
 		} else {
 			right = right_pre.to_expression(context)?;
 		}
 
 		if let Token::Group(l, _) = left_pre {
+			left = treeify(left_pre, context)?;
+			left.set_linelocation(&(left.get_linelocation() + l));
+		} else if let Token::Tuple(l, _) = left_pre {
 			left = treeify(left_pre, context)?;
 			left.set_linelocation(&(left.get_linelocation() + l));
 		} else {
@@ -251,6 +257,9 @@ fn treeify_unary(
 			if let Token::Group(l, _) = next_pre {
 				next = treeify(next_pre, context)?;
 				next.set_linelocation(&(next.get_linelocation() + l));
+			} else if let Token::Tuple(l, _) = next_pre {
+				next = treeify(next_pre, context)?;
+				next.set_linelocation(&(next.get_linelocation() + l));
 			} else {
 				next = next_pre.to_expression(context)?;
 			}
@@ -286,8 +295,17 @@ pub fn treeify(
 	mut g: Token,
 	context: &Context
 ) -> Result<Expression, (LineLocation, DaisyError)> {
+
 	let (l, g_inner): (LineLocation, &mut VecDeque<Token>) = match g {
 		Token::Group(l, ref mut x) => (l, x),
+		Token::Tuple(l, parts) => {
+			let mut t: VecDeque<Expression> = VecDeque::new();
+			for p in parts {
+				t.push_back(treeify(p, context)?);
+			};
+
+			return Ok(Expression::Tuple(l, t));
+		},
 		_ => panic!()
 	};
 
@@ -358,9 +376,11 @@ pub fn treeify(
 		Token::Operator(l, _) => {
 			Err((l, DaisyError::Syntax))
 		},
+		Token::Tuple(_, _) |
 		Token::Group(_,_) => {
 			treeify(g, context)
 		},
+
 
 		_ => { Ok(g.to_expression(context)?) }
 	};

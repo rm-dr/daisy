@@ -209,6 +209,13 @@ pub fn groupify(
 	let mut levels: Vec<(LineLocation, VecDeque<Token>)> = Vec::with_capacity(8);
 	levels.push((LineLocation{pos: 0, len: last_linelocation.pos + last_linelocation.len}, VecDeque::with_capacity(8)));
 
+	// Group types
+	// if true, this is a tuple.
+	// if false, this is a group.
+	let mut is_tuple: Vec<bool> = Vec::with_capacity(8);
+	is_tuple.push(false);
+
+
 	// Makes sure parenthesis are matched
 	let mut i_level = 0;
 
@@ -219,6 +226,7 @@ pub fn groupify(
 		match t {
 			Token::GroupStart(l) => {
 				levels.push((l, VecDeque::with_capacity(8)));
+				is_tuple.push(false);
 				i_level += 1;
 			},
 
@@ -234,14 +242,23 @@ pub fn groupify(
 				let (_, v_now) = levels.last_mut().unwrap();
 				lookback(&mut v, context)?;
 
-				v_now.push_back(Token::Group(l, v));
+				let q = is_tuple.pop().unwrap();
+				if q {
+					v_now.push_back(Token::new_tuple(l, v)?);
+				} else {
+					v_now.push_back(Token::Group(l, v));
+				}
+			},
+
+			Token::TupleDelim(_) => {
+				*is_tuple.last_mut().unwrap() = true;
+				v_now.push_back(t);
 			},
 
 			_ => {
 				v_now.push_back(t);
 			}
 		}
-
 	}
 
 	/*
@@ -260,12 +277,27 @@ pub fn groupify(
 		if v.len() == 0 { return Err((l, DaisyError::EmptyGroup)) }
 		lookback(&mut v, context)?;
 
-		v_now.push_back(Token::Group(l, v));
+		let q = is_tuple.pop().unwrap();
+		if q {
+			v_now.push_back(Token::new_tuple(l, v)?);
+		} else {
+			v_now.push_back(Token::Group(l, v));
+		}
 	}
 
 
-	let (_, mut v) = levels.pop().unwrap();
+
+	let (l, mut v) = levels.pop().unwrap();
+	let q = is_tuple.pop().unwrap();
+
+	if q {
+		return Err((l, DaisyError::BadTuple));
+	}
+
 	lookback(&mut v, context)?;
 
-	return Ok(Token::Group(LineLocation{pos:0, len:last_linelocation.pos + last_linelocation.len}, v));
+	return Ok(Token::Group(
+		LineLocation{pos:0, len:last_linelocation.pos + last_linelocation.len},
+		v
+	));
 }

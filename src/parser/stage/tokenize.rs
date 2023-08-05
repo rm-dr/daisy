@@ -20,7 +20,8 @@ fn push_token(
 	let mut t = t.unwrap();
 
 	match t {
-		Token::GroupStart(ref mut l)
+		Token::TupleDelim(ref mut l)
+		| Token::GroupStart(ref mut l)
 		| Token::GroupEnd(ref mut l)
 		| Token::Operator(ref mut l, _)
 		| Token::Quantity(ref mut l, _)
@@ -33,6 +34,7 @@ fn push_token(
 		},
 
 		Token::Group(_,_)
+		| Token::Tuple(_,_)
 		| Token::Container(_)
 		=> unreachable!()
 	};
@@ -143,10 +145,7 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 
 			',' => {
 				push_token(&mut g, t, i, context);
-				t = Some(Token::Operator(
-					LineLocation{pos: i, len: 1},
-					String::from(c)
-				));
+				t = Some(Token::TupleDelim(LineLocation{pos: i, len: 1}));
 			},
 
 			// Operator

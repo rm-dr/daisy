@@ -11,6 +11,7 @@ pub enum DaisyError {
 	BadNumber,
 	BadVariable,
 	BadFunction,
+	BadTuple,
 
 	// Evaluation errors
 	BadMath,
@@ -58,7 +59,12 @@ impl DaisyError {
 				return FormattedText::new(
 					"[e]Syntax Error:[n] Bad function name".to_string()
 				);
-			}
+			},
+			DaisyError::BadTuple => {
+				return FormattedText::new(
+					"[e]Syntax Error:[n] Bad tuple syntax".to_string()
+				);
+			},
 
 
 			DaisyError::BadMath => {
