@@ -5,15 +5,59 @@ use crate::parser::Operator;
 use crate::parser::Expression;
 use crate::context::Context;
 use crate::errors::DaisyError;
+use super::evaluate;
 
 
-pub fn eval_operator(g: &Expression, _context: &mut Context) -> Result<Option<Expression>, (LineLocation, DaisyError)> {
+pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Expression>, (LineLocation, DaisyError)> {
 
 	let Expression::Operator(op_loc, op, args) = g else {panic!()};
 
 	match op {
 		Operator::Function(_) => unreachable!("Functions are handled seperately."),
-		Operator::UserFunction(_) => unimplemented!(),
+
+		Operator::UserFunction(s) => {
+			let (sh_vars, exp) = context.get_function(s).unwrap();
+
+			if args.len() != 1 {panic!()};
+			let a = &args[0];
+
+			if sh_vars.len() == 1 {
+				if let Expression::Tuple(l, v) = a {
+					return Err((
+						*l + *op_loc,
+						DaisyError::BadArguments(s.clone(), 1, v.len())
+					))
+				};
+
+				context.add_shadow(sh_vars[0].clone(), Some(a.clone()));
+			} else {
+				let Expression::Tuple(l, v) = a else {
+					return Err((
+						a.get_linelocation() + *op_loc,
+						DaisyError::BadArguments(s.clone(), sh_vars.len(), 1)
+					));
+				};
+
+				if sh_vars.len() != v.len() {
+					return Err((
+						*l + *op_loc,
+						DaisyError::BadArguments(s.clone(), sh_vars.len(), v.len())
+					));
+				}
+
+				let mut i = 0;
+				while i < sh_vars.len() {
+					context.add_shadow(sh_vars[i].clone(), Some(v[i].clone()));
+					i += 1;
+				}
+			}
+
+
+			let r = evaluate(&exp, context)?;
+			context.clear_shadow();
+
+			return Ok(Some(r));
+		},
 
 		Operator::Tuple => {
 			if args.len() != 2 { panic!() };
