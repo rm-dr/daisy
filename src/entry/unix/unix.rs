@@ -101,8 +101,8 @@ fn do_assignment(
 
 	let left = parts[0].trim().to_string();
 	let right = parts[1].trim().to_string();
-	let right = substitute(&right);
-	let left = substitute(&left);
+	let right = substitute(&right, &context);
+	let left = substitute(&left, &context);
 
 	let is_function = left.contains("(");
 
@@ -305,7 +305,7 @@ pub fn main() -> Result<(), std::io::Error> {
 
 	'outer: loop {
 
-		pb.write_prompt(&mut stdout)?;
+		pb.write_prompt(&mut stdout, &context)?;
 
 		let stdin = stdin();
 		for c in stdin.keys() {
@@ -314,7 +314,7 @@ pub fn main() -> Result<(), std::io::Error> {
 					'\n' => {
 						// Print again without cursor, in case we pressed enter
 						// while inside a substitution
-						pb.write_prompt_nocursor(&mut stdout)?;
+						pb.write_prompt_nocursor(&mut stdout, &context)?;
 						let in_str = pb.enter();
 						write!(stdout, "\r\n")?;
 						if in_str == "" { break; }
@@ -384,7 +384,7 @@ pub fn main() -> Result<(), std::io::Error> {
 				};
 			};
 
-			pb.write_prompt(&mut stdout)?;
+			pb.write_prompt(&mut stdout, &context)?;
 		}
 	}
 

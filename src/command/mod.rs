@@ -231,7 +231,7 @@ pub fn do_command(
 			}
 
 			let v = args[1].to_string();
-			let v = substitute(&v);
+			let v = substitute(&v, context);
 			let r = context.delete(&v);
 
 			return match r {

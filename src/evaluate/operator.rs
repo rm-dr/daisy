@@ -13,6 +13,8 @@ pub fn eval_operator(g: &Expression, _context: &mut Context) -> Result<Option<Ex
 
 	match op {
 		Operator::Function(_) => unreachable!("Functions are handled seperately."),
+		Operator::UserFunction(_) => unimplemented!(),
+
 		Operator::Tuple => {
 			if args.len() != 2 { panic!() };
 			let a = &args[0];

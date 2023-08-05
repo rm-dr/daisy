@@ -7,10 +7,12 @@ use super::super::{
 };
 
 use crate::errors::DaisyError;
+use crate::context::Context;
 
 
 fn lookback_signs(
-	g: &mut VecDeque<Token>
+	g: &mut VecDeque<Token>,
+	context: &Context
 ) -> Result<(), (LineLocation, DaisyError)> {
 
 	// Convert `-` operators to `neg` operators
@@ -42,7 +44,7 @@ fn lookback_signs(
 				(Token::Operator(_, sa), Token::Operator(l,sb))
 				=> {
 					if {
-						let o = Operator::from_string(sa);
+						let o = Operator::from_string(sa, context);
 
 						o.is_some() &&
 						(
@@ -99,10 +101,11 @@ fn lookback_signs(
 
 // Inserts implicit operators
 fn lookback(
-	g: &mut VecDeque<Token>
+	g: &mut VecDeque<Token>,
+	context: &Context
 ) -> Result<(), (LineLocation, DaisyError)> {
 
-	lookback_signs(g)?;
+	lookback_signs(g, context)?;
 
 	let mut i: usize = 0;
 	while i < g.len() {
@@ -139,7 +142,7 @@ fn lookback(
 				=> {
 					let la = la.clone();
 					let lb = lb.clone();
-					let o = Operator::from_string(s);
+					let o = Operator::from_string(s, context);
 
 					g.insert(i-1, b);
 					if o.is_some() {
@@ -161,7 +164,7 @@ fn lookback(
 				=> {
 					let la = la.clone();
 					let lb = lb.clone();
-					let o = Operator::from_string(s);
+					let o = Operator::from_string(s, context);
 
 					g.insert(i-1, b);
 					if o.is_some() {
@@ -193,7 +196,8 @@ fn lookback(
 
 
 pub fn groupify(
-	mut g: VecDeque<Token>
+	mut g: VecDeque<Token>,
+	context: &Context
 ) -> Result<
 	Token,
 	(LineLocation, DaisyError)
@@ -228,7 +232,7 @@ pub fn groupify(
 
 				let (_, mut v) = levels.pop().unwrap();
 				let (_, v_now) = levels.last_mut().unwrap();
-				lookback(&mut v)?;
+				lookback(&mut v, context)?;
 
 				v_now.push_back(Token::Group(l, v));
 			},
@@ -254,14 +258,14 @@ pub fn groupify(
 		let (_, v_now) = levels.last_mut().unwrap();
 
 		if v.len() == 0 { return Err((l, DaisyError::EmptyGroup)) }
-		lookback(&mut v)?;
+		lookback(&mut v, context)?;
 
 		v_now.push_back(Token::Group(l, v));
 	}
 
 
 	let (_, mut v) = levels.pop().unwrap();
-	lookback(&mut v)?;
+	lookback(&mut v, context)?;
 
 	return Ok(Token::Group(LineLocation{pos:0, len:last_linelocation.pos + last_linelocation.len}, v));
 }

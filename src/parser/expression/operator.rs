@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 
+use crate::context::Context;
+
 use super::Expression;
 use super::Function;
 
@@ -8,7 +10,7 @@ use super::Function;
 /// Operator types, in order of increasing priority.
 #[derive(Debug)]
 #[derive(Clone)]
-#[derive(Copy)]
+//#[derive(Copy)]
 #[repr(usize)]
 pub enum Operator {
 	// When adding operators, don't forget to update help command text.
@@ -32,6 +34,7 @@ pub enum Operator {
 	Factorial,
 
 	Function(Function),
+	UserFunction(String)
 }
 
 impl PartialEq for Operator {
@@ -61,11 +64,15 @@ impl Operator {
 	}
 
 	#[inline(always)]
-	pub fn from_string(s: &str) -> Option<Operator> {
+	pub fn from_string(s: &str, context: &Context) -> Option<Operator> {
 
 		let f = Function::from_string(s);
 		if let Some(f) = f {
 			return Some(Operator::Function(f));
+		}
+
+		if context.is_function(s) {
+			return Some(Operator::UserFunction(s.to_string()));
 		}
 
 		return match s {
@@ -117,7 +124,7 @@ impl Operator {
 	fn print_map(&self) -> Operator {
 		match self {
 			Operator::ImplicitMultiply => Operator::Multiply,
-			_ => *self
+			_ => self.clone()
 		}
 	}
 
@@ -325,6 +332,10 @@ impl Operator {
 			},
 
 			Operator::Function(s) => {
+				return format!("{}({})", s.to_string(), args[0].to_string());
+			},
+
+			Operator::UserFunction(s) => {
 				return format!("{}({})", s.to_string(), args[0].to_string());
 			}
 		};

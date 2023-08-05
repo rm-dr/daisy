@@ -56,7 +56,7 @@ fn treeify_binary(
 
 
 	if let Token::Operator(l, s) = left {
-		let o = Operator::from_string(s);
+		let o = Operator::from_string(s, context);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 		let o = o.unwrap();
 
@@ -72,7 +72,7 @@ fn treeify_binary(
 	}
 
 	if let Token::Operator(l, s) = right {
-		let o = Operator::from_string(s);
+		let o = Operator::from_string(s, context);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 		let o = o.unwrap();
 
@@ -91,7 +91,7 @@ fn treeify_binary(
 	// This operator
 	let this_op = {
 		let Token::Operator(l, s) = this else {panic!()};
-		let o = Operator::from_string(s);
+		let o = Operator::from_string(s, context);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // bad operator string
 		o.unwrap()
 	};
@@ -99,14 +99,14 @@ fn treeify_binary(
 	// The operators contesting our arguments
 	let left_op = if i > 1 {
 		let Token::Operator(l, s) = &g_inner[i-2] else {panic!()};
-		let o = Operator::from_string(s);
+		let o = Operator::from_string(s, context);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad operator string
 		Some(o.unwrap())
 	} else { None };
 
 	let right_op = if i < g_inner.len()-2 {
 		let Token::Operator(l, s) = &g_inner[i+2] else {panic!()};
-		let o = Operator::from_string(s);
+		let o = Operator::from_string(s, context);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad operator string
 		Some(o.unwrap())
 	} else { None };
@@ -137,7 +137,7 @@ fn treeify_binary(
 
 		let (l, o) = {
 			let Token::Operator(l, s) = this_pre else {panic!()};
-			let o = Operator::from_string(&s);
+			let o = Operator::from_string(&s, context);
 			if o.is_none() { panic!() }
 			(l, o.unwrap())
 		};
@@ -218,7 +218,7 @@ fn treeify_unary(
 		// This operator
 		let this_op = {
 			let Token::Operator(l, s) = this else {panic!()};
-			let o = Operator::from_string(s);
+			let o = Operator::from_string(s, context);
 				if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 			o.unwrap()
 		};
@@ -227,14 +227,14 @@ fn treeify_unary(
 		let next_op = if left_associative {
 			if i > 1 {
 				let Token::Operator(l, s) = &g_inner[i-2] else {panic!()};
-				let o = Operator::from_string(s);
+				let o = Operator::from_string(s, context);
 				if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 				Some(o.unwrap())
 			} else { None }
 		} else {
 			if i < g_inner.len()-2 {
 				let Token::Operator(l, s) = &g_inner[i+2] else {panic!()};
-				let o = Operator::from_string(s);
+				let o = Operator::from_string(s, context);
 				if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 				Some(o.unwrap())
 			} else { None }
@@ -258,7 +258,7 @@ fn treeify_unary(
 
 			let (l, o) = {
 				let Token::Operator(l, s) = this_pre else {panic!()};
-				let o = Operator::from_string(&s);
+				let o = Operator::from_string(&s, context);
 				if o.is_none() { panic!() }
 				(l, o.unwrap())
 			};
@@ -314,7 +314,7 @@ pub fn treeify(
 		// If not an operator, move on.
 		let this_op = match &g_inner[i] {
 			Token::Operator(l, s) => {
-				let o = Operator::from_string(&s);
+				let o = Operator::from_string(&s, context);
 				if o.is_none() { return Err((*l, DaisyError::Syntax)); }
 				o.unwrap()
 			},

@@ -4,7 +4,7 @@ use termion::raw::RawTerminal;
 use termion::color;
 use termion::style;
 use crate::parser::substitute_cursor;
-
+use crate::context::Context;
 
 #[derive(Debug)]
 pub struct PromptBuffer {
@@ -37,9 +37,9 @@ impl PromptBuffer {
 	}
 
 	// Same as write_primpt, but pretends there is no cursor
-	pub fn write_prompt_nocursor(&mut self, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
+	pub fn write_prompt_nocursor(&mut self, stdout: &mut RawTerminal<std::io::Stdout>, context: &Context) -> Result<(), std::io::Error> {
 		// Draw prettyprinted expression
-		let (_, s) = substitute_cursor(&self.get_contents(), self.buffer.chars().count());
+		let (_, s) = substitute_cursor(&self.get_contents(), self.buffer.chars().count(), context);
 
 		write!(
 			stdout, "\r{}{}==>{}{} {}",
@@ -64,12 +64,12 @@ impl PromptBuffer {
 		return Ok(());
 	}
 
-	pub fn write_prompt(&mut self, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
+	pub fn write_prompt(&mut self, stdout: &mut RawTerminal<std::io::Stdout>, context: &Context) -> Result<(), std::io::Error> {
 		let l = self.buffer.chars().count();
 		let i = if l == 0 {0} else {l - self.cursor};
 
 		// Draw prettyprinted expression
-		let (display_cursor, s) = substitute_cursor(&self.get_contents(), i);
+		let (display_cursor, s) = substitute_cursor(&self.get_contents(), i, context);
 
 		write!(
 			stdout, "\r{}{}==>{}{} {}",
