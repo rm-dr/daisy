@@ -46,17 +46,23 @@ pub fn do_string(
 	}
 
 	let (l, e) = r;
-	let t = FormattedText::new(
-		format!(
+	let mut t = FormattedText::new("".to_string());
+	if l.zero() {
+		t.push(&format!(
+			"\n  {}\n\n",
+			e.text().to_string(),
+		));
+	} else {
+		t.push(&format!(
 			concat!(
 				"{}[e]{}[n]\n",
-				"  {}\n"
+				"  {}\n\n"
 			),
 			" ".repeat(l.pos + 4),
 			"^".repeat(l.len),
 			e.text().to_string(),
-		)
-	);
+		));
+	}
 
 	return Err(t);
 }
