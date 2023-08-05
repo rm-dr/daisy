@@ -14,7 +14,7 @@ Binary will be in `target/release/daisy`
 
 # 📹 Screenshot
 
-![Screenshot](https://github.com/rm-dr/daisy/assets/96270320/7e1315b9-7be1-4f36-a006-3c2f75bdeff8)
+![Screenshot](https://github.com/rm-dr/daisy/assets/96270320/cc71887a-0fde-46b2-a13b-96b05098b158)
 
 # 🛠️ Features
  - Open-source
