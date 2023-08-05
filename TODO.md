@@ -3,7 +3,6 @@
  - Tuple operations
  - we don't need vectors as arguments to operators
  - Assignment tests
- - Clean up entrypoint mess
 
 ## Parser
  - Better error when `sin = 2`
