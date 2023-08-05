@@ -77,6 +77,13 @@ impl FormattedText {
 							s.push_str(&format!("{}{}", color::Fg(color::LightBlack), style::Italic));
 						},
 
+						('s', ']') => { // Repeat prompt (how => is styled)
+							s.push_str(&format!("{}{}", color::Fg(color::Magenta), style::Bold));
+						},
+						('r', ']') => { // Result prompt (how = is styled)
+							s.push_str(&format!("{}{}", color::Fg(color::Green), style::Bold));
+						},
+
 						_ => {
 							s.push('[');
 							s.push(a);
