@@ -1,23 +1,20 @@
 ## Pre-release
- - Commands to list units and substitutions
- - Fix linelocation (consistent)
- - Better substitution. Consistent: when ascii, when unicode?
- - better "=" parsing
- - better tuples
+ - Fix linelocation (consistent, what does an operator's linelocation mean?)
+ - better tuples (only combine when consecutive, addition, etc)
  - we don't need vectors as arguments to operators
  - Assignment tests
+ - Clean up entrypoint mess
 
 ## Parser
  - Better error when `sin = 2`
- - Define functions (f(x) = ??)
  - Should functions be operators?
- - Multi-argument functions
  - Binary, hex, octal numbers
 
 
 ## General
  - Optional config file
  - Optional history file
+ - daisyrc file
  - Compile to WASM, publish a webapp
  - Options:
    - disable replacement
@@ -26,6 +23,7 @@
    - powers as superscripts toggle
  - evaluate straight from command line
  - Auto-push to crates.io
+ - Package for debian
 
 
 
@@ -57,9 +55,12 @@
    - we shouldn't need to re-print user input on evaluation errors, red arrows should adjust themselves to the prettyprinted string
  - Backend-independent colorful printing
    - Better colors in error texts
+ - Better substitution. Consistent: when ascii, when unicode?
+ - Command to list substitutions
 
 ## Units
  - long prefixes (megatonne, etc)
  - HMS for degrees
  - Exact radians, using pi constant?
  - Weird units: flops, lumen, lux, bel
+ - Command to list units
