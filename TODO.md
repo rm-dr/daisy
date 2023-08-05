@@ -1,3 +1,14 @@
+## Version Bump checklist
+ - update Cargo.toml
+ - run cargo test
+ - commit
+ - git tag -a v1.0.0 -m "Version 1.0.0"
+ - push
+ - cargo publish
+ - Update packages
+
+
+
 ## Pre-release
  - Fix linelocation (consistent, what does an operator's linelocation mean?)
  - Tuple operations
