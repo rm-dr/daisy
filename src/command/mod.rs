@@ -148,15 +148,22 @@ pub fn do_command(
 
 			let mut t = FormattedText::new("".to_string());
 
+			let mut longest = 0;
+			for (key, _) in v {
+				if key.len() > longest {
+					longest = key.len();
+				}
+			}
+			for (key, (args, _exp)) in f {
+				let s = format!("{key}({})", args.join(", "));
+				if s.len() > longest {
+					longest = s.len();
+				}
+			}
+
+
 			if v.len() != 0 {
 				t.push("\n╞═══ [t]User-Defined Variables[n] ═══╡\n");
-
-				let mut longest = 0;
-				for (key, _) in v {
-					if key.len() > longest {
-						longest = key.len();
-					}
-				}
 
 				for (key, value) in v {
 					let padding = " ".repeat(longest - key.len());
@@ -171,20 +178,12 @@ pub fn do_command(
 			if f.len() != 0 {
 				t.push("\n╞═══ [t]User-Defined Functions[n] ═══╡\n");
 
-				let mut longest = 0;
-				for (key, (args, _exp)) in f {
-					let s = format!("{key}({})", args.join(", "));
-					if s.len() > longest {
-						longest = s.len();
-					}
-				}
-
 				for (key, (args, exp)) in f {
-					let padding = " ".repeat(longest - key.len());
+					let s = format!("{key}({})", args.join(", "));
+					let padding = " ".repeat(longest - s.len());
 
 					t.push(&format!(
-						"  {key}({}){padding} = [c]{v}[n]\n",
-						args.join(", "),
+						"  {s}{padding} = [c]{v}[n]\n",
 						v = exp.to_string(),
 					));
 				}
