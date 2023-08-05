@@ -1,6 +1,6 @@
 ## Pre-release
  - Fix linelocation (consistent, what does an operator's linelocation mean?)
- - better tuples (only combine when consecutive, addition, etc)
+ - Tuple operations
  - we don't need vectors as arguments to operators
  - Assignment tests
  - Clean up entrypoint mess
