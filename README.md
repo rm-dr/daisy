@@ -14,7 +14,7 @@ Binary will be in `target/release/daisy`
 
 # 📹 Screenshot
 
-![Screenshot](https://betalupi.com/static/git/daisy.png)
+![Screenshot](https://github.com/rm-dr/daisy/assets/96270320/7e1315b9-7be1-4f36-a006-3c2f75bdeff8)
 
 # 🛠️ Features
  - Open-source
