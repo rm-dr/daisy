@@ -78,8 +78,8 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 						return Err((
 							*la + *lb + *op_loc,
 							DaisyError::IncompatibleUnits(
-								a.convert_to_base().unit.to_string(),
-								b.convert_to_base().unit.to_string()
+								a.convert_to_base().unit.display(context),
+								b.convert_to_base().unit.display(context)
 							)
 						));
 					}
@@ -101,8 +101,8 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 						return Err((
 							*la + *lb + *op_loc,
 							DaisyError::IncompatibleUnits(
-								a.convert_to_base().unit.to_string(),
-								b.convert_to_base().unit.to_string()
+								a.convert_to_base().unit.display(context),
+								b.convert_to_base().unit.display(context)
 							)
 						));
 					}
@@ -179,8 +179,8 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 						return Err((
 							*la + *lb + *op_loc,
 							DaisyError::IncompatibleUnits(
-								va.convert_to_base().unit.to_string(),
-								vb.convert_to_base().unit.to_string()
+								va.convert_to_base().unit.display(context),
+								vb.convert_to_base().unit.display(context)
 							)
 						));
 					}

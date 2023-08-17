@@ -170,7 +170,7 @@ pub fn do_command(
 
 					t.push(&format!(
 						"  {key}{padding} = [c]{v}[n]\n",
-						v = value.to_string(),
+						v = value.display(context),
 					));
 				}
 			}
@@ -184,7 +184,7 @@ pub fn do_command(
 
 					t.push(&format!(
 						"  {s}{padding} = [c]{v}[n]\n",
-						v = exp.to_string(),
+						v = exp.display(context),
 					));
 				}
 			}

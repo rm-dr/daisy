@@ -128,8 +128,8 @@ impl Operator {
 	}
 
 	#[inline(always)]
-	fn add_parens_to_arg(&self, arg: &Expression) -> String {
-		let mut astr: String = arg.to_string();
+	fn add_parens_to_arg(&self, context: &Context, arg: &Expression) -> String {
+		let mut astr: String = arg.display(context);
 		if let Expression::Operator(_, o,_) = arg {
 			if o.print_map() < self.print_map() {
 				astr = format!("({})", astr);
@@ -139,8 +139,8 @@ impl Operator {
 	}
 
 	#[inline(always)]
-	fn add_parens_to_arg_strict(&self, arg: &Expression) -> String {
-		let mut astr: String = arg.to_string();
+	fn add_parens_to_arg_strict(&self, context: &Context, arg: &Expression) -> String {
+		let mut astr: String = arg.display(context);
 		if let Expression::Operator(_, o,_) = arg {
 			if o.print_map() <= self.print_map() {
 				astr = format!("({})", astr);
@@ -150,56 +150,56 @@ impl Operator {
 	}
 
 
-	pub fn print(&self, args: &VecDeque<Expression>) -> String {
+	pub fn display(&self, context: &Context, args: &VecDeque<Expression>) -> String {
 		match self {
 			Operator::Negative => {
-				return format!("-{}", self.add_parens_to_arg(&args[0]));
+				return format!("-{}", self.add_parens_to_arg(context, &args[0]));
 			},
 
 			Operator::Sqrt => {
 				return format!(
 					"√{}",
-					self.add_parens_to_arg(&args[0]),
+					self.add_parens_to_arg(context, &args[0]),
 				);
 			},
 
 			Operator::ModuloLong => {
 				return format!(
 					"{} mod {}",
-					self.add_parens_to_arg(&args[0]),
-					self.add_parens_to_arg(&args[1])
+					self.add_parens_to_arg(context, &args[0]),
+					self.add_parens_to_arg(context, &args[1])
 				);
 			},
 
 			Operator::DivideLong => {
 				return format!(
 					"{} per {}",
-					self.add_parens_to_arg(&args[0]),
-					self.add_parens_to_arg(&args[1])
+					self.add_parens_to_arg(context, &args[0]),
+					self.add_parens_to_arg(context, &args[1])
 				);
 			},
 
 			Operator::UnitConvert => {
 				return format!(
 					"{} to {}",
-					self.add_parens_to_arg(&args[0]),
-					self.add_parens_to_arg(&args[1])
+					self.add_parens_to_arg(context, &args[0]),
+					self.add_parens_to_arg(context, &args[1])
 				);
 			},
 
 			Operator::Modulo => {
 				return format!(
 					"{} % {}",
-					self.add_parens_to_arg(&args[0]),
-					self.add_parens_to_arg(&args[1])
+					self.add_parens_to_arg(context, &args[0]),
+					self.add_parens_to_arg(context, &args[1])
 				);
 			},
 
 			Operator::Subtract => {
 				return format!(
 					"{} - {}",
-					self.add_parens_to_arg(&args[0]),
-					self.add_parens_to_arg(&args[1])
+					self.add_parens_to_arg(context, &args[0]),
+					self.add_parens_to_arg(context, &args[1])
 				);
 			},
 
@@ -208,13 +208,13 @@ impl Operator {
 				let q = &args[1];
 
 				if {
-					//context.config.enable_super_powers &&
+					context.config.enable_super_powers &&
 					q.is_unitless_integer() &&
-					!q.to_string().contains("e")
+					!q.display(context).contains("e")
 				} {
 					// Write integer powers as a superscript
 					let mut b = String::new();
-					for c in q.to_string().chars() {
+					for c in q.display(context).chars() {
 						b.push(match c {
 							'-' => '⁻',
 							'0' => '⁰',
@@ -233,27 +233,27 @@ impl Operator {
 
 					return format!(
 						"{}{}",
-						self.add_parens_to_arg_strict(&args[0]),
+						self.add_parens_to_arg_strict(context, &args[0]),
 						b
 					);
 				} else {
 					return format!(
 						"{}^{}",
-						self.add_parens_to_arg_strict(&args[0]),
-						self.add_parens_to_arg_strict(&args[1])
+						self.add_parens_to_arg_strict(context, &args[0]),
+						self.add_parens_to_arg_strict(context, &args[1])
 					);
 				}
 			},
 
 			Operator::Factorial => {
-				return format!("{}!", self.add_parens_to_arg(&args[0]));
+				return format!("{}!", self.add_parens_to_arg(context, &args[0]));
 			},
 
 			Operator::Add => {
 				return format!(
 					"{} + {}",
-					self.add_parens_to_arg(&args[0]),
-					self.add_parens_to_arg(&args[1])
+					self.add_parens_to_arg(context, &args[0]),
+					self.add_parens_to_arg(context, &args[1])
 				);
 			},
 
@@ -283,26 +283,26 @@ impl Operator {
 					if let Expression::Quantity(_, u) = b {
 						if u.unit.no_space() {
 							return format!("{}{}",
-								self.add_parens_to_arg_strict(a),
-								self.add_parens_to_arg_strict(b)
+								self.add_parens_to_arg_strict(context, a),
+								self.add_parens_to_arg_strict(context, b)
 							);
 						} else {
 							return format!("{} {}",
-								self.add_parens_to_arg_strict(a),
-								self.add_parens_to_arg_strict(b)
+								self.add_parens_to_arg_strict(context, a),
+								self.add_parens_to_arg_strict(context, b)
 							);
 						}
 					} else {
 						return format!("{}{}",
-							self.add_parens_to_arg_strict(a),
-							self.add_parens_to_arg_strict(b)
+							self.add_parens_to_arg_strict(context, a),
+							self.add_parens_to_arg_strict(context, b)
 						);
 					};
 
 				} else {
 					return format!("{} × {}",
-						self.add_parens_to_arg_strict(a),
-						self.add_parens_to_arg_strict(b)
+						self.add_parens_to_arg_strict(context, a),
+						self.add_parens_to_arg_strict(context, b)
 					);
 				}
 			},
@@ -313,25 +313,25 @@ impl Operator {
 
 
 				if let Expression::Quantity(_, q) = a {
-					if q.is_one() {
+					if q.is_one() && context.config.enable_one_over_power {
 						return format!("{}⁻¹",
-							self.add_parens_to_arg_strict(b)
+							self.add_parens_to_arg_strict(context, b)
 						);
 					}
 				}
 
 				return format!("{} ÷ {}",
-					self.add_parens_to_arg_strict(a),
-					self.add_parens_to_arg_strict(b)
+					self.add_parens_to_arg_strict(context, a),
+					self.add_parens_to_arg_strict(context, b)
 				);
 			},
 
 			Operator::Function(s) => {
-				return format!("{}({})", s.to_string(), args[0].to_string());
+				return format!("{}({})", s.to_string(), args[0].display(context));
 			},
 
 			Operator::UserFunction(s) => {
-				return format!("{}({})", s.to_string(), args[0].to_string());
+				return format!("{}({})", s, args[0].display(context));
 			}
 		};
 	}

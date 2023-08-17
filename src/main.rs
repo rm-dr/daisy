@@ -85,13 +85,13 @@ fn do_expression(
 	// Display parsed string
 	output.push(&format!(
 		" [s]=>[n] {}\n\n",
-		g.to_string()
+		g.display(context)
 	));
 
 	// Display result
 	output.push(&format!(
 		"  [r]=[n] {}\n\n",
-		g_evaluated.to_string_outer(),
+		g_evaluated.display_outer(context),
 	));
 
 	return Ok((output, g_evaluated));
@@ -224,7 +224,7 @@ fn do_assignment(
 		// Display parsed string
 		output.push(&format!(
 			" [s]=>[n] {left} = {}\n\n",
-			g.to_string()
+			g.display(context)
 		));
 
 		// Evaluate expression with shadow variables
@@ -266,7 +266,7 @@ fn do_assignment(
 		// Display parsed string
 		output.push(&format!(
 			" [t]=>[n] {left} = {}\n\n",
-			g.to_string()
+			g.display(context)
 		));
 
 		// Evaluate expression

@@ -7,6 +7,7 @@ use std::ops::{
 };
 use std::cmp::Ordering;
 
+use crate::context::Context;
 use crate::quantity::Unit;
 use crate::quantity::FreeUnit;
 
@@ -21,12 +22,12 @@ pub struct Quantity {
 
 
 
-impl ToString for Quantity {
-	fn to_string(&self) -> String {
+impl Quantity {
+	pub fn display(&self, context: &Context) -> String {
 		let n = self.scalar.to_string();
 		if self.unitless() { return n; }
 
-		let u = self.unit.to_string();
+		let u = self.unit.display(context);
 		if self.is_one() { return u; };
 
 		if self.unit.no_space() {
@@ -38,11 +39,11 @@ impl ToString for Quantity {
 }
 
 impl Quantity {
-	pub fn to_string_outer(&self) -> String {
+	pub fn display_outer(&self, context: &Context) -> String {
 		let n = self.scalar.to_string();
 		if self.unitless() { return n; }
 
-		let u = self.unit.to_string();
+		let u = self.unit.display(context);
 		if self.unit.no_space() {
 			return format!("{n}{u}");
 		} else {

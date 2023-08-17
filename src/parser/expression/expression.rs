@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 use crate::quantity::Quantity;
+use crate::context::Context;
 
 use super::Operator;
 use super::Constant;
@@ -17,17 +18,17 @@ pub enum Expression {
 	Tuple(LineLocation, VecDeque<Expression>),
 }
 
-impl ToString for Expression {
-	fn to_string(&self) -> String {
+impl Expression {
+	pub fn display(&self, context: &Context) -> String {
 		match self {
-			Expression::Quantity(_, v) => v.to_string(),
+			Expression::Quantity(_, v) => v.display(context),
 			Expression::Constant(_, c) => c.to_string(),
 			Expression::Variable(_, s) => s.clone(),
-			Expression::Operator(_, o,a) => o.print(a),
+			Expression::Operator(_, o,a) => o.display(context, a),
 			Expression::Tuple(_, v) => {
 				format!("({})",
 					v.iter()
-						.map(|x| x.to_string())
+						.map(|x| x.display(context))
 						.collect::<Vec<String>>()
 						.join(", ")
 				)
@@ -39,16 +40,16 @@ impl ToString for Expression {
 impl Expression {
 	// This is called only when this is the outermost Expression.
 	// This sometimes leads to different--usually more verbose--behavior.
-	pub fn to_string_outer(&self) -> String {
+	pub fn display_outer(&self, context: &Context) -> String {
 		match self {
-			Expression::Quantity(_, v) => v.to_string_outer(),
+			Expression::Quantity(_, v) => v.display_outer(context),
 			Expression::Constant(_, c) => c.to_string(),
 			Expression::Variable(_, s) => s.clone(),
-			Expression::Operator(_, o,a) => o.print(a),
+			Expression::Operator(_, o,a) => o.display(context, a),
 			Expression::Tuple(_, v) => {
 				format!("({})",
 					v.iter()
-						.map(|x| x.to_string())
+						.map(|x| x.display(context))
 						.collect::<Vec<String>>()
 						.join(", ")
 				)
