@@ -3,7 +3,68 @@ use crate::quantity::freeunit_from_string;
 use std::collections::HashMap;
 
 #[derive(Debug)]
+#[derive(Clone)]
+pub struct Config {
+
+	// How to color terminal text.
+	// 0: No colors
+	// 1: ANSI-compatible, 8 colors
+	// 2: Full 256 color and special styles
+	pub term_color_type: u8,
+
+	// Should we accept input and print in unicode?
+	//pub enable_unicode: bool,
+
+	// Should we replace certain strings (like "pi")
+	// with prettier unicode alternatives?
+	//
+	// Automatically disabled if enable_unicode is off.
+	//pub enable_substituion: bool,
+
+	// Should we print simple powers
+	// as unicode superscript chars?
+	//
+	// Automatically disables if enable_unicode is off.
+	pub enable_super_powers: bool,
+
+	// Should we write "one-over" fractions
+	// as -1 powers?
+	//
+	// Automatically disabled if enable_super_powers is off.
+	pub enable_one_over_power: bool,
+}
+
+impl Config {
+	pub fn new() -> Config {
+		Config{
+			term_color_type: 2,
+			//enable_substituion: true,
+			//enable_unicode: true,
+			enable_super_powers: true,
+			enable_one_over_power: true
+		}
+	}
+
+	pub fn check(&mut self) {
+		//if !self.enable_unicode {
+		//	self.enable_substituion = false;
+		//	self.enable_super_powers = false;
+		//}
+
+		if !self.enable_super_powers {
+			self.enable_one_over_power = false
+		}
+	}
+}
+
+
+
+
+#[derive(Debug)]
+#[derive(Clone)]
 pub struct Context {
+	pub config: Config,
+
 	history: Vec<Expression>,
 	variables: HashMap<String, Expression>,
 	functions: HashMap<String, (Vec<String>, Expression)>,
@@ -16,6 +77,7 @@ pub struct Context {
 impl Context {
 	pub fn new() -> Context {
 		Context{
+			config: Config::new(),
 			history: Vec::new(),
 			variables: HashMap::new(),
 			functions: HashMap::new(),
@@ -84,10 +146,10 @@ impl Context {
 	}
 
 	pub fn is_varible(&self, s: &str) -> bool {
-		return self.valid_varible(s) && (
-			self.variables.contains_key(s) ||
-			self.shadow.contains_key(s)
-		);
+		return {
+			self.valid_varible(s) &&
+			(self.variables.contains_key(s) || self.shadow.contains_key(s))
+		};
 	}
 
 	pub fn get_variables(&self) -> &HashMap<String, Expression> {

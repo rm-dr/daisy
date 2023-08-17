@@ -10,9 +10,9 @@ use super::super::{
 };
 
 fn treeify_binary(
+	context: &Context,
 	i: usize,
-	g_inner: &mut VecDeque<Token>,
-	context: &Context
+	g_inner: &mut VecDeque<Token>
 ) -> Result<bool, (LineLocation, DaisyError)> {
 
 	let this: &Token = &g_inner[i];
@@ -56,7 +56,7 @@ fn treeify_binary(
 
 
 	if let Token::Operator(l, s) = left {
-		let o = Operator::from_string(s, context);
+		let o = Operator::from_string(context, s);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 		let o = o.unwrap();
 
@@ -72,7 +72,7 @@ fn treeify_binary(
 	}
 
 	if let Token::Operator(l, s) = right {
-		let o = Operator::from_string(s, context);
+		let o = Operator::from_string(context, s);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 		let o = o.unwrap();
 
@@ -91,7 +91,7 @@ fn treeify_binary(
 	// This operator
 	let this_op = {
 		let Token::Operator(l, s) = this else {panic!()};
-		let o = Operator::from_string(s, context);
+		let o = Operator::from_string(context, s);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // bad operator string
 		o.unwrap()
 	};
@@ -99,14 +99,14 @@ fn treeify_binary(
 	// The operators contesting our arguments
 	let left_op = if i > 1 {
 		let Token::Operator(l, s) = &g_inner[i-2] else {panic!()};
-		let o = Operator::from_string(s, context);
+		let o = Operator::from_string(context, s);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad operator string
 		Some(o.unwrap())
 	} else { None };
 
 	let right_op = if i < g_inner.len()-2 {
 		let Token::Operator(l, s) = &g_inner[i+2] else {panic!()};
-		let o = Operator::from_string(s, context);
+		let o = Operator::from_string(context, s);
 		if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad operator string
 		Some(o.unwrap())
 	} else { None };
@@ -122,20 +122,20 @@ fn treeify_binary(
 		let right_pre = g_inner.remove(i-1).unwrap();
 		let mut left: Expression; let mut right: Expression;
 		if let Token::Group(l, _) = right_pre {
-			right = treeify(right_pre, context)?;
+			right = treeify(context, right_pre)?;
 			right.set_linelocation(&(right.get_linelocation() + l));
 		} else if let Token::Tuple(l, _) = right_pre {
-			right = treeify(right_pre, context)?;
+			right = treeify(context, right_pre)?;
 			right.set_linelocation(&(right.get_linelocation() + l));
 		} else {
 			right = right_pre.to_expression(context)?;
 		}
 
 		if let Token::Group(l, _) = left_pre {
-			left = treeify(left_pre, context)?;
+			left = treeify(context, left_pre)?;
 			left.set_linelocation(&(left.get_linelocation() + l));
 		} else if let Token::Tuple(l, _) = left_pre {
-			left = treeify(left_pre, context)?;
+			left = treeify(context, left_pre)?;
 			left.set_linelocation(&(left.get_linelocation() + l));
 		} else {
 			left = left_pre.to_expression(context)?;
@@ -143,7 +143,7 @@ fn treeify_binary(
 
 		let (l, o) = {
 			let Token::Operator(l, s) = this_pre else {panic!()};
-			let o = Operator::from_string(&s, context);
+			let o = Operator::from_string(context, &s);
 			if o.is_none() { panic!() }
 			(l, o.unwrap())
 		};
@@ -161,10 +161,10 @@ fn treeify_binary(
 }
 
 fn treeify_unary(
+	context: &Context,
 	i: usize,
 	g_inner: &mut VecDeque<Token>,
-	left_associative: bool,
-	context: &Context
+	left_associative: bool
 ) -> Result<bool, (LineLocation, DaisyError)> {
 
 	let this: &Token = &g_inner[i];
@@ -224,7 +224,7 @@ fn treeify_unary(
 		// This operator
 		let this_op = {
 			let Token::Operator(l, s) = this else {panic!()};
-			let o = Operator::from_string(s, context);
+			let o = Operator::from_string(context, s);
 				if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 			o.unwrap()
 		};
@@ -233,14 +233,14 @@ fn treeify_unary(
 		let next_op = if left_associative {
 			if i > 1 {
 				let Token::Operator(l, s) = &g_inner[i-2] else {panic!()};
-				let o = Operator::from_string(s, context);
+				let o = Operator::from_string(context, s);
 				if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 				Some(o.unwrap())
 			} else { None }
 		} else {
 			if i < g_inner.len()-2 {
 				let Token::Operator(l, s) = &g_inner[i+2] else {panic!()};
-				let o = Operator::from_string(s, context);
+				let o = Operator::from_string(context, s);
 				if o.is_none() { return Err((*l, DaisyError::Syntax)); } // Bad string
 				Some(o.unwrap())
 			} else { None }
@@ -255,10 +255,10 @@ fn treeify_unary(
 				next_pre = g_inner.remove(i).unwrap();
 			}
 			if let Token::Group(l, _) = next_pre {
-				next = treeify(next_pre, context)?;
+				next = treeify(context, next_pre)?;
 				next.set_linelocation(&(next.get_linelocation() + l));
 			} else if let Token::Tuple(l, _) = next_pre {
-				next = treeify(next_pre, context)?;
+				next = treeify(context, next_pre)?;
 				next.set_linelocation(&(next.get_linelocation() + l));
 			} else {
 				next = next_pre.to_expression(context)?;
@@ -267,7 +267,7 @@ fn treeify_unary(
 
 			let (l, o) = {
 				let Token::Operator(l, s) = this_pre else {panic!()};
-				let o = Operator::from_string(&s, context);
+				let o = Operator::from_string(context, &s);
 				if o.is_none() { panic!() }
 				(l, o.unwrap())
 			};
@@ -292,8 +292,8 @@ fn treeify_unary(
 
 
 pub fn treeify(
-	mut g: Token,
-	context: &Context
+	context: &Context,
+	mut g: Token
 ) -> Result<Expression, (LineLocation, DaisyError)> {
 
 	let (l, g_inner): (LineLocation, &mut VecDeque<Token>) = match g {
@@ -301,7 +301,7 @@ pub fn treeify(
 		Token::Tuple(l, parts) => {
 			let mut t: VecDeque<Expression> = VecDeque::new();
 			for p in parts {
-				t.push_back(treeify(p, context)?);
+				t.push_back(treeify(context, p)?);
 			};
 
 			return Ok(Expression::Tuple(l, t));
@@ -332,7 +332,7 @@ pub fn treeify(
 		// If not an operator, move on.
 		let this_op = match &g_inner[i] {
 			Token::Operator(l, s) => {
-				let o = Operator::from_string(&s, context);
+				let o = Operator::from_string(context, &s);
 				if o.is_none() { return Err((*l, DaisyError::Syntax)); }
 				o.unwrap()
 			},
@@ -346,9 +346,9 @@ pub fn treeify(
 			let mut changed = false;
 			if this_op.is_left_associative() {
 				if this_op.is_binary() {
-					changed = treeify_binary(i, g_inner, context)?;
+					changed = treeify_binary(context, i, g_inner)?;
 				} else {
-					changed = treeify_unary(i, g_inner, left_associative, context)?;
+					changed = treeify_unary(context, i, g_inner, left_associative)?;
 				}
 			}
 
@@ -360,9 +360,9 @@ pub fn treeify(
 		} else {
 			if !this_op.is_left_associative() {
 				if this_op.is_binary() {
-					treeify_binary(i, g_inner, context)?;
+					treeify_binary(context, i, g_inner)?;
 				} else {
-					treeify_unary(i, g_inner, left_associative, context)?;
+					treeify_unary(context, i, g_inner, left_associative)?;
 				}
 			}
 			j -= 1
@@ -378,7 +378,7 @@ pub fn treeify(
 		},
 		Token::Tuple(_, _) |
 		Token::Group(_,_) => {
-			treeify(g, context)
+			treeify(context, g)
 		},
 
 

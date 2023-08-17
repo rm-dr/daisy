@@ -18,30 +18,30 @@ use crate::context::Context;
 use crate::errors::DaisyError;
 
 pub fn parse(
-	s: &String, context: &Context
+	context: &Context, s: &String
 ) -> Result<Expression, (LineLocation, DaisyError)> {
 
-	let expressions = stage::tokenize(s, context);
+	let expressions = stage::tokenize(context, s);
 	let (_, expressions) = stage::find_subs(expressions);
-	let g = stage::groupify(expressions, context)?;
-	let g = stage::treeify(g, context)?;
+	let g = stage::groupify(context, expressions)?;
+	let g = stage::treeify(context, g)?;
 
 	return Ok(g);
 }
 
 pub fn parse_no_context(s: &String) -> Result<Expression, (LineLocation, DaisyError)> {
-	parse(s, &Context::new())
+	parse(&Context::new(), s)
 }
 
-pub fn substitute(s: &String, context: &Context) -> String {
-	let (_, s) = substitute_cursor(s, s.chars().count(), context);
+pub fn substitute(context: &Context, s: &String) -> String {
+	let (_, s) = substitute_cursor(context, s, s.chars().count());
 	return s;
 }
 
 pub fn substitute_cursor(
+	context: &Context,
 	s: &String, // The string to substitute
-	c: usize,   // Location of the cursor right now
-	context: &Context
+	c: usize    // Location of the cursor right now
 ) -> (
 	usize,  // Location of cursor in substituted string
 	String  // String with substitutions
@@ -50,7 +50,7 @@ pub fn substitute_cursor(
 	let mut new_s = s.clone();
 
 	let l = s.chars().count();
-	let expressions = stage::tokenize(s, context);
+	let expressions = stage::tokenize(context, s);
 	let (mut subs, _) = stage::find_subs(expressions);
 	let mut new_c = l - c;
 

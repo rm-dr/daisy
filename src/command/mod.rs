@@ -44,8 +44,8 @@ fn greeter() -> FormattedText {
 
 #[inline(always)]
 pub fn do_command(
+	context: &mut Context,
 	s: &String,
-	context: &mut Context
 ) -> FormattedText {
 	let args: Vec<&str> = s.split(" ").collect();
 	let first = args[0];
@@ -170,7 +170,7 @@ pub fn do_command(
 
 					t.push(&format!(
 						"  {key}{padding} = [c]{v}[n]\n",
-						v = value.to_string(),
+						v = value.display(context),
 					));
 				}
 			}
@@ -184,7 +184,7 @@ pub fn do_command(
 
 					t.push(&format!(
 						"  {s}{padding} = [c]{v}[n]\n",
-						v = exp.to_string(),
+						v = exp.display(context),
 					));
 				}
 			}
@@ -230,7 +230,7 @@ pub fn do_command(
 			}
 
 			let v = args[1].to_string();
-			let v = substitute(&v, context);
+			let v = substitute(context, &v);
 			let r = context.delete(&v);
 
 			return match r {

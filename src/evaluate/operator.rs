@@ -7,7 +7,7 @@ use crate::errors::DaisyError;
 use super::evaluate;
 
 
-pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Expression>, (LineLocation, DaisyError)> {
+pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Expression>, (LineLocation, DaisyError)> {
 
 	let Expression::Operator(op_loc, op, args) = g else {panic!()};
 
@@ -52,7 +52,7 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 			}
 
 
-			let r = evaluate(&exp, context)?;
+			let r = evaluate(context, &exp)?;
 			context.clear_shadow();
 
 			return Ok(Some(r));
@@ -78,8 +78,8 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 						return Err((
 							*la + *lb + *op_loc,
 							DaisyError::IncompatibleUnits(
-								a.convert_to_base().unit.to_string(),
-								b.convert_to_base().unit.to_string()
+								a.convert_to_base().unit.display(context),
+								b.convert_to_base().unit.display(context)
 							)
 						));
 					}
@@ -101,8 +101,8 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 						return Err((
 							*la + *lb + *op_loc,
 							DaisyError::IncompatibleUnits(
-								a.convert_to_base().unit.to_string(),
-								b.convert_to_base().unit.to_string()
+								a.convert_to_base().unit.display(context),
+								b.convert_to_base().unit.display(context)
 							)
 						));
 					}
@@ -179,8 +179,8 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 						return Err((
 							*la + *lb + *op_loc,
 							DaisyError::IncompatibleUnits(
-								va.convert_to_base().unit.to_string(),
-								vb.convert_to_base().unit.to_string()
+								va.convert_to_base().unit.display(context),
+								vb.convert_to_base().unit.display(context)
 							)
 						));
 					}

@@ -1,4 +1,3 @@
-use std::io::Write;
 use std::io::stdout;
 use std::io::stdin;
 use std::env;
@@ -6,35 +5,63 @@ use std::env;
 use termion::{
 	event::Key,
 	input::TermRead,
-	raw::IntoRawMode
+	raw::IntoRawMode,
+	color::DetectColors
 };
 
 use super::promptbuffer::PromptBuffer;
 use crate::command;
 use crate::context::Context;
-
+use crate::FormattedText;
 
 #[inline(always)]
 pub fn main() -> Result<(), std::io::Error> {
 	let mut stdout = stdout().into_raw_mode().unwrap();
 	let mut pb: PromptBuffer = PromptBuffer::new(64);
-	let mut context: Context = Context::new();
+	let mut context = Context::new();
+
+	// Set color compatibilty
+	let term_colors = stdout.available_colors().unwrap_or(0);
+	if term_colors >= 256 {
+		context.config.term_color_type = 2
+	} else if term_colors >= 8 {
+		context.config.term_color_type = 1
+	} else {
+		context.config.term_color_type = 0
+	}
+
+	context.config.check();
+
 
 
 	// Handle command-line arguments
 	let args: Vec<String> = env::args().collect();
 	if args.iter().any(|s| s == "--help") {
-		let t = command::do_command(&String::from("help"), &mut context);
-		t.write(&mut stdout)?;
+		let t = command::do_command(&mut context, &String::from("help"));
+		t.write(&context, &mut stdout)?;
 		return Ok(());
 	} else if args.iter().any(|s| s == "--version") {
-		write!(stdout, "Daisy v{}\r\n", env!("CARGO_PKG_VERSION"))?;
+		let t = FormattedText::new(format!(
+			"Daisy v{}\n", env!("CARGO_PKG_VERSION")
+		));
+		t.write(&context, &mut stdout)?;
+		return Ok(());
+	} else if args.iter().any(|s| s == "--debug") {
+		let t = FormattedText::new(format!(
+			concat!(
+				"Daisy v{}\n",
+				"Your terminal supports {} colors.\n"
+			),
+			env!("CARGO_PKG_VERSION"),
+			term_colors
+		));
+		t.write(&context, &mut stdout)?;
 		return Ok(());
 	}
 
 	'outer: loop {
 
-		pb.write_prompt(&mut stdout, &context)?;
+		pb.write_prompt(&mut context, &mut stdout)?;
 
 		let stdin = stdin();
 		for c in stdin.keys() {
@@ -43,19 +70,19 @@ pub fn main() -> Result<(), std::io::Error> {
 					'\n' => {
 						// Print again without cursor, in case we pressed enter
 						// while inside a substitution
-						pb.write_prompt_nocursor(&mut stdout, &context)?;
+						pb.write_prompt_nocursor(&mut context, &mut stdout)?;
 						let in_str = pb.enter();
-						write!(stdout, "\r\n")?;
+						FormattedText::newline(&mut stdout)?;
 						if in_str == "" { break; }
 
 						if in_str.trim() == "quit" {
 							break 'outer;
 						} else {
-							let r = crate::do_string(&in_str, &mut context);
+							let r = crate::do_string(&mut context, &in_str);
 
 							match r {
 								Ok(t) | Err(t) => {
-									t.write(&mut stdout).unwrap();
+									t.write(&context, &mut stdout).unwrap();
 								}
 							}
 						}
@@ -79,10 +106,10 @@ pub fn main() -> Result<(), std::io::Error> {
 				};
 			};
 
-			pb.write_prompt(&mut stdout, &context)?;
+			pb.write_prompt(&mut context, &mut stdout)?;
 		}
 	}
 
-	write!(stdout, "\r\n")?;
+	FormattedText::newline(&mut stdout)?;
 	return Ok(());
 }

@@ -10,8 +10,10 @@ fn eval_to_str(s: &str) -> Result<String, ()> {
 	};
 	//let out_str = g.print();
 
-	return match evaluate(&g, &mut Context::new()) {
-		Ok(x) => Ok(x.to_string_outer()),
+	let mut c = Context::new();
+
+	return match evaluate(&mut c, &g) {
+		Ok(x) => Ok(x.display_outer(&c)),
 		Err(_) => Err(())
 	};
 }

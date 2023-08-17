@@ -5,6 +5,7 @@ A high-precision scientific calculator with support for units, derivatives, and 
 Many features are missing, this is still under development.
 
 # 📦 Installation
+ - **Cargo:** `cargo install daisycalc`
  - **Arch:** `yay -S daisy`
  - **Debian:** coming soon
 
@@ -14,7 +15,7 @@ Binary will be in `target/release/daisy`
 
 # 📹 Screenshot
 
-![](https://betalupi.com/static/git/daisy.png)
+![Screenshot](https://github.com/rm-dr/daisy/assets/96270320/cc71887a-0fde-46b2-a13b-96b05098b158)
 
 # 🛠️ Features
  - Open-source

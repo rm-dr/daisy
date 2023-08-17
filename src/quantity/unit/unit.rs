@@ -4,6 +4,7 @@ use std::ops::{
 	MulAssign, DivAssign
 };
 
+use crate::context::Context;
 use crate::quantity::Scalar;
 use crate::quantity::Quantity;
 use super::FreeUnit;
@@ -16,8 +17,8 @@ pub struct Unit {
 	pub val: HashMap<FreeUnit, Scalar>
 }
 
-impl ToString for Unit {
-	fn to_string(&self) -> String {
+impl Unit {
+	pub fn display(&self, context: &Context) -> String {
 
 		if self.unitless() { return String::new(); };
 
@@ -37,7 +38,11 @@ impl ToString for Unit {
 
 			if *p == Scalar::new_rational(1f64).unwrap() {
 				t.push_str(&format!("{c}·"));
-			} else if p.is_int() && !p.to_string().contains("e"){
+			} else if {
+				context.config.enable_super_powers &&
+				p.is_int() &&
+				!p.to_string().contains("e")
+			} {
 				t.push_str(&c);
 				for c in p.to_string().chars() {
 					t.push( match c {
@@ -74,7 +79,11 @@ impl ToString for Unit {
 			bottom_count += 1;
 			if t.len() != 0 && *p == Scalar::new_rational(-1f64).unwrap() {
 				b.push_str(&format!("{c}·"));
-			} else if p.is_int() && !p.to_string().contains("e") {
+			} else if {
+				context.config.enable_super_powers &&
+				p.is_int() &&
+				!p.to_string().contains("e")
+			} {
 				b.push_str(&c);
 				for c in p.to_string().chars() {
 					if c == '-' && t.len() != 0 { continue; }

@@ -10,10 +10,10 @@ use super::super::{
 // Called whenever a token is finished.
 #[inline(always)]
 fn push_token(
+	context: &Context,
 	g: &mut VecDeque<Token>,
 	t: Option<Token>,
-	stop_i: usize,
-	context: &Context
+	stop_i: usize
 ) {
 
 	if t.is_none() { return }
@@ -60,7 +60,7 @@ fn push_token(
 
 	// Some operators are written as words.
 	if let Token::Word(l, s) = &t {
-		if Operator::from_string(s, context).is_some() {
+		if Operator::from_string(context, s).is_some() {
 			t = Token::Operator(*l, s.clone());
 		}
 	}
@@ -69,7 +69,7 @@ fn push_token(
 }
 
 /// Turns a string into Tokens. First stage of parsing.
-pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
+pub fn tokenize(context: &Context, input: &String) -> VecDeque<Token> {
 	let mut t: Option<Token> = None; // The current token we're reading
 	let mut g: VecDeque<Token> = VecDeque::with_capacity(32);
 
@@ -88,7 +88,7 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 					// If we're not building a number, finalize
 					// previous token and start one.
 					_ => {
-						push_token(&mut g, t, i, context);
+						push_token(context, &mut g, t, i);
 						t = Some(Token::Quantity(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
@@ -102,7 +102,7 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 					Some(Token::Quantity(_, val)) => { val.push(c); },
 
 					_ => {
-						push_token(&mut g, t, i, context);
+						push_token(context, &mut g, t, i);
 						t = Some(Token::Word(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
@@ -122,7 +122,7 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 						} else {
 							// Otherwise, end the number.
 							// We probably have a subtraction.
-							push_token(&mut g, t, i, context);
+							push_token(context, &mut g, t, i);
 							t = Some(Token::Operator(
 								LineLocation{pos: i, len: 1},
 								String::from(c)
@@ -134,7 +134,7 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 					// Multi-character operators with - and + are NOT supported!
 					// (for example, we can't use -> for unit conversion)
 					_ => {
-						push_token(&mut g, t, i, context);
+						push_token(context, &mut g, t, i);
 						t = Some(Token::Operator(
 							LineLocation{pos: i, len: 1},
 							String::from(c)
@@ -144,7 +144,7 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 			},
 
 			',' => {
-				push_token(&mut g, t, i, context);
+				push_token(context, &mut g, t, i);
 				t = Some(Token::TupleDelim(LineLocation{pos: i, len: 1}));
 			},
 
@@ -157,7 +157,7 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 				match &mut t {
 					Some(Token::Operator(_, val)) => { val.push(c); },
 					_ => {
-						push_token(&mut g, t, i, context);
+						push_token(context, &mut g, t, i);
 						t = Some(Token::Operator(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
@@ -165,17 +165,17 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 
 			// Group
 			'(' => {
-				push_token(&mut g, t, i, context);
+				push_token(context, &mut g, t, i);
 				t = Some(Token::GroupStart(LineLocation{pos: i, len: 0}));
 			},
 			')' => {
-				push_token(&mut g, t, i, context);
+				push_token(context, &mut g, t, i);
 				t = Some(Token::GroupEnd(LineLocation{pos: i, len: 0}));
 			},
 
 			// Space. Basic seperator.
 			' ' => {
-				push_token(&mut g, t, i, context);
+				push_token(context, &mut g, t, i);
 				t = None;
 			}
 
@@ -185,7 +185,7 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 					Some(Token::Word(_, val)) => { val.push(c); },
 
 					_ => {
-						push_token(&mut g, t, i, context);
+						push_token(context, &mut g, t, i);
 						t = Some(Token::Word(LineLocation{pos: i, len: 0}, String::from(c)));
 					}
 				};
@@ -193,7 +193,7 @@ pub fn tokenize(input: &String, context: &Context) -> VecDeque<Token> {
 		};
 	}
 
-	push_token(&mut g, t, input.chars().count(), context);
+	push_token(context, &mut g, t, input.chars().count());
 
 	return g;
 }

@@ -3,7 +3,8 @@
  - run cargo test
  - commit
  - git tag -a v1.0.0 -m "Version 1.0.0"
- - push
+ - git push
+ - git push origin v1.0.0
  - cargo publish
  - Update packages
 
@@ -26,11 +27,6 @@
  - Optional history file
  - daisyrc file
  - Compile to WASM, publish a webapp
- - Options:
-   - disable replacement
-   - disable special characters
-   - 1/ as -1 power toggle
-   - powers as superscripts toggle
  - evaluate straight from command line
  - Auto-push to crates.io
  - Package for debian
