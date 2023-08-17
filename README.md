@@ -5,6 +5,7 @@ A high-precision scientific calculator with support for units, derivatives, and 
 Many features are missing, this is still under development.
 
 # 📦 Installation
+ - **Cargo:** `cargo install daisycalc`
  - **Arch:** `yay -S daisy`
  - **Debian:** coming soon
 
