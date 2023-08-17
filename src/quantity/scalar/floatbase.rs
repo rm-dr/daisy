@@ -244,7 +244,7 @@ impl Rem<FloatBase> for FloatBase {
 			(!modulus.fract().unwrap().is_zero())
 		} { panic!() }
 
-		FloatBase{val : self.val.fract() % modulus.val.fract()}
+		FloatBase{val : self.val.trunc() % modulus.val.trunc()}
 	}
 }
 

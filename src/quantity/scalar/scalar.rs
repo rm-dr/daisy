@@ -186,7 +186,7 @@ impl Scalar {
 	pub fn is_nan(&self) -> bool {
 		match self {
 			Scalar::Float {v} => {v.val.is_nan()},
-			Scalar::Rational {..} => {panic!()}
+			Scalar::Rational {..} => {false}
 		}
 	}
 

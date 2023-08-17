@@ -162,6 +162,11 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 					if va.fract() != Quantity::new_rational(0f64).unwrap() { return Err((*la + *lb + *op_loc, DaisyError::BadMath)); }
 					if vb.fract() != Quantity::new_rational(0f64).unwrap() { return Err((*la + *lb + *op_loc, DaisyError::BadMath)); }
 
+
+					let o = va.clone() % vb.clone();
+					if o.is_nan() {return Err((*la + *lb + *op_loc, DaisyError::BadMath));}
+
+
 					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, va.clone() % vb.clone())));
 				} else { return Ok(None); }
 			} else { return Ok(None); }

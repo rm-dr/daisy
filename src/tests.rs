@@ -162,6 +162,7 @@ fn operators() {
 
 	good_expr("2", "6/3");
 	good_expr("2", "5%3");
+	good_expr("4", "2^5 mod 7");
 	good_expr("8", "5+3");
 	good_expr("64", "4^3");
 	good_expr("64", "4 ^ 3");
