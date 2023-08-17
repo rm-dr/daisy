@@ -61,10 +61,12 @@ fn format_map_ansi(c: char) -> Option<String> {
 }
 
 
+// style::reset also resets color.
+// Make sure color comes AFTER style reset.
 fn format_map_full(c: char) -> Option<String> {
 	Some(match c {
 		'n' => { // Normal text
-			format!("{}{}", color::Fg(color::Reset), style::Reset)
+			format!("{}{}", style::Reset, color::Fg(color::Reset))
 		},
 		'i' => { // Normal italic text
 			format!("{}{}", color::Fg(color::Reset), style::Italic)
@@ -73,7 +75,7 @@ fn format_map_full(c: char) -> Option<String> {
 			format!("{}{}", color::Fg(color::Magenta), style::Bold)
 		},
 		'a' => { // Colored text
-			format!("{}{}", color::Fg(color::Magenta), style::Reset)
+			format!("{}{}", style::Reset, color::Fg(color::Magenta))
 		},
 		'e' => { // Error titles
 			format!("{}{}", color::Fg(color::Red), style::Bold)
