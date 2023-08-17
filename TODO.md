@@ -2,9 +2,9 @@
  - update Cargo.toml
  - run cargo test
  - commit
- - git tag -a v1.0.0 -m "Version 1.0.0"
- - git push
- - git push origin v1.0.0
+ - push
+ - merge
+ - git tag -a v1.0.0 -m "Version 1.0.0" on merge commit
  - cargo publish
  - Update packages
 
