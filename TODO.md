@@ -7,6 +7,7 @@
  - git tag -a v1.0.0 -m "Version 1.0.0" on merge commit
  - cargo publish
  - Update packages
+ - Faster startup
 
 
 
