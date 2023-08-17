@@ -9,8 +9,8 @@ use super::function::eval_function;
 
 
 pub fn evaluate(
-	t: &Expression,
-	context: &mut Context
+	context: &mut Context,
+	t: &Expression
 ) -> Result<
 	Expression,
 	(LineLocation, DaisyError)
@@ -51,7 +51,7 @@ pub fn evaluate(
 			let new = match g {
 				Expression::Quantity(_, _) => None,
 				Expression::Tuple(_, _) => None,
-				Expression::Constant(_, c) => { Some(evaluate(&c.value(), context).unwrap()) },
+				Expression::Constant(_, c) => { Some(evaluate(context, &c.value()).unwrap()) },
 				Expression::Variable(l, s) => {
 					// Don't move up, re-evaluate
 					// This makes variables containing floating variables work properly
@@ -64,7 +64,7 @@ pub fn evaluate(
 					context.get_variable(&s)
 				},
 				Expression::Operator(_, Operator::Function(_), _) => { Some(eval_function(g)?) },
-				Expression::Operator(_, _, _) => { eval_operator(g, context)? },
+				Expression::Operator(_, _, _) => { eval_operator(context, g)? },
 			};
 
 			if let Some(mut new) = new {

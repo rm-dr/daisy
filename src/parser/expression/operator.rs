@@ -62,7 +62,7 @@ impl Operator {
 	}
 
 	#[inline(always)]
-	pub fn from_string(s: &str, context: &Context) -> Option<Operator> {
+	pub fn from_string(context: &Context, s: &str) -> Option<Operator> {
 
 		let f = Function::from_string(s);
 		if let Some(f) = f {
@@ -207,7 +207,11 @@ impl Operator {
 
 				let q = &args[1];
 
-				if q.is_unitless_integer() && !q.to_string().contains("e") {
+				if {
+					//context.config.enable_super_powers &&
+					q.is_unitless_integer() &&
+					!q.to_string().contains("e")
+				} {
 					// Write integer powers as a superscript
 					let mut b = String::new();
 					for c in q.to_string().chars() {

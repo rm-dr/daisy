@@ -24,8 +24,8 @@ pub fn main() -> Result<(), std::io::Error> {
 	// Handle command-line arguments
 	let args: Vec<String> = env::args().collect();
 	if args.iter().any(|s| s == "--help") {
-		let t = command::do_command(&String::from("help"), &mut context);
-		t.write(&mut stdout)?;
+		let t = command::do_command(&mut context, &String::from("help"));
+		t.write(&context, &mut stdout)?;
 		return Ok(());
 	} else if args.iter().any(|s| s == "--version") {
 		write!(stdout, "Daisy v{}\r\n", env!("CARGO_PKG_VERSION"))?;
@@ -34,7 +34,7 @@ pub fn main() -> Result<(), std::io::Error> {
 
 	'outer: loop {
 
-		pb.write_prompt(&mut stdout, &context)?;
+		pb.write_prompt(&mut context, &mut stdout)?;
 
 		let stdin = stdin();
 		for c in stdin.keys() {
@@ -43,7 +43,7 @@ pub fn main() -> Result<(), std::io::Error> {
 					'\n' => {
 						// Print again without cursor, in case we pressed enter
 						// while inside a substitution
-						pb.write_prompt_nocursor(&mut stdout, &context)?;
+						pb.write_prompt_nocursor(&mut context, &mut stdout)?;
 						let in_str = pb.enter();
 						write!(stdout, "\r\n")?;
 						if in_str == "" { break; }
@@ -51,11 +51,11 @@ pub fn main() -> Result<(), std::io::Error> {
 						if in_str.trim() == "quit" {
 							break 'outer;
 						} else {
-							let r = crate::do_string(&in_str, &mut context);
+							let r = crate::do_string(&mut context, &in_str);
 
 							match r {
 								Ok(t) | Err(t) => {
-									t.write(&mut stdout).unwrap();
+									t.write(&context, &mut stdout).unwrap();
 								}
 							}
 						}
@@ -79,7 +79,7 @@ pub fn main() -> Result<(), std::io::Error> {
 				};
 			};
 
-			pb.write_prompt(&mut stdout, &context)?;
+			pb.write_prompt(&mut context, &mut stdout)?;
 		}
 	}
 

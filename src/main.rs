@@ -26,21 +26,21 @@ fn main() -> Result<(), std::io::Error> {
 
 #[inline(always)]
 pub fn do_string(
-	s: &String,
-	mut context: &mut Context
+	context: &mut Context,
+	s: &String
 ) -> Result<FormattedText, FormattedText> {
 
 	let r: (LineLocation, DaisyError);
 	if command::is_command(s) {
-		return Ok(command::do_command(s, &mut context));
+		return Ok(command::do_command(context, s));
 	} else if s.contains("=") {
-		let x = do_assignment(s, &mut context);
+		let x = do_assignment(context, s);
 		match x {
 			Ok(t) => { return Ok(t) },
 			Err(t) => { r = t }
 		};
 	} else {
-		let x = do_expression(s, &mut context);
+		let x = do_expression(context, s);
 		match x {
 			Ok((t, e)) => { context.push_hist(e); return Ok(t) },
 			Err(t) => { r = t }
@@ -73,14 +73,14 @@ pub fn do_string(
 // Returns a FormattedText with output that should be printed.
 #[inline(always)]
 fn do_expression(
-	s: &String,
-	context: &mut Context
+	context: &mut Context,
+	s: &String
 ) -> Result<(FormattedText, parser::Expression), (LineLocation, DaisyError)> {
 
 	let mut output = FormattedText::new("".to_string());
 
-	let g = parser::parse(&s, context)?;
-	let g_evaluated = evaluate::evaluate(&g, context)?;
+	let g = parser::parse(context, &s)?;
+	let g_evaluated = evaluate::evaluate(context, &g)?;
 
 	// Display parsed string
 	output.push(&format!(
@@ -102,8 +102,8 @@ fn do_expression(
 // Returns a FormattedText with output that should be printed.
 #[inline(always)]
 fn do_assignment(
-	s: &String,
-	context: &mut Context
+	context: &mut Context,
+	s: &String
 ) -> Result<FormattedText, (LineLocation, DaisyError)> {
 
 	let mut output = FormattedText::new("".to_string());
@@ -135,8 +135,8 @@ fn do_assignment(
 			.unwrap_or_else(|| parts[0].len());
 
 
-	let left = substitute(&parts[0].trim().to_string(), &context);
-	let right = substitute(&parts[1].trim().to_string(), &context);
+	let left = substitute(context, &parts[0].trim().to_string());
+	let right = substitute(context, &parts[1].trim().to_string());
 	let is_function = left.contains("(");
 
 	// The order of methods below is a bit odd.
@@ -212,7 +212,7 @@ fn do_assignment(
 		}
 
 		// Parse right hand side
-		let g = parser::parse(&right, context);
+		let g = parser::parse(context, &right);
 		let Ok(g) = g else {
 			let Err((l, e)) = g else { unreachable!() };
 			return Err((
@@ -229,7 +229,7 @@ fn do_assignment(
 
 		// Evaluate expression with shadow variables
 		for a in &args { context.add_shadow(a.to_string(), None);}
-		let g_evaluated = evaluate::evaluate(&g, context);
+		let g_evaluated = evaluate::evaluate(context, &g);
 		context.clear_shadow();
 		let Ok(_g_evaluated) = g_evaluated else {
 			let Err((l, e)) = g_evaluated else { unreachable!() };
@@ -254,7 +254,7 @@ fn do_assignment(
 		}
 
 		// Parse right hand side
-		let g = parser::parse(&right, context);
+		let g = parser::parse(context, &right);
 		let Ok(g) = g else {
 			let Err((l, e)) = g else { unreachable!() };
 			return Err((
@@ -270,7 +270,7 @@ fn do_assignment(
 		));
 
 		// Evaluate expression
-		let g_evaluated = evaluate::evaluate(&g, context);
+		let g_evaluated = evaluate::evaluate(context, &g);
 		let Ok(g_evaluated) = g_evaluated else {
 			let Err((l, e)) = g_evaluated else { unreachable!() };
 			return Err((

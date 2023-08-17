@@ -7,7 +7,7 @@ use crate::errors::DaisyError;
 use super::evaluate;
 
 
-pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Expression>, (LineLocation, DaisyError)> {
+pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Expression>, (LineLocation, DaisyError)> {
 
 	let Expression::Operator(op_loc, op, args) = g else {panic!()};
 
@@ -52,7 +52,7 @@ pub fn eval_operator(g: &Expression, context: &mut Context) -> Result<Option<Exp
 			}
 
 
-			let r = evaluate(&exp, context)?;
+			let r = evaluate(context, &exp)?;
 			context.clear_shadow();
 
 			return Ok(Some(r));

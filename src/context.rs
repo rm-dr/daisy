@@ -84,10 +84,10 @@ impl Context {
 	}
 
 	pub fn is_varible(&self, s: &str) -> bool {
-		return self.valid_varible(s) && (
-			self.variables.contains_key(s) ||
-			self.shadow.contains_key(s)
-		);
+		return {
+			self.valid_varible(s) &&
+			(self.variables.contains_key(s) || self.shadow.contains_key(s))
+		};
 	}
 
 	pub fn get_variables(&self) -> &HashMap<String, Expression> {

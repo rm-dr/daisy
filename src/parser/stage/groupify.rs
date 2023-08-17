@@ -11,8 +11,8 @@ use crate::context::Context;
 
 
 fn lookback_signs(
-	g: &mut VecDeque<Token>,
-	context: &Context
+	context: &Context,
+	g: &mut VecDeque<Token>
 ) -> Result<(), (LineLocation, DaisyError)> {
 
 	// Convert `-` operators to `neg` operators
@@ -44,7 +44,7 @@ fn lookback_signs(
 				(Token::Operator(_, sa), Token::Operator(l,sb))
 				=> {
 					if {
-						let o = Operator::from_string(sa, context);
+						let o = Operator::from_string(context, sa);
 
 						o.is_some() &&
 						(
@@ -101,11 +101,11 @@ fn lookback_signs(
 
 // Inserts implicit operators
 fn lookback(
-	g: &mut VecDeque<Token>,
-	context: &Context
+	context: &Context,
+	g: &mut VecDeque<Token>
 ) -> Result<(), (LineLocation, DaisyError)> {
 
-	lookback_signs(g, context)?;
+	lookback_signs(context, g)?;
 
 	let mut i: usize = 0;
 	while i < g.len() {
@@ -142,7 +142,7 @@ fn lookback(
 				=> {
 					let la = la.clone();
 					let lb = lb.clone();
-					let o = Operator::from_string(s, context);
+					let o = Operator::from_string(context, s);
 
 					g.insert(i-1, b);
 					if o.is_some() {
@@ -164,7 +164,7 @@ fn lookback(
 				=> {
 					let la = la.clone();
 					let lb = lb.clone();
-					let o = Operator::from_string(s, context);
+					let o = Operator::from_string(context, s);
 
 					g.insert(i-1, b);
 					if o.is_some() {
@@ -196,8 +196,8 @@ fn lookback(
 
 
 pub fn groupify(
-	mut g: VecDeque<Token>,
-	context: &Context
+	context: &Context,
+	mut g: VecDeque<Token>
 ) -> Result<
 	Token,
 	(LineLocation, DaisyError)
@@ -240,7 +240,7 @@ pub fn groupify(
 
 				let (_, mut v) = levels.pop().unwrap();
 				let (_, v_now) = levels.last_mut().unwrap();
-				lookback(&mut v, context)?;
+				lookback(context, &mut v)?;
 
 				let q = is_tuple.pop().unwrap();
 				if q {
@@ -275,7 +275,7 @@ pub fn groupify(
 		let (_, v_now) = levels.last_mut().unwrap();
 
 		if v.len() == 0 { return Err((l, DaisyError::EmptyGroup)) }
-		lookback(&mut v, context)?;
+		lookback(context, &mut v)?;
 
 		let q = is_tuple.pop().unwrap();
 		if q {
@@ -294,7 +294,7 @@ pub fn groupify(
 		return Err((l, DaisyError::BadTuple));
 	}
 
-	lookback(&mut v, context)?;
+	lookback(context, &mut v)?;
 
 	return Ok(Token::Group(
 		LineLocation{pos:0, len:last_linelocation.pos + last_linelocation.len},

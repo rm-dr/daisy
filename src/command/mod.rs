@@ -44,8 +44,8 @@ fn greeter() -> FormattedText {
 
 #[inline(always)]
 pub fn do_command(
+	context: &mut Context,
 	s: &String,
-	context: &mut Context
 ) -> FormattedText {
 	let args: Vec<&str> = s.split(" ").collect();
 	let first = args[0];
@@ -230,7 +230,7 @@ pub fn do_command(
 			}
 
 			let v = args[1].to_string();
-			let v = substitute(&v, context);
+			let v = substitute(context, &v);
 			let r = context.delete(&v);
 
 			return match r {

@@ -31,7 +31,7 @@ impl FormattedText {
 	}
 
 
-	pub fn write(&self, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
+	pub fn write(&self, context: &Context, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
 
 		if self.text == "[clear]" {
 			write!(
