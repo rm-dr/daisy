@@ -7,8 +7,6 @@
  - git tag -a v1.0.0 -m "Version 1.0.0" on merge commit
  - cargo publish
  - Update packages
- - Faster startup
-
 
 
 ## Pre-release
@@ -31,6 +29,7 @@
  - evaluate straight from command line
  - Auto-push to crates.io
  - Package for debian
+ - Faster startup
 
 
 
@@ -49,6 +48,7 @@
  - Complex numbers
  - acot/acoth functions
  - Sums and products with functional arguments
+ - Add functions: gcd, inverse mod
 
 ## Prompt
  - Live syntax/output (like firefox js terminal)
