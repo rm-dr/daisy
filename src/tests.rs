@@ -185,6 +185,7 @@ fn operators() {
 	bad_expr("1e5!");
 	bad_expr("0^(-1)");
 	bad_expr("pi!");
+	bad_expr("2.5 mod 8");
 }
 
 #[test]
