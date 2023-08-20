@@ -6,6 +6,64 @@ use super::super::{
 };
 
 
+fn sub_string(s: &str) -> Option<&'static str> {
+	let r = match s {
+
+		/* Only found in operator tokens */
+
+		"*"    => "×",
+		"/"    => "÷",
+		"sqrt" => "√",
+		"rt"   => "√",
+
+
+
+		/* Only found in word tokens */
+
+		// Greek letters
+		"alpha"   => "α",
+		"beta"    => "β",
+		"gamma"   => "γ",
+		"delta"   => "δ",
+		"epsilon" => "ε",
+		"zeta"    => "ζ",
+		"eta"     => "η",
+		"theta"   => "θ",
+		//"iota"    => {Some("ι")}, // looks just like i
+		//"kappa"   => {Some("κ")}, // looks just like k
+		"lambda"  => "λ",
+		"mu"      => "μ",
+		//"nu"      => {Some("ν")}, // looks just like v
+		"xi"      => "ξ",
+		//"omicron" => {Some("ο")}, // looks exactly like o
+		"pi"      => "π",
+		"rho"     => "ρ",
+		"sigma"   => "σ",
+		"tau"     => "τ",
+		//"upsilon" => {Some("υ")}, // looks just like u
+		"phi"     => "φ",
+		"chi"     => "χ",
+		//"psi"     => {Some("ψ")},  Conflict with pound / square inch
+		"omega"   => "ω",
+
+		// Constants
+		"epsilon_zero" => "ε₀",
+		"eps_zero"     => "ε₀",
+		"g_zero"       => "g₀",
+		"mu_zero"      => "μ₀",
+		"h_bar"        => "ℏ",
+
+		// Misc
+		"deg" => "°",
+
+		_ => { return None; }
+	};
+	return Some(r);
+}
+
+
+
+
 pub fn find_subs(
 	mut g: VecDeque<Token>,
 ) -> (
@@ -24,62 +82,19 @@ pub fn find_subs(
 	while g.len() > 0 {
 		let mut t = g.pop_front().unwrap();
 
+
 		let target: Option<&str> = match &mut t {
 			Token::Operator(_, s) => {
-				let target = match &s[..] {
-					"*" => {Some("×")},
-					"/" => {Some("÷")},
-					"sqrt"    => {Some("√")},
-					"rt"      => {Some("√")},
-					_ => {None}
-				};
+				let target = sub_string(s);
 
 				// Update token contents too.
-				// This makes sure that errors also contain the updated text.
+				// This makes errors and printouts use the updated string.
 				if target.is_some() { *s = String::from(target.unwrap()); }
 				target
 			},
 
 			Token::Word(_, s) => {
-				let target = match &s[..] {
-					// Greek letters
-					"alpha"   => {Some("α")},
-					"beta"    => {Some("β")},
-					"gamma"   => {Some("γ")},
-					"delta"   => {Some("δ")},
-					"epsilon" => {Some("ε")},
-					"zeta"    => {Some("ζ")},
-					"eta"     => {Some("η")},
-					"theta"   => {Some("θ")},
-					//"iota"    => {Some("ι")},
-					//"kappa"   => {Some("κ")},
-					"lambda"  => {Some("λ")},
-					"mu"      => {Some("μ")},
-					//"nu"      => {Some("ν")},
-					"xi"      => {Some("ξ")},
-					//"omicron" => {Some("ο")},
-					"pi"      => {Some("π")},
-					"rho"     => {Some("ρ")},
-					"sigma"   => {Some("σ")},
-					"tau"     => {Some("τ")},
-					//"upsilon" => {Some("υ")},
-					"phi"     => {Some("φ")},
-					"chi"     => {Some("χ")},
-					//"psi"     => {Some("ψ")},  Conflict with pound / square inch
-					"omega"   => {Some("ω")},
-
-					// Constants
-					"epsilon_zero" => {Some("ε₀")},
-					"eps_zero"     => {Some("ε₀")},
-					"g_zero"       => {Some("g₀")},
-					"mu_zero"      => {Some("μ₀")},
-					"h_bar"        => {Some("ℏ")},
-
-					// Misc
-					"deg" => {Some("°")}
-					_ => {None}
-				};
-
+				let target = sub_string(s);
 				if target.is_some() { *s = String::from(target.unwrap()); }
 				target
 			},

@@ -38,39 +38,23 @@ impl PromptBuffer {
 
 	// Same as write_primpt, but pretends there is no cursor
 	pub fn write_prompt_nocursor(&mut self, context: &Context, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
-		// Draw prettyprinted expression
-		let (_, s) = substitute_cursor(context, &self.get_contents(), self.buffer.chars().count());
-
-		write!(
-			stdout, "\r{}{}==>{}{} {}",
-			style::Bold,
-			color::Fg(color::Blue),
-			color::Fg(color::Reset),
-			style::Reset,
-			s
-		)?;
-
-		// If this string is shorter, clear the remaining old one.
-		if s.chars().count() < self.last_print_len {
-			write!(
-				stdout, "{}{}",
-				" ".repeat(self.last_print_len - s.chars().count()),
-				termion::cursor::Left((self.last_print_len - s.chars().count()) as u16)
-			)?;
-		}
-
-		self.last_print_len = s.chars().count();
-		stdout.flush()?;
-		return Ok(());
+		let tmp = self.cursor;
+		self.cursor = 0;
+		let r = self.write_prompt(context, stdout);
+		self.cursor = tmp;
+		return r;
 	}
 
 	pub fn write_prompt(&mut self, context: &Context, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
 		let l = self.buffer.chars().count();
 		let i = if l == 0 {0} else {l - self.cursor};
 
-		// Draw prettyprinted expression
-		let (display_cursor, s) = substitute_cursor(context, &self.get_contents(), i);
 
+		//println!("{i} {}", self.cursor);
+
+		// Draw prettyprinted expression
+		let (display_c, s) = substitute_cursor(context, &self.get_contents(), i);
+	
 		write!(
 			stdout, "\r{}{}==>{}{} {}",
 			style::Bold,
@@ -83,21 +67,17 @@ impl PromptBuffer {
 		// If this string is shorter, clear the remaining old one.
 		if s.chars().count() < self.last_print_len {
 			write!(
-				stdout, "{}{}",
-				" ".repeat(self.last_print_len - s.chars().count()),
-				termion::cursor::Left((self.last_print_len - s.chars().count()) as u16)
-			)?;
-		}
-
-
-		// Move cursor to correct position
-		if display_cursor != 0 {
-			write!(
 				stdout, "{}",
-				termion::cursor::Left(display_cursor as u16)
+				" ".repeat(self.last_print_len - s.chars().count()),
 			)?;
-			stdout.flush()?;
 		}
+
+	
+		write!(
+			stdout, "\r{}",
+			termion::cursor::Right((display_c + 4) as u16)
+		)?;
+		stdout.flush()?;
 		self.last_print_len = s.chars().count();
 
 		stdout.flush()?;

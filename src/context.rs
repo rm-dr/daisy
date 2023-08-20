@@ -19,7 +19,7 @@ pub struct Config {
 	// with prettier unicode alternatives?
 	//
 	// Automatically disabled if enable_unicode is off.
-	//pub enable_substituion: bool,
+	pub enable_substituion: bool,
 
 	// Should we print simple powers
 	// as unicode superscript chars?
@@ -38,7 +38,7 @@ impl Config {
 	pub fn new() -> Config {
 		Config{
 			term_color_type: 2,
-			//enable_substituion: true,
+			enable_substituion: true,
 			//enable_unicode: true,
 			enable_super_powers: true,
 			enable_one_over_power: true
