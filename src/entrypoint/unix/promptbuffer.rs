@@ -1,10 +1,11 @@
 use std::collections::VecDeque;
 use std::io::Write;
 use termion::raw::RawTerminal;
-use termion::color;
-use termion::style;
+use crate::formattedtext;
 use crate::parser::substitute_cursor;
 use crate::context::Context;
+
+const PROMPT_STR: &str = "==> ";
 
 #[derive(Debug)]
 pub struct PromptBuffer {
@@ -49,18 +50,13 @@ impl PromptBuffer {
 		let l = self.buffer.chars().count();
 		let i = if l == 0 {0} else {l - self.cursor};
 
-
-		//println!("{i} {}", self.cursor);
-
 		// Draw prettyprinted expression
 		let (display_c, s) = substitute_cursor(context, &self.get_contents(), i);
 	
 		write!(
-			stdout, "\r{}{}==>{}{} {}",
-			style::Bold,
-			color::Fg(color::Blue),
-			color::Fg(color::Reset),
-			style::Reset,
+			stdout, "\r{}{PROMPT_STR}{}{}",
+			formattedtext::format_map('p', context).unwrap(),
+			formattedtext::format_map('n', context).unwrap(),
 			s
 		)?;
 
@@ -72,15 +68,13 @@ impl PromptBuffer {
 			)?;
 		}
 
-	
 		write!(
 			stdout, "\r{}",
-			termion::cursor::Right((display_c + 4) as u16)
+			termion::cursor::Right((display_c + PROMPT_STR.chars().count()) as u16)
 		)?;
-		stdout.flush()?;
-		self.last_print_len = s.chars().count();
 
 		stdout.flush()?;
+		self.last_print_len = s.chars().count();
 
 		return Ok(());
 	}
