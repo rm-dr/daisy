@@ -23,11 +23,11 @@ pub fn main() -> Result<(), std::io::Error> {
 	// Set color compatibilty
 	let term_colors = stdout.available_colors().unwrap_or(0);
 	if term_colors >= 256 {
-		context.config.term_color_type = 2
+		context.config.term_color_type = 2;
 	} else if term_colors >= 8 {
-		context.config.term_color_type = 1
+		context.config.term_color_type = 1;
 	} else {
-		context.config.term_color_type = 0
+		context.config.term_color_type = 0;
 	}
 
 	context.config.check();
