@@ -224,7 +224,7 @@ pub fn do_command(
 			if args.len() != 2 {
 				return FormattedText::new(
 					format!(
-						"[c]{first}[n] [t]takes exactly two arguments.[n]\n\n",
+						"[c]{first}[n] [t]takes exactly one argument.[n]\n\n",
 					)
 				);
 			}
