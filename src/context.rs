@@ -126,6 +126,7 @@ impl Context {
 		} else { panic!() }
 	}
 
+	// Can we define a new variable with this name?
 	pub fn valid_varible(&self, s: &str) -> bool {
 		if {
 			Function::from_string(s).is_some() ||
@@ -145,10 +146,17 @@ impl Context {
 		}
 	}
 
+	// Can we get a value fro mthis variable name?
 	pub fn is_varible(&self, s: &str) -> bool {
 		return {
-			self.valid_varible(s) &&
-			(self.variables.contains_key(s) || self.shadow.contains_key(s))
+			(
+				s == "ans" &&
+				self.history.len() != 0
+			) ||
+			(
+				self.valid_varible(s) &&
+				(self.variables.contains_key(s) || self.shadow.contains_key(s))
+			)
 		};
 	}
 
