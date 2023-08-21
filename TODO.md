@@ -1,4 +1,5 @@
 ## Version Bump checklist
+ - TODO: build and publish script
  - update Cargo.toml
  - run cargo test
  - commit
@@ -10,28 +11,22 @@
 
 
 ## Pre-release
- - Fix linelocation (consistent, what does an operator's linelocation mean?)
  - Tuple operations
  - we don't need vectors as arguments to operators
- - Assignment tests
- - Color check is too slow
+ - Fix linelocation when evaluating functions
 
 ## Parser
- - Better error when `sin = 2`
  - Should functions be operators?
  - Binary, hex, octal numbers
 
 
 ## General
+ - Better tests (assignment, many expressions in one context)
  - Optional config file
  - Optional history file
- - daisyrc file
  - Compile to WASM, publish a webapp
  - evaluate straight from command line
- - Auto-push to crates.io
  - Package for debian
- - Faster startup
-
 
 
 ## Internals
@@ -41,7 +36,6 @@
  - Remove rug dependency (too big, incompatible)
 
 ## Math Features
- - Dice
  - Mean, Median, Min
  - Arbitrary base logarithm
  - Derivatives
@@ -49,21 +43,16 @@
  - Complex numbers
  - acot/acoth functions
  - Sums and products with functional arguments
- - Add functions: gcd, inverse mod
+ - Add functions: gcd, inverse mod, dice
 
 ## Prompt
+ - Fix terminal color detection
  - Live syntax/output (like firefox js terminal)
- - Syntax highlight input and output
+ - Syntax highlighting
  - fish-style tab completion
  - Numbered expressions, history recall
- - Color configuration
  - Enable/disable unit sets (defaults?)
  - Consistent unit ordering
- - Better linelocation
-   - we shouldn't need to re-print user input on evaluation errors, red arrows should adjust themselves to the prettyprinted string
- - Backend-independent colorful printing
-   - Better colors in error texts
- - Better substitution. Consistent: when ascii, when unicode?
  - Command to list substitutions
 
 ## Units
