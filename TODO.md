@@ -14,6 +14,7 @@
  - Tuple operations
  - we don't need vectors as arguments to operators
  - Assignment tests
+ - Color check is too slow
 
 ## Parser
  - Better error when `sin = 2`
