@@ -35,6 +35,12 @@ pub fn parse_no_context(s: &String) -> Result<Expression, (LineLocation, DaisyEr
 	parse(&Context::new(), s)
 }
 
+
+
+// Substitiution replaces certain string with pretty unicode characters.
+// When it is enabled, ALL input strings are substituted. Variable and
+// operator tokens use the replaced string value. Make sure both the
+// original and the replaced strings are handled correctly by the parser.
 pub fn substitute(context: &Context, s: &String) -> String {
 	if !context.config.enable_substituion { return s.clone(); }
 	let (_, s) = substitute_cursor(context, s, s.chars().count());

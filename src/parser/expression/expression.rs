@@ -11,6 +11,23 @@ use super::super::LineLocation;
 #[derive(Debug)]
 #[derive(Clone)]
 pub enum Expression {
+	// Meaning of `LineLocation`:
+	//
+	// For Variables, Constants, Quantities, Tuples:
+	// If this expression was parsed, LineLocation is what part of the prompt was parsed to get this expression
+	// If this expression is the result of a calculation, LineLocaion is the sum of the LineLocations of
+	//	all expressions used to make it. In other words, it points to the part of the prompt that was evaluated
+	//	to get this new expression.
+	//
+	// For Operators:
+	// Linelocation points to the operator's position in the prompt.
+	// If this is a function, it points to the function name.
+	// If this is `+`, `!`, or etc, it points to that character.
+	// Operator arguments are NOT included in this linelocation.
+	//
+	//
+	// All the above rules are implemented when parsing and evaluating expressions.
+
 	Variable(LineLocation, String),
 	Quantity(LineLocation, Quantity),
 	Constant(LineLocation, Constant),

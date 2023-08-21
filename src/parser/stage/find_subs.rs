@@ -62,13 +62,13 @@ fn sub_string(s: &str) -> Option<&'static str> {
 }
 
 
-
-
+// Finds substitutions in an array of tokens.
+// Returns new token array and substitution list.
 pub fn find_subs(
 	mut g: VecDeque<Token>,
 ) -> (
-	VecDeque<(LineLocation, String)>,
-	VecDeque<Token>
+	VecDeque<(LineLocation, String)>, // List of substrings to replace (in order)
+	VecDeque<Token> // New token array, with updated strings and linelocations
 ) {
 
 	// Array of replacements
@@ -103,7 +103,7 @@ pub fn find_subs(
 		};
 
 		if target.is_none() {
-			// Even if nothing changed, we need to update token location
+			// Even if nothing changed, we need to update the new token's linelocation
 			let l = t.get_mut_linelocation();
 			*l = LineLocation{pos: l.pos - offset, len: l.len};
 		} else {
