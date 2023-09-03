@@ -26,7 +26,7 @@
  - Optional history file
  - Compile to WASM, publish a webapp
  - evaluate straight from command line
- - Package for debian
+ - Package for debian, nix
 
 
 ## Internals
@@ -53,7 +53,6 @@
  - Numbered expressions, history recall
  - Enable/disable unit sets (defaults?)
  - Consistent unit ordering
- - Command to list substitutions
 
 ## Units
  - long prefixes (megatonne, etc)
