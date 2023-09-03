@@ -8,7 +8,8 @@ use std::ops::{
 
 use std::cmp::Ordering;
 use super::ScalarBase;
-use super::PRINT_LEN;
+use super::SHOW_SIG;
+use super::MAX_LEN;
 
 macro_rules! foward {
 	( $x:ident ) => {
@@ -55,63 +56,57 @@ impl ToString for F64Base {
 		}
 
 
+		// Pick significant digits and round
+		let mut s = String::from(s);
+		if s.len() > SHOW_SIG {
+			let round;
+			if s.len() != SHOW_SIG + 1 {
+				round = s[SHOW_SIG..SHOW_SIG+1].parse().unwrap();
+			} else { round = 0; }
+
+			s = String::from(&s[0..SHOW_SIG]);
+
+			if round >= 5 {
+				let new = s[s.len()-1..s.len()].parse::<u8>().unwrap() + 1u8;
+				if new != 10 {
+					s = format!("{}{new}", &s[0..s.len()-1]);
+				}
+			}
+		}
+
+		s = format!("{s}{}", "0".repeat(SHOW_SIG - s.len()));
+		// at this point, s is guaranteed to have exactly SHOW_SIG digits.
+
 		let neg = if neg {"-"} else {""};
 
-		if (p.abs() as usize) < PRINT_LEN {
-
+		if (p.abs() as usize) < MAX_LEN {
 			if p >= 0 {
 				let q = p as usize;
 
-				// Add zero padding
-				let t;
-				if s.len() < (q + 1) {
-					t = format!("{s}{}", "0".repeat(q + 1 - s.len()));
-				} else { t = s.to_string() }
-
-				// Section before decimal point
-				let first = &t[0..q+1];
-
-				// The rest of the number, including a decimal point
-				let mut rest: String;
-				if first.len() == t.len() {
-					rest = String::from("");
+				let first = &s[0..q+1];
+				let mut rest = &s[q+1..];
+				rest = rest.trim_end_matches('0');
+				if rest == "" {
+					return format!("{neg}{first}");
 				} else {
-					rest = format!(".{}", &t[q+1..]);
+					return format!("{neg}{first}.{rest}");
 				}
-
-				// Limit length of decimal portion
-				if rest.len() > PRINT_LEN {
-					rest = String::from(&rest[0..PRINT_LEN]);
-				}
-
-				return format!("{neg}{first}{rest}");
 			} else {
 				let q = p.abs() as usize;
-
-				let t = format!("{neg}0.{}{s}", "0".repeat(q-1));
-
-				return if t.len() > PRINT_LEN { String::from(&t[0..PRINT_LEN]) } else {t};
+				let t = format!("0.{}{s}", "0".repeat(q-1));
+				return format!("{neg}{}", t.trim_end_matches('0'));
 			}
 
 		// Print full scientific notation
 		} else {
-			// First (non-zero) digit of our number
 			let first = &s[0..1];
-
-			// The rest of the number, including a decimal point
-			let mut rest: String;
-			if first.len() == s.len() {
-				rest = String::from("");
+			let mut rest = &s[1..];
+			rest = rest.trim_end_matches('0');
+			if rest == "" {
+				return format!("{neg}{first}e{p}");
 			} else {
-				rest = format!(".{}", &s[1..]);
+				return format!("{neg}{first}.{rest}e{p}");
 			}
-
-			// Limit length of decimal portion
-			if rest.len() > 5 {
-				rest = String::from(&rest[0..PRINT_LEN]);
-			}
-
-			return format!("{neg}{first}{rest}e{p}");
 		}
 	}
 }
@@ -249,11 +244,11 @@ impl Rem<F64Base> for F64Base {
 
 	fn rem(self, modulus: F64Base) -> Self::Output {
 		if {
-			(!self.fract().unwrap().is_zero()) ||
-			(!modulus.fract().unwrap().is_zero())
+			(!self.is_int()) ||
+			(!modulus.is_int())
 		} { panic!() }
 
-		F64Base{val : self.val.fract() % modulus.val.fract()}
+		F64Base{val : self.val.round() % modulus.val.round()}
 	}
 }
 

@@ -1,5 +1,6 @@
 //const FLOAT_PRECISION: u32 = 1024;
-const PRINT_LEN: usize = 5; // How many significant digits we will show in output
+const SHOW_SIG: usize = 5; // How many significant digits we will show in output
+const MAX_LEN: usize = 5; // If a scientific exponent is >= this value, do not use scientific notation.
 
 pub(in self) mod rationalbase;
 
