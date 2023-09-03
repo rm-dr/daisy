@@ -27,7 +27,7 @@ pub use self::scalar::ScalarBase;
 //
 // input (s): a decimal of any length, like 123123.123123
 // s may start with an optional `-` sign.
-pub(in self)  fn dec_to_sci(mut s: String) -> String {
+pub(in self) fn dec_to_sci(mut s: String) -> String {
 	// Remove negative sign from string
 	let neg = s.starts_with("-");
 	if neg { s = String::from(&s[1..]); }
