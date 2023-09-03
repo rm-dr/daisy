@@ -33,7 +33,6 @@
  - Non-recursive treeify
  - Faster factorial function. Maybe use gamma instead?
  - Arbitrary precision float (rug doesn't offer arbitrary exponents)
- - Remove rug dependency (too big, incompatible)
 
 ## Math Features
  - Mean, Median, Min
