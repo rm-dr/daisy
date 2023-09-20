@@ -22,7 +22,8 @@ impl ToString for FormattedText {
 fn format_map_none(c: char) -> Option<String> {
 	Some(match c {
 		'n'|'i'|'t'|'a'|
-		'e'|'c'|'s'|'r'
+		'e'|'c'|'s'|'r'|
+		'p'
 		=> { "".to_string() },
 		_ => { return None }
 	})
@@ -37,23 +38,26 @@ fn format_map_ansi(c: char) -> Option<String> {
 		'i' => { // Normal italic text
 			format!("{}{}", color::Fg(color::Reset), color::Bg(color::Reset))
 		},
-		't' => { // Title text
+		't' => { // Title text (should be cyan)
 			format!("{}{}", color::Fg(color::AnsiValue(6)), color::Bg(color::Reset))
 		},
-		'a' => { // Colored text
+		'a' => { // Colored text (should be pink)
 			format!("{}{}", color::Fg(color::AnsiValue(5)), color::Bg(color::Reset))
 		},
-		'e' => { // Error titles
+		'e' => { // Error titles (should be red)
 			format!("{}{}", color::Fg(color::AnsiValue(1)), color::Bg(color::Reset))
 		},
-		'c' => { // Console text
+		'c' => { // Console text (inverted black on white)
 			format!("{}{}", color::Fg(color::AnsiValue(0)), color::Bg(color::AnsiValue(7)))
 		},
-		's' => { // Repeat prompt (how => is styled)
-			format!("{}{}", color::Fg(color::AnsiValue(2)), color::Bg(color::Reset))
-		},
-		'r' => { // Result prompt (how = is styled)
+		'p' => { // Input prompt (how ==> is styled) (should be blue)
 			format!("{}{}", color::Fg(color::AnsiValue(4)), color::Bg(color::Reset))
+		},
+		's' => { // Repeat prompt (how => is styled) (should be pink)
+			format!("{}{}", color::Fg(color::AnsiValue(5)), color::Bg(color::Reset))
+		},
+		'r' => { // Result prompt (how = is styled) (should be green)
+			format!("{}{}", color::Fg(color::AnsiValue(2)), color::Bg(color::Reset))
 		},
 
 		_ => { return None }
@@ -61,10 +65,12 @@ fn format_map_ansi(c: char) -> Option<String> {
 }
 
 
+// style::reset also resets color.
+// Make sure color comes AFTER style reset.
 fn format_map_full(c: char) -> Option<String> {
 	Some(match c {
 		'n' => { // Normal text
-			format!("{}{}", color::Fg(color::Reset), style::Reset)
+			format!("{}{}", style::Reset, color::Fg(color::Reset))
 		},
 		'i' => { // Normal italic text
 			format!("{}{}", color::Fg(color::Reset), style::Italic)
@@ -73,13 +79,16 @@ fn format_map_full(c: char) -> Option<String> {
 			format!("{}{}", color::Fg(color::Magenta), style::Bold)
 		},
 		'a' => { // Colored text
-			format!("{}{}", color::Fg(color::Magenta), style::Reset)
+			format!("{}{}", style::Reset, color::Fg(color::Magenta))
 		},
 		'e' => { // Error titles
 			format!("{}{}", color::Fg(color::Red), style::Bold)
 		},
 		'c' => { // Console text
 			format!("{}{}", color::Fg(color::LightBlack), style::Italic)
+		},
+		'p' => { // Input prompt (how ==> is styled)
+			format!("{}{}", color::Fg(color::Blue), style::Bold)
 		},
 		's' => { // Repeat prompt (how => is styled)
 			format!("{}{}", color::Fg(color::Magenta), style::Bold)
@@ -88,17 +97,24 @@ fn format_map_full(c: char) -> Option<String> {
 			format!("{}{}", color::Fg(color::Green), style::Bold)
 		},
 
+
 		_ => { return None }
 	})
+}
+
+pub fn format_map(c: char, context: &Context) -> Option<String> {
+	match context.config.term_color_type {
+		0 => format_map_none(c),
+		1 => format_map_ansi(c),
+		2 => format_map_full(c),
+		_ => unreachable!("Invalid term_color_type")
+	}
 }
 
 
 impl FormattedText {
 	pub fn newline(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
-		write!(
-			stdout,
-			"\r\n",
-		)?;
+		write!(stdout, "\n")?;
 		return Ok(());
 	}
 }
@@ -145,12 +161,7 @@ impl FormattedText {
 					match (a, b) {
 						(c, ']') => { // Normal text
 
-							let q = match context.config.term_color_type {
-								0 => format_map_none(c),
-								1 => format_map_ansi(c),
-								2 => format_map_full(c),
-								_ => unreachable!("Invalid term_color_type")
-							};
+							let q = format_map(c, context);
 
 							if q.is_some() {
 								s.push_str(&q.unwrap());
@@ -173,7 +184,7 @@ impl FormattedText {
 			}
 		}
 
-		write!(stdout, "{}", s)?;
+		write!(stdout, "\r{}", s)?;
 		return Ok(());
 	}
 }

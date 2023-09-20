@@ -131,7 +131,7 @@ fn operators() {
 
 	good_expr("125", "5^(+3)");
 	good_expr("125", "+5^3");
-	good_expr("0.2148", "3 ^ (-1.4)");
+	good_expr("0.21479", "3 ^ (-1.4)");
 
 	// Should parse as ((2^3)^4)^5
 	good_expr("1.1529e18", "2^3^4^5");
@@ -162,6 +162,7 @@ fn operators() {
 
 	good_expr("2", "6/3");
 	good_expr("2", "5%3");
+	good_expr("4", "2^5 mod 7");
 	good_expr("8", "5+3");
 	good_expr("64", "4^3");
 	good_expr("64", "4 ^ 3");
@@ -184,6 +185,7 @@ fn operators() {
 	bad_expr("1e5!");
 	bad_expr("0^(-1)");
 	bad_expr("pi!");
+	bad_expr("2.5 mod 8");
 }
 
 #[test]

@@ -75,12 +75,26 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 			if let Expression::Quantity(la, a) = a {
 				if let Expression::Quantity(lb, b) = b {
 					if !a.unit.compatible_with(&b.unit) {
+						let a = a.convert_to_base().unit;
+						let b = b.convert_to_base().unit;
+
+						let a_s: String;
+						let b_s: String;
+						if a.unitless() {
+							a_s = String::from("scalar");
+						} else {
+							a_s = a.display(context);
+						}
+
+						if b.unitless() {
+							b_s = String::from("scalar");
+						} else {
+							b_s = b.display(context);
+						}
+
 						return Err((
 							*la + *lb + *op_loc,
-							DaisyError::IncompatibleUnits(
-								a.convert_to_base().unit.display(context),
-								b.convert_to_base().unit.display(context)
-							)
+							DaisyError::IncompatibleUnits(a_s, b_s)
 						));
 					}
 					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, a.clone() + b.clone())));
@@ -98,12 +112,24 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 			if let Expression::Quantity(la, a) = a {
 				if let Expression::Quantity(lb, b) = b {
 					if !a.unit.compatible_with(&b.unit) {
+
+						let a_s: String;
+						let b_s: String;
+						if a.unitless() {
+							a_s = String::from("scalar");
+						} else {
+							a_s = a.display(context);
+						}
+
+						if b.unitless() {
+							b_s = String::from("scalar");
+						} else {
+							b_s = b.display(context);
+						}
+
 						return Err((
 							*la + *lb + *op_loc,
-							DaisyError::IncompatibleUnits(
-								a.convert_to_base().unit.display(context),
-								b.convert_to_base().unit.display(context)
-							)
+							DaisyError::IncompatibleUnits(a_s, b_s)
 						));
 					}
 					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, a.clone() - b.clone())));
@@ -138,7 +164,8 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 
 			if let Expression::Quantity(la, a) = a {
 				if let Expression::Quantity(lb, b) = b {
-					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, a.clone() * b.clone())));
+					let o = a.clone() * b.clone();
+					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, o)));
 				}
 			}
 
@@ -162,6 +189,11 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 					if va.fract() != Quantity::new_rational(0f64).unwrap() { return Err((*la + *lb + *op_loc, DaisyError::BadMath)); }
 					if vb.fract() != Quantity::new_rational(0f64).unwrap() { return Err((*la + *lb + *op_loc, DaisyError::BadMath)); }
 
+
+					let o = va.clone() % vb.clone();
+					if o.is_nan() {return Err((*la + *lb + *op_loc, DaisyError::BadMath));}
+
+
 					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, va.clone() % vb.clone())));
 				} else { return Ok(None); }
 			} else { return Ok(None); }
@@ -176,12 +208,26 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 				if let Expression::Quantity(lb, vb) = b {
 					let n = va.clone().convert_to(vb.clone());
 					if n.is_none() {
+						let va = va.convert_to_base().unit;
+						let vb = vb.convert_to_base().unit;
+
+						let a_s: String;
+						let b_s: String;
+						if va.unitless() {
+							a_s = String::from("scalar");
+						} else {
+							a_s = a.display(context);
+						}
+
+						if vb.unitless() {
+							b_s = String::from("scalar");
+						} else {
+							b_s = b.display(context);
+						}
+
 						return Err((
 							*la + *lb + *op_loc,
-							DaisyError::IncompatibleUnits(
-								va.convert_to_base().unit.display(context),
-								vb.convert_to_base().unit.display(context)
-							)
+							DaisyError::IncompatibleUnits(a_s, b_s)
 						));
 					}
 					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, n.unwrap())));

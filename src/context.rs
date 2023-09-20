@@ -19,7 +19,7 @@ pub struct Config {
 	// with prettier unicode alternatives?
 	//
 	// Automatically disabled if enable_unicode is off.
-	//pub enable_substituion: bool,
+	pub enable_substituion: bool,
 
 	// Should we print simple powers
 	// as unicode superscript chars?
@@ -38,7 +38,7 @@ impl Config {
 	pub fn new() -> Config {
 		Config{
 			term_color_type: 2,
-			//enable_substituion: true,
+			enable_substituion: true,
 			//enable_unicode: true,
 			enable_super_powers: true,
 			enable_one_over_power: true
@@ -61,7 +61,7 @@ impl Config {
 
 
 #[derive(Debug)]
-#[derive(Clone)]
+//#[derive(Clone)]
 pub struct Context {
 	pub config: Config,
 
@@ -76,12 +76,12 @@ pub struct Context {
 // General functions
 impl Context {
 	pub fn new() -> Context {
-		Context{
+		Context {
 			config: Config::new(),
 			history: Vec::new(),
 			variables: HashMap::new(),
 			functions: HashMap::new(),
-			shadow: HashMap::new(),
+			shadow: HashMap::new()
 		}
 	}
 
@@ -126,6 +126,7 @@ impl Context {
 		} else { panic!() }
 	}
 
+	// Can we define a new variable with this name?
 	pub fn valid_varible(&self, s: &str) -> bool {
 		if {
 			Function::from_string(s).is_some() ||
@@ -145,10 +146,17 @@ impl Context {
 		}
 	}
 
+	// Can we get a value fro mthis variable name?
 	pub fn is_varible(&self, s: &str) -> bool {
 		return {
-			self.valid_varible(s) &&
-			(self.variables.contains_key(s) || self.shadow.contains_key(s))
+			(
+				s == "ans" &&
+				self.history.len() != 0
+			) ||
+			(
+				self.valid_varible(s) &&
+				(self.variables.contains_key(s) || self.shadow.contains_key(s))
+			)
 		};
 	}
 

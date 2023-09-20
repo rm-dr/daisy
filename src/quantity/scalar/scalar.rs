@@ -7,7 +7,7 @@ use std::ops::{
 };
 use std::cmp::Ordering;
 
-use super::floatbase::FloatBase as FloatBase;
+use super::FloatBase as FloatBase;
 use super::rationalbase::RationalBase;
 
 
@@ -21,7 +21,6 @@ pub trait ScalarBase:
 	PartialEq + PartialOrd
 {
 	// Creation
-	fn from_f64(f: f64) -> Option<Self>;
 	fn from_string(s: &str) -> Option<Self>;
 
 	// Utility
@@ -87,8 +86,8 @@ fn to_float(r: Scalar) -> Scalar {
 	match &r {
 		Scalar::Float {..} => r,
 		Scalar::Rational {v} => wrap_float!(
-			FloatBase::from(v.val.numer()).unwrap() /
-			FloatBase::from(v.val.denom()).unwrap()
+			FloatBase::from_string(&v.val.numer().to_string()).unwrap() /
+			FloatBase::from_string(&v.val.denom().to_string()).unwrap()
 		)
 	}
 }
@@ -105,13 +104,13 @@ impl ToString for Scalar {
 // Creation methods
 impl Scalar {
 	pub fn new_float(f: f64) -> Option<Self> {
-		let v = FloatBase::from_f64(f);
+		let v = FloatBase::from_string(&f.to_string());
 		if v.is_none() { return None; }
 		return Some(wrap_float!(v.unwrap()));
 	}
 
 	pub fn new_rational(f: f64) -> Option<Self> {
-		let r = RationalBase::from_f64(f);
+		let r = RationalBase::from_string(&f.to_string());
 		if r.is_none() { return None; }
 		return Some(wrap_rational!(r.unwrap()));
 	}
@@ -185,8 +184,8 @@ impl Scalar {
 
 	pub fn is_nan(&self) -> bool {
 		match self {
-			Scalar::Float {v} => {v.val.is_nan()},
-			Scalar::Rational {..} => {panic!()}
+			Scalar::Float{ v } => {v.val.is_nan()},
+			Scalar::Rational {..} => {false}
 		}
 	}
 

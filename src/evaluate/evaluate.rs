@@ -63,7 +63,7 @@ pub fn evaluate(
 
 					context.get_variable(&s)
 				},
-				Expression::Operator(_, Operator::Function(_), _) => { Some(eval_function(g)?) },
+				Expression::Operator(_, Operator::Function(_), _) => { eval_function(g)? },
 				Expression::Operator(_, _, _) => { eval_operator(context, g)? },
 			};
 

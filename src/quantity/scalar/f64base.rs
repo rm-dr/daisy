@@ -8,6 +8,7 @@ use std::ops::{
 
 use std::cmp::Ordering;
 use super::ScalarBase;
+use super::dec_to_sci;
 
 
 macro_rules! foward {
@@ -25,16 +26,39 @@ pub struct F64Base where {
 }
 
 impl ToString for F64Base {
-	fn to_string(&self) -> String { self.val.to_string() }
+	fn to_string(&self) -> String {
+		// Remove negative sign from string
+		let mut s = self.val.to_string();
+		
+		let neg = s.starts_with("-");
+		if neg { s = String::from(&s[1..]); }
+		
+		// Power of ten
+		let mut p: i64 = {
+			if let Some(x) = s.find(".") {
+				x as i64
+			} else {
+				s.len() as i64
+			}
+		};
+		p -= 1;
+
+		// We no longer need a decimal point in our string.
+		// also, trim off leading zeros and adjust power.
+		let mut s: &str = &s.replace(".", "");
+		s = &s[0..];
+		s = s.trim_end_matches('0');
+		while s.starts_with('0') {
+			s = &s[1..];
+			p -= 1;
+		}
+
+		return dec_to_sci(neg, s.to_string(), p);
+	}
 }
 
 
 impl ScalarBase for F64Base {
-
-	fn from_f64(f: f64) -> Option<F64Base> {
-		return Some(F64Base{ val: f });
-	}
-
 	fn from_string(s: &str) -> Option<F64Base> {
 		let v = s.parse::<f64>();
 		let v = match v {
@@ -51,6 +75,7 @@ impl ScalarBase for F64Base {
 	fn is_one(&self) -> bool {self.val == 1f64}
 	fn is_negative(&self) -> bool { self.val.is_sign_negative() }
 	fn is_positive(&self) -> bool { self.val.is_sign_positive() }
+	fn is_int(&self) -> bool { self.val.floor() == self.val }
 
 	foward!(abs);
 	foward!(floor);
@@ -60,9 +85,11 @@ impl ScalarBase for F64Base {
 	foward!(sin);
 	foward!(cos);
 	foward!(tan);
-	foward!(csc);
-	foward!(sec);
-	foward!(cot);
+
+	fn csc(&self) -> Option<F64Base> { Some(F64Base{ val: 1f64/self.val.sin() }) }
+	fn sec(&self) -> Option<F64Base> { Some(F64Base{ val: 1f64/self.val.cos() }) }
+	fn cot(&self) -> Option<F64Base> { Some(F64Base{ val: 1f64/self.val.tan() }) }
+
 	foward!(asin);
 	foward!(acos);
 	foward!(atan);
@@ -70,9 +97,11 @@ impl ScalarBase for F64Base {
 	foward!(sinh);
 	foward!(cosh);
 	foward!(tanh);
-	foward!(csch);
-	foward!(sech);
-	foward!(coth);
+
+	fn csch(&self) -> Option<F64Base> { Some(F64Base{ val: 1f64/self.val.sinh() }) }
+	fn sech(&self) -> Option<F64Base> { Some(F64Base{ val: 1f64/self.val.cosh() }) }
+	fn coth(&self) -> Option<F64Base> { Some(F64Base{ val: 1f64/self.val.tanh() }) }
+
 	foward!(asinh);
 	foward!(acosh);
 	foward!(atanh);
@@ -161,11 +190,11 @@ impl Rem<F64Base> for F64Base {
 
 	fn rem(self, modulus: F64Base) -> Self::Output {
 		if {
-			(!self.fract().unwrap().is_zero()) ||
-			(!modulus.fract().unwrap().is_zero())
+			(!self.is_int()) ||
+			(!modulus.is_int())
 		} { panic!() }
 
-		F64Base{val : self.val.fract() % modulus.val.fract()}
+		F64Base{val : self.val.round() % modulus.val.round()}
 	}
 }
 

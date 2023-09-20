@@ -1,6 +1,6 @@
 [package]
 name = "daisycalc"
-version = "1.0.1"
+version = "1.1.0"
 edition = "2021"
 build = "buildscript/main.rs"
 license = "GPL-3.0-only"
@@ -28,7 +28,8 @@ cfg-if = "1.0.0"
 
 [target.'cfg(target_family = "unix")'.dependencies]
 termion = "2.0.1"
-rug = "1.19.2"
+num = "0.4.1"
+#astro-float = "0.7.1"
 
 [build-dependencies]
 toml = "0.7.4"

@@ -1,5 +1,7 @@
-use rug::Rational;
-use rug::Integer;
+use num::rational::BigRational;
+use num::BigInt;
+use num::Num;
+use num::Signed;
 
 use std::ops::{
 	Add, Sub, Mul, Div,
@@ -22,7 +24,7 @@ macro_rules! cant_do {
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct RationalBase where {
-	pub val: Rational
+	pub val: BigRational
 }
 
 impl ToString for RationalBase{
@@ -33,18 +35,12 @@ impl ToString for RationalBase{
 
 impl RationalBase {
 	pub fn from_frac(t: i64, b: i64) -> Option<RationalBase> {
-		let v = Rational::from((t, b));
+		let v = BigRational::new_raw(BigInt::from(t), BigInt::from(b));
 		return Some(RationalBase{ val: v });
 	}
 }
 
 impl ScalarBase for RationalBase {
-	fn from_f64(f: f64) -> Option<RationalBase> {
-		let v = Rational::from_f64(f);
-		if v.is_none() { return None }
-		return Some(RationalBase{ val: v.unwrap() });
-	}
-
 	fn from_string(s: &str) -> Option<RationalBase> {
 		// Scientific notation
 		let mut sci = s.split("e");
@@ -89,7 +85,7 @@ impl ScalarBase for RationalBase {
 
 
 		// From fraction string
-		let r = Rational::from_str_radix(&s, 10);
+		let r = BigRational::from_str_radix(&s, 10);
 		let r = match r {
 			Ok(x) => x,
 			Err(_) => return None
@@ -100,18 +96,13 @@ impl ScalarBase for RationalBase {
 	}
 
 
-	fn fract(&self) -> Option<RationalBase> {
-		Some(RationalBase{val: self.val.clone().fract_floor(Integer::new()).0})
-	}
+	fn fract(&self) -> Option<RationalBase> { Some(RationalBase{val: self.val.fract()}) }
+	fn is_int(&self) -> bool { self.val.is_integer() }
 
-	fn is_int(&self) -> bool {
-		self.fract() == RationalBase::from_f64(0f64)
-	}
-
-	fn is_zero(&self) -> bool {self.val == Rational::from((0,1))}
-	fn is_one(&self) -> bool {self.val == Rational::from((1,1))}
-	fn is_negative(&self) -> bool { self.val.clone().signum() == -1 }
-	fn is_positive(&self) -> bool { self.val.clone().signum() == 1 }
+	fn is_zero(&self) -> bool {self.val == BigRational::from_integer(BigInt::from(0))}
+	fn is_one(&self) -> bool {self.val == BigRational::from_integer(BigInt::from(1))}
+	fn is_negative(&self) -> bool { self.val.is_negative() }
+	fn is_positive(&self) -> bool { self.val.is_positive() }
 
 	fn abs(&self) -> Option<RationalBase> {Some(RationalBase{val: self.val.clone().abs()})}
 	fn floor(&self) -> Option<RationalBase> {Some(RationalBase{val: self.val.clone().floor()})}
@@ -153,9 +144,7 @@ impl Add for RationalBase where {
 	type Output = Self;
 
 	fn add(self, other: Self) -> Self::Output {
-		Self {
-			val: self.val + other.val
-		}
+		Self { val: self.val + other.val }
 	}
 }
 
@@ -169,9 +158,7 @@ impl Sub for RationalBase {
 	type Output = Self;
 
 	fn sub(self, other: Self) -> Self::Output {
-		Self {
-			val: self.val - other.val
-		}
+		Self { val: self.val - other.val }
 	}
 }
 
@@ -185,9 +172,7 @@ impl Mul for RationalBase {
 	type Output = Self;
 
 	fn mul(self, other: Self) -> Self::Output {
-		Self {
-			val: self.val * other.val
-		}
+		Self { val: self.val * other.val }
 	}
 }
 
@@ -201,9 +186,7 @@ impl Div for RationalBase {
 	type Output = Self;
 
 	fn div(self, other: Self) -> Self::Output {
-		Self {
-			val: self.val / other.val
-		}
+		Self { val: self.val / other.val }
 	}
 }
 
@@ -217,9 +200,7 @@ impl Neg for RationalBase where {
 	type Output = Self;
 
 	fn neg(self) -> Self::Output {
-		Self {
-			val: -self.val
-		}
+		Self { val: -self.val }
 	}
 }
 
@@ -228,15 +209,15 @@ impl Rem<RationalBase> for RationalBase {
 
 	fn rem(self, modulus: RationalBase) -> Self::Output {
 		if {
-			*self.val.denom() != 1 ||
-			*modulus.val.denom() != 1
+			*self.val.denom() != BigInt::from(1) ||
+			*modulus.val.denom() != BigInt::from(1)
 		} { panic!() }
 
 		RationalBase{
-			val : Rational::from((
+			val : BigRational::new_raw(
 				self.val.numer() % modulus.val.numer(),
-				1
-			))
+				BigInt::from(1)
+			)
 		}
 	}
 }

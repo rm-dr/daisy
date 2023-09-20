@@ -1,7 +1,7 @@
-use rug::Float;
-use rug::Assign;
-use rug::ops::AssignRound;
-use rug::ops::Pow;
+use bigdecimal::BigDecimal;
+use bigdecimal::Zero;
+use bigdecimal::RoundingMode;
+use std::str::FromStr;
 
 use std::ops::{
 	Add, Sub, Mul, Div,
@@ -14,158 +14,151 @@ use std::ops::{
 use std::cmp::Ordering;
 
 use super::ScalarBase;
-use super::PRINT_LEN;
-use super::FLOAT_PRECISION;
+use super::dec_to_sci;
+
 
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct FloatBase where {
-	pub val: Float
+	pub val: BigDecimal
 }
 
 impl FloatBase {
-	pub fn from<T>(a: T) -> Option<FloatBase> where
-		Float: Assign<T> + AssignRound<T>
-	{
-		let v = Float::with_val(FLOAT_PRECISION, a);
-		return Some(FloatBase{ val: v });
+	pub fn new(s: &str) -> FloatBase {
+		return FloatBase {
+			val: s.parse().unwrap()
+		};
 	}
 }
+
 
 impl ToString for FloatBase {
 	fn to_string(&self) -> String {
-		let (sign, mut string, exp) = self.val.to_sign_string_exp(10, Some(PRINT_LEN));
 
-		// zero, nan, or inf.
-		let sign = if sign {"-"} else {""};
-		if exp.is_none() { return format!("{sign}{string}"); }
-		let exp = exp.unwrap();
-
-		// Remove trailing zeros.
-		// At this point, string is guaranteed to be nonzero.
-		while string.chars().last().unwrap() == '0' {
-			string.remove(string.len() - 1);
+		if self.val.is_nan() {
+			return "NaN".to_string();
+		} else if self.val.is_inf_neg() {
+			return "-Inf".to_string();
+		} else if self.val.is_inf_pos() {
+			return "+Inf".to_string();
 		}
 
-		let exp_u: usize;
 
-		if exp < 0 {
-			exp_u = (-exp).try_into().unwrap()
-		} else {
-			exp_u = exp.try_into().unwrap()
-		}
+		// Already in scientific notation,we just need to trim significant digits.
+		let mut _a = self.val.round(32, astro_float::RoundingMode::Up).to_string();
+		let mut _b = _a.split('e');
 
-		if exp_u >= PRINT_LEN {
-			// Exponential notation
-			let pre = &string[0..1];
-			let post = &string[1..];
+		let mut s = String::from(_b.next().unwrap()); // Decimal
+		let p: i64 = _b.next().unwrap().parse().unwrap(); // Exponent
 
-			format!(
-				"{pre}{}{post}e{}",
-				if post.len() != 0 {"."} else {""},
-				//if exp > 0 {"+"} else {""},
-				exp - 1
-			)
-		} else {
-			if exp <= 0 { // Decimal, needs `0.` and leading zeros
-				format!(
-					"{sign}0.{}{string}",
-					"0".repeat(exp_u)
-				)
-			} else if exp_u < string.len() { // Decimal, needs only `.`
-				format!(
-					"{sign}{}.{}",
-					&string[0..exp_u],
-					&string[exp_u..]
-				)
-			} else { // Integer, needs trailing zeros
-				format!(
-					"{sign}{string}{}",
-					"0".repeat(exp_u - string.len())
-				)
-			}
-		}
+		// Remove negative sign from string
+		let neg = s.starts_with("-");
+		if neg { s = String::from(&s[1..]); }
 
+		// We no longer need a decimal point in our string.
+		// also, trim off leading zeros and adjust power.
+		let mut s: &str = &s.replace(".", "");
+		s = &s[0..];
+		s = s.trim_end_matches('0');
+		s = s.trim_start_matches('0');
+
+		return dec_to_sci(neg, s.to_string(), p);
 	}
 }
 
 
-macro_rules! foward {
-	( $x:ident ) => {
-		fn $x(&self) -> Option<FloatBase> {
-			Some(FloatBase{ val: self.val.clone().$x()})
-		}
-	}
-}
 
 impl ScalarBase for FloatBase {
 
-	fn from_f64(f: f64) -> Option<FloatBase> {
-		let v = Float::with_val(FLOAT_PRECISION, f);
-		return Some(FloatBase{ val: v });
-	}
-
 	fn from_string(s: &str) -> Option<FloatBase> {
-		let v = Float::parse(s);
+		let v = BigDecimal::from_str(s);
 		let v = match v {
 			Ok(x) => x,
 			Err(_) => return None
 		};
 
-		return Some(
-			FloatBase{ val:
-				Float::with_val(FLOAT_PRECISION, v)
-			}
-		);
+		return Some(FloatBase{ val: v });
 	}
 
-	foward!(fract);
+	//foward!(fract);
 
 	fn is_zero(&self) -> bool {self.val.is_zero()}
-	fn is_one(&self) -> bool {self.val == Float::with_val(FLOAT_PRECISION, 1)}
-	fn is_negative(&self) -> bool { self.val.is_sign_negative() }
-	fn is_positive(&self) -> bool { self.val.is_sign_positive() }
+	fn is_one(&self) -> bool {self.val == BigDecimal::from_str("1").unwrap()}
+	fn is_negative(&self) -> bool { self.val.sign() == num::bigint::Sign::Minus }
+	fn is_positive(&self) -> bool { self.val.sign() == num::bigint::Sign::Plus }
 
-	fn is_int(&self) -> bool {
-		self.fract() == FloatBase::from_f64(0f64)
+	fn is_int(&self) -> bool { self.val.is_integer() }
+
+	fn abs(&self) -> Option<FloatBase> { Some(FloatBase{ val: self.val.abs() }) }
+	fn round(&self) -> Option<FloatBase> { Some(FloatBase{ val: self.val.round(0) }) }
+
+	fn floor(&self) -> Option<FloatBase> {
+		let (_, scale) = self.val.as_bigint_and_exponent();
+		Some(FloatBase{ val: self.val.with_scale_round(scale, RoundingMode::Down) })
 	}
 
-	foward!(abs);
-	foward!(floor);
-	foward!(ceil);
-	foward!(round);
-
-	foward!(sin);
-	foward!(cos);
-	foward!(tan);
-	foward!(csc);
-	foward!(sec);
-	foward!(cot);
-	foward!(asin);
-	foward!(acos);
-	foward!(atan);
-
-	foward!(sinh);
-	foward!(cosh);
-	foward!(tanh);
-	foward!(csch);
-	foward!(sech);
-	foward!(coth);
-	foward!(asinh);
-	foward!(acosh);
-	foward!(atanh);
-
-	foward!(exp);
-	foward!(ln);
-	foward!(log10);
-	foward!(log2);
-
-	fn log(&self, base: FloatBase) -> Option<FloatBase> {
-		Some(FloatBase{ val: self.val.clone().log10() } / base.log10().unwrap())
+	fn ceil(&self) -> Option<FloatBase> {
+		let (_, scale) = self.val.as_bigint_and_exponent();
+		Some(FloatBase{ val: self.val.with_scale_round(scale, RoundingMode::Up) })
 	}
 
-	fn pow(&self, base: FloatBase) -> Option<FloatBase> {
-		Some(FloatBase{ val: self.val.clone().pow(base.val)})
+	fn fract(&self) -> Option<FloatBase> { Some(self.clone() - self.floor().unwrap()) }
+
+
+	fn sin(&self) -> Option<FloatBase> {
+		let c0: BigDecimal = "1.276278962".parse().unwrap();
+		let c1: BigDecimal = "-.285261569".parse().unwrap();
+		let c2: BigDecimal = "0.009118016".parse().unwrap();
+		let c3: BigDecimal = "-.000136587".parse().unwrap();
+		let c4: BigDecimal = "0.000001185".parse().unwrap();
+		let c5: BigDecimal = "-.000000007".parse().unwrap();
+		
+
+		// z should be between -0.25 to 0.25 (percent of a full circle)
+		let z: BigDecimal = self.val.clone() / 360f64;
+		let w = BigDecimal::from(4) * z;
+		let x: BigDecimal = 2 * w.clone() * w.clone() - 1;
+
+		let p = (
+			c0 * 1 +
+			c1 * x.clone() +
+			c2 * (2 * x.clone()*x.clone() - 1) +
+			c3 * (4 * x.clone()*x.clone()*x.clone() - 3 * x.clone()) +
+			c4 * (8 * x.clone()*x.clone()*x.clone()*x.clone() - 8 * x.clone()*x.clone() + 1) +
+			c5 * (16 * x.clone()*x.clone()*x.clone()*x.clone()*x.clone() - 20 * x.clone()*x.clone()*x.clone() + 5 * x.clone())
+		) * w;
+
+		return Some(FloatBase{ val: p })
+	}
+	fn cos(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn tan(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn csc(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn sec(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn cot(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn asin(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn acos(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn atan(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn sinh(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn cosh(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn tanh(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn csch(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn sech(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn coth(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn asinh(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn acosh(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn atanh(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn exp(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn ln(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn log10(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+	fn log2(&self) -> Option<FloatBase> { Some(FloatBase{ val: "1".parse().unwrap() }) }
+
+
+	fn log(&self, _base: FloatBase) -> Option<FloatBase> {
+		Some(FloatBase{ val: "1".parse().unwrap() })
+	}
+
+	fn pow(&self, _base: FloatBase) -> Option<FloatBase> {
+		Some(FloatBase{ val: "1".parse().unwrap() })
 	}
 
 }
@@ -223,7 +216,7 @@ impl Div for FloatBase {
 
 impl DivAssign for FloatBase where {
 	fn div_assign(&mut self, other: Self) {
-		self.val /= other.val;
+		self.val = self.val.clone() / other.val;
 	}
 }
 
@@ -240,11 +233,11 @@ impl Rem<FloatBase> for FloatBase {
 
 	fn rem(self, modulus: FloatBase) -> Self::Output {
 		if {
-			(!self.fract().unwrap().is_zero()) ||
-			(!modulus.fract().unwrap().is_zero())
+			(!self.is_int()) ||
+			(!modulus.is_int())
 		} { panic!() }
 
-		FloatBase{val : self.val.fract() % modulus.val.fract()}
+		FloatBase{val : self.val.round(0) % modulus.val.round(0)}
 	}
 }
 
