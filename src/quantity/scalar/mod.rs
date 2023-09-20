@@ -25,36 +25,17 @@ pub use self::scalar::ScalarBase;
 // Convert a string to scientific notation,
 // with parameters SHOW_SIG and MAX_LEN.
 //
-// input (s): a decimal of any length, like 123123.123123
-// s may start with an optional `-` sign.
-pub(in self) fn dec_to_sci(mut s: String) -> String {
-	// Remove negative sign from string
-	let neg = s.starts_with("-");
-	if neg { s = String::from(&s[1..]); }
-	
-	// Power of ten
-	let mut p: i32 = {
-		if let Some(x) = s.find(".") {
-			x as i32
-		} else {
-			s.len() as i32
-		}
-	};
-	p -= 1;
+// input:
+//  neg: true if negative
+//  s: decimal portion. Must contain only digits and a single decimal point.
+//     zeros must be stripped from both ends.
+//  p: power of ten to multiply by.
+//
+//  So, (-1)^(neg) + (s * 10^p) should give us our number.
 
-	// We no longer need a decimal point in our string.
-	// also, trim off leading zeros and adjust power.
-	let mut s: &str = &s.replace(".", "");
-	s = &s[0..];
-	s = s.trim_end_matches('0');
-	while s.starts_with('0') {
-		s = &s[1..];
-		p -= 1;
-	}
-
-
+#[allow(dead_code)]
+pub(in self) fn dec_to_sci(neg: bool, mut s: String, p: i64) -> String {
 	// Pick significant digits and round
-	let mut s = String::from(s);
 	if s.len() > SHOW_SIG {
 		let round;
 		if s.len() != SHOW_SIG + 1 {
@@ -77,6 +58,8 @@ pub(in self) fn dec_to_sci(mut s: String) -> String {
 	let neg = if neg {"-"} else {""};
 
 	if (p.abs() as usize) < MAX_LEN {
+		// Print whole decimal
+
 		if p >= 0 {
 			let q = p as usize;
 
@@ -94,8 +77,9 @@ pub(in self) fn dec_to_sci(mut s: String) -> String {
 			return format!("{neg}{}", t.trim_end_matches('0'));
 		}
 
-	// Print full scientific notation
 	} else {
+		// Print full scientific notation
+
 		let first = &s[0..1];
 		let mut rest = &s[1..];
 		rest = rest.trim_end_matches('0');

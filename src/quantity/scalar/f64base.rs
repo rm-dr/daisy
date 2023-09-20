@@ -27,7 +27,33 @@ pub struct F64Base where {
 
 impl ToString for F64Base {
 	fn to_string(&self) -> String {
-		return dec_to_sci(self.val.to_string());
+		// Remove negative sign from string
+		let mut s = self.val.to_string();
+		
+		let neg = s.starts_with("-");
+		if neg { s = String::from(&s[1..]); }
+		
+		// Power of ten
+		let mut p: i64 = {
+			if let Some(x) = s.find(".") {
+				x as i64
+			} else {
+				s.len() as i64
+			}
+		};
+		p -= 1;
+
+		// We no longer need a decimal point in our string.
+		// also, trim off leading zeros and adjust power.
+		let mut s: &str = &s.replace(".", "");
+		s = &s[0..];
+		s = s.trim_end_matches('0');
+		while s.starts_with('0') {
+			s = &s[1..];
+			p -= 1;
+		}
+
+		return dec_to_sci(neg, s.to_string(), p);
 	}
 }
 

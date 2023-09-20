@@ -34,7 +34,35 @@ impl FloatBase {
 
 impl ToString for FloatBase {
 	fn to_string(&self) -> String {
-		return dec_to_sci(self.val.to_string());
+
+		if self.val.is_nan() {
+			return "NaN".to_string();
+		} else if self.val.is_inf_neg() {
+			return "-Inf".to_string();
+		} else if self.val.is_inf_pos() {
+			return "+Inf".to_string();
+		}
+
+
+		// Already in scientific notation,we just need to trim significant digits.
+		let mut _a = self.val.round(32, astro_float::RoundingMode::Up).to_string();
+		let mut _b = _a.split('e');
+
+		let mut s = String::from(_b.next().unwrap()); // Decimal
+		let p: i64 = _b.next().unwrap().parse().unwrap(); // Exponent
+
+		// Remove negative sign from string
+		let neg = s.starts_with("-");
+		if neg { s = String::from(&s[1..]); }
+
+		// We no longer need a decimal point in our string.
+		// also, trim off leading zeros and adjust power.
+		let mut s: &str = &s.replace(".", "");
+		s = &s[0..];
+		s = s.trim_end_matches('0');
+		s = s.trim_start_matches('0');
+
+		return dec_to_sci(neg, s.to_string(), p);
 	}
 }
 
