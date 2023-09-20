@@ -17,6 +17,24 @@ pub use crate::errors::DaisyError;
 pub use crate::evaluate::evaluate;
 
 
+cfg_if::cfg_if! {
+	if #[cfg(target_arch = "wasm32")] {
+		use wasm_bindgen::prelude::*;
+
+		#[wasm_bindgen]
+		pub fn dostr(x: String) -> String{
+			let mut context = Context::new();
+			let x = x.trim().to_string();
+			let r = do_string(&mut context, &x);
+			 
+			match r {
+				Ok(t) | Err(t) => {
+					return t.write();
+				}
+			}
+		}
+	}
+}
 
 #[inline(always)]
 pub fn do_string(
