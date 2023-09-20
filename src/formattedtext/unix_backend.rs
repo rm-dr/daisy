@@ -1,34 +1,12 @@
+use super::FormattedText;
 use std::io::Write;
+use crate::context::Context;
+
 use termion::raw::RawTerminal;
 use termion::color;
 use termion::style;
 use termion::clear;
 use termion::cursor;
-use std::ops::Add;
-use crate::context::Context;
-
-
-#[derive(Debug)]
-#[derive(Clone)]
-pub struct FormattedText {
-	text: String
-}
-
-impl ToString for FormattedText {
-	fn to_string(&self) -> String { return self.text.clone(); }
-}
-
-
-fn format_map_none(c: char) -> Option<String> {
-	Some(match c {
-		'n'|'i'|'t'|'a'|
-		'e'|'c'|'s'|'r'|
-		'p'
-		=> { "".to_string() },
-		_ => { return None }
-	})
-}
-
 
 fn format_map_ansi(c: char) -> Option<String> {
 	Some(match c {
@@ -64,6 +42,17 @@ fn format_map_ansi(c: char) -> Option<String> {
 	})
 }
 
+
+
+fn format_map_none(c: char) -> Option<String> {
+	Some(match c {
+		'n'|'i'|'t'|'a'|
+		'e'|'c'|'s'|'r'|
+		'p'
+		=> { "".to_string() },
+		_ => { return None }
+	})
+}
 
 // style::reset also resets color.
 // Make sure color comes AFTER style reset.
@@ -102,9 +91,6 @@ fn format_map_full(c: char) -> Option<String> {
 	})
 }
 
-
-
-
 impl FormattedText {
 	pub fn newline(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
 		write!(stdout, "\n")?;
@@ -119,20 +105,6 @@ impl FormattedText {
 			_ => unreachable!("Invalid term_color_type")
 		}
 	}
-}
-
-
-impl FormattedText {
-	pub fn new(s: String) -> FormattedText {
-		return FormattedText {
-			text: s
-		}
-	}
-
-	pub fn push(&mut self, s: &str) {
-		self.text.push_str(s);
-	}
-
 
 	pub fn write(&self, context: &Context, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
 
@@ -155,7 +127,7 @@ impl FormattedText {
 				'[' => {
 					let a = chars.next().unwrap();
 
-					// Handle double [[ as escaped [
+					// Treat double [[ as escaped [
 					if a == '[' { s.push('['); }
 
 					let b = chars.next().unwrap();
@@ -188,14 +160,5 @@ impl FormattedText {
 
 		write!(stdout, "\r{}", s)?;
 		return Ok(());
-	}
-}
-
-
-impl Add for FormattedText {
-	type Output = Self;
-
-	fn add(self, other: Self) -> Self::Output {
-		return FormattedText::new(format!("{}{}", self.text, other.text));
 	}
 }
