@@ -164,7 +164,8 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 
 			if let Expression::Quantity(la, a) = a {
 				if let Expression::Quantity(lb, b) = b {
-					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, a.clone() * b.clone())));
+					let o = a.clone() * b.clone();
+					return Ok(Some(Expression::Quantity(*la + *lb + *op_loc, o)));
 				}
 			}
 

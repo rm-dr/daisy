@@ -275,7 +275,6 @@ impl Unit {
 		let mut q = Quantity::new_rational(1f64).unwrap();
 		q.set_unit(b);
 		return Some(q);
-
 	}
 }
 

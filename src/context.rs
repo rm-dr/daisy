@@ -61,7 +61,7 @@ impl Config {
 
 
 #[derive(Debug)]
-#[derive(Clone)]
+//#[derive(Clone)]
 pub struct Context {
 	pub config: Config,
 
@@ -76,12 +76,12 @@ pub struct Context {
 // General functions
 impl Context {
 	pub fn new() -> Context {
-		Context{
+		Context {
 			config: Config::new(),
 			history: Vec::new(),
 			variables: HashMap::new(),
 			functions: HashMap::new(),
-			shadow: HashMap::new(),
+			shadow: HashMap::new()
 		}
 	}
 
