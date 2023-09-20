@@ -1,9 +1,9 @@
 use std::collections::VecDeque;
 use std::io::Write;
 use termion::raw::RawTerminal;
-use crate::formattedtext;
-use crate::parser::substitute_cursor;
-use crate::context::Context;
+use daisycalc::FormattedText;
+use daisycalc::parser::substitute_cursor;
+use daisycalc::Context;
 
 const PROMPT_STR: &str = "==> ";
 
@@ -55,8 +55,8 @@ impl PromptBuffer {
 	
 		write!(
 			stdout, "\r{}{PROMPT_STR}{}{}",
-			formattedtext::format_map('p', context).unwrap(),
-			formattedtext::format_map('n', context).unwrap(),
+			FormattedText::format_map('p', context).unwrap(),
+			FormattedText::format_map('n', context).unwrap(),
 			s
 		)?;
 

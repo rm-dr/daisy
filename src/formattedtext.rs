@@ -102,20 +102,22 @@ fn format_map_full(c: char) -> Option<String> {
 	})
 }
 
-pub fn format_map(c: char, context: &Context) -> Option<String> {
-	match context.config.term_color_type {
-		0 => format_map_none(c),
-		1 => format_map_ansi(c),
-		2 => format_map_full(c),
-		_ => unreachable!("Invalid term_color_type")
-	}
-}
+
 
 
 impl FormattedText {
 	pub fn newline(stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
 		write!(stdout, "\n")?;
 		return Ok(());
+	}
+
+	pub fn format_map(c: char, context: &Context) -> Option<String> {
+		match context.config.term_color_type {
+			0 => format_map_none(c),
+			1 => format_map_ansi(c),
+			2 => format_map_full(c),
+			_ => unreachable!("Invalid term_color_type")
+		}
 	}
 }
 
@@ -161,7 +163,7 @@ impl FormattedText {
 					match (a, b) {
 						(c, ']') => { // Normal text
 
-							let q = format_map(c, context);
+							let q = Self::format_map(c, context);
 
 							if q.is_some() {
 								s.push_str(&q.unwrap());

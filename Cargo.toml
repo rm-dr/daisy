@@ -13,6 +13,10 @@ readme = "README.md"
 name = "daisy"
 path = "src/main.rs"
 
+[lib]
+name = "daisycalc"
+path = "src/lib.rs"
+
 [profile.release]
 opt-level = 3
 debug = 0
