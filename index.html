@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+	</head>
+	<body>
+		<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+
+		<div id="terminal">
+			<div id="output"></div>
+			<div id="input">
+				<span id="prompt">$ </span>
+				<input type="text" id="cmd">
+			</div>
+		</div>
+
+		<!-- Note the usage of `type=module` here as this is an ES6 module -->
+		<script type="module">
+			// See wasm-pack docs
+			// Build with `wasm-pack build --release --target web`
+			// Works with wasm-pack 0.9.1. Some other versions give a segfault.
+			import init, { dostr } from './pkg/daisycalc.js';
+			await init();
+
+			$(document).ready(function() {
+				$("#cmd").focus();
+				$("#cmd").keypress(function(e) {
+				if(e.which == 13) {
+					var cmd = $("#cmd").val();
+					$("#output").append("<div>$ " + cmd + "</div>");
+					$("#output").append("<div>$ " + dostr(cmd) + "</div>");
+					$("#cmd").val("");
+				}
+				});
+			});
+		</script>
+	</body>
+</html>
