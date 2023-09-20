@@ -55,7 +55,7 @@ pub fn main() -> Result<(), std::io::Error> {
 		));
 		t.write(&context, &mut stdout)?;
 		return Ok(());
-	} else if args.iter().any(|s| s == "--debug") {
+	} else if args.iter().any(|s| s == "--info") {
 		let t = FormattedText::new(format!(
 			concat!(
 				"Daisy v{}\n",
