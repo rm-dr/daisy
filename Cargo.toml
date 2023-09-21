@@ -34,8 +34,7 @@ num = "0.4.1"
 #astro-float = "0.7.1"
 
 [package.metadata.wasm-pack.profile.release]
-# wasm-opt doesn't work, need to figure out why
-wasm-opt = false
+wasm-opt = true
 
 [target.'cfg(target_family = "unix")'.dependencies]
 termion = "2.0.1"
