@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <html>
 	<head>
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
@@ -52,7 +54,7 @@
 
 				box-sizing: box;
 				border: 0mm;
-				box-shadow: 0px 0px 10px 4px #4d5257;
+				box-shadow: 0px 0px 10px 4px #3c4044;
 			}
 
 			#header {
@@ -98,8 +100,7 @@
 
 		<script type="module">
 			// See wasm-pack docs
-			// Build with `wasm-pack build --release --target web`
-			// Works with wasm-pack 0.9.1. Some other versions give a segfault.
+			// Build with `wasm-pack build --release --target web --out-dir site/pkg`
 
 			import init, { daisy_init, daisy_free, daisy_char, daisy_prompt } from './pkg/daisycalc.js';
 			await init();
