@@ -1,9 +1,7 @@
 use std::collections::VecDeque;
-use std::io::Write;
-use termion::raw::RawTerminal;
-use daisycalc::FormattedText;
-use daisycalc::parser::substitute_cursor;
-use daisycalc::Context;
+use crate::FormattedText;
+use crate::parser::substitute_cursor;
+use crate::Context;
 
 const PROMPT_STR: &str = "==> ";
 
@@ -18,11 +16,48 @@ pub struct PromptBuffer {
 	// 1 means "on last item of history"
 	hist_cursor: usize,
 
-	buffer: String,
+	pub buffer: String,
 	buffer_changed: bool,
 	cursor: usize,
 	last_print_len: usize
 }
+
+impl PromptBuffer {
+	// Same as write_primpt, but pretends there is no cursor
+	pub fn write_prompt_nocursor(&mut self, context: &Context) -> FormattedText {
+		let tmp = self.cursor;
+		self.cursor = 0;
+		let r = self.write_prompt(context);
+		self.cursor = tmp;
+		return r;
+	}
+
+	pub fn write_prompt(&mut self, context: &Context) -> FormattedText {
+		let l = self.buffer.chars().count();
+		let i = if l == 0 {0} else {l - self.cursor};
+
+		// Draw prettyprinted expression
+		let (display_c, s) = substitute_cursor(context, &self.get_contents(), i);
+	
+		let mut tx = FormattedText::new("".to_string());
+
+		tx.push(&format!("\r[p]{PROMPT_STR}[n]{s}"));
+
+
+		// If this string is shorter, clear the remaining old one.
+		if s.chars().count() < self.last_print_len {
+			tx.push(&" ".repeat(self.last_print_len - s.chars().count()));
+		}
+
+		let q = (display_c + PROMPT_STR.chars().count()) as u16;
+		tx.push(&format!("\r[cursorright{q}]"));
+
+		self.last_print_len = s.chars().count();
+
+		return tx;
+	}
+}
+
 
 impl PromptBuffer {
 	pub fn new(maxlen: usize) -> PromptBuffer {
@@ -35,48 +70,6 @@ impl PromptBuffer {
 			cursor: 0,
 			last_print_len: 0,
 		};
-	}
-
-	// Same as write_primpt, but pretends there is no cursor
-	pub fn write_prompt_nocursor(&mut self, context: &Context, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
-		let tmp = self.cursor;
-		self.cursor = 0;
-		let r = self.write_prompt(context, stdout);
-		self.cursor = tmp;
-		return r;
-	}
-
-	pub fn write_prompt(&mut self, context: &Context, stdout: &mut RawTerminal<std::io::Stdout>) -> Result<(), std::io::Error> {
-		let l = self.buffer.chars().count();
-		let i = if l == 0 {0} else {l - self.cursor};
-
-		// Draw prettyprinted expression
-		let (display_c, s) = substitute_cursor(context, &self.get_contents(), i);
-	
-		write!(
-			stdout, "\r{}{PROMPT_STR}{}{}",
-			FormattedText::format_map('p', context).unwrap(),
-			FormattedText::format_map('n', context).unwrap(),
-			s
-		)?;
-
-		// If this string is shorter, clear the remaining old one.
-		if s.chars().count() < self.last_print_len {
-			write!(
-				stdout, "{}",
-				" ".repeat(self.last_print_len - s.chars().count()),
-			)?;
-		}
-
-		write!(
-			stdout, "\r{}",
-			termion::cursor::Right((display_c + PROMPT_STR.chars().count()) as u16)
-		)?;
-
-		stdout.flush()?;
-		self.last_print_len = s.chars().count();
-
-		return Ok(());
 	}
 
 	// Prompt methods
