@@ -1,4 +1,5 @@
 use std::ops::Add;
+use std::ops::AddAssign;
 
 
 #[derive(Debug)]
@@ -29,5 +30,11 @@ impl Add for FormattedText {
 
 	fn add(self, other: Self) -> Self::Output {
 		return FormattedText::new(format!("{}{}", self.text, other.text));
+	}
+}
+
+impl AddAssign for FormattedText where {
+	fn add_assign(&mut self, other: Self) {
+		self.text.push_str(&other.text);
 	}
 }
