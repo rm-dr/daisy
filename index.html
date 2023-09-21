@@ -1,37 +1,149 @@
 <html>
 	<head>
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+		<link rel="stylesheet" href="node_modules/xterm/css/xterm.css" />
+		<link rel="stylesheet" href="xterm.css">
+		<script src="node_modules/xterm/lib/xterm.js"></script>
+		<style>
+			@font-face {
+				font-family: Fantasque;
+				src: url("FantasqueSansMono/Regular/complete/Fantasque Sans Mono Regular Nerd Font Complete.ttf") format("opentype");
+			}
+
+			html, body {
+				color: #FFFFFF;
+				background-color: #272A30;
+				font-size: 14pt;
+				font-family: Fantasque;
+
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+
+				height: 100vh;
+			}
+
+			body {
+				max-width: 1000px; 
+				margin: 0 auto !important; 
+				float: none !important; 
+			}
+
+			a {
+				font-size: 12pt;
+			}
+
+			a:link, a:visited {
+				color: #00B6B6;
+				text-decoration: none;
+			}
+
+			a:hover, a:active {
+				color: #04F1F1;
+				text-decoration: underline;
+			}
+
+
+			#terminal {
+				width: 90%;
+				height: auto;
+				margin: 0 auto !important; 
+				padding: 20px;
+				background: #1D1F21;
+
+				box-sizing: box;
+				border: 0mm;
+				box-shadow: 0px 0px 10px 4px #4d5257;
+			}
+
+			#header {
+				padding-top: 20px;
+				padding-bottom: 20px;
+				width: 90%;
+				margin: 0 auto !important; 
+			}
+
+			#footer {
+				padding-top: 20px;
+				padding-bottom: 20px;
+				width: 90%;
+				margin: 0 auto !important; 
+
+				text-align: center;
+			}
+
+			#banner {
+				width: 40%;
+			}
+
+
+		</style>
 	</head>
 	<body>
-		<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 
-		<div id="terminal">
-			<div id="output"></div>
-			<div id="input">
-				<span id="prompt">$ </span>
-				<input type="text" id="cmd">
-			</div>
+		<div id="header">
+			<img id="banner" src = "misc/daisy-light.svg" alt="Daisy Banner"/>
+			<p>A high-precision, general-purpose scientific calculator</p>
+		</div>
+		
+		<div id="terminal"></div>
+
+		<div id="footer">
+			<a href="https://github.com/rm-dr/daisy" target="_blank" rel="noopener noreferrer">Source Code</a> |
+			<a href="https://github.com/rm-dr/daisy#-usage" target="_blank" rel="noopener noreferrer">Documentation</a> |
+			<a href="https://github.com/rm-dr/daisy/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">License</a>
+			<br>
+			<a href="https://crates.io/crates/daisycalc" target="_blank" rel="noopener noreferrer">crates.io</a> |
+			<a href="https://aur.archlinux.org/packages/daisy" target="_blank" rel="noopener noreferrer">AUR</a>
 		</div>
 
-		<!-- Note the usage of `type=module` here as this is an ES6 module -->
 		<script type="module">
 			// See wasm-pack docs
 			// Build with `wasm-pack build --release --target web`
 			// Works with wasm-pack 0.9.1. Some other versions give a segfault.
-			import init, { dostr } from './pkg/daisycalc.js';
+
+			import init, { daisy_init, daisy_free, daisy_char, daisy_prompt } from './pkg/daisycalc.js';
 			await init();
 
-			$(document).ready(function() {
-				$("#cmd").focus();
-				$("#cmd").keypress(function(e) {
-				if(e.which == 13) {
-					var cmd = $("#cmd").val();
-					$("#output").append("<div>$ " + cmd + "</div>");
-					$("#output").append("<div>$ " + dostr(cmd) + "</div>");
-					$("#cmd").val("");
+			const term = new Terminal({
+				"fontFamily": "Fantasque",
+				"rows": 32,
+				"fontSize": 16,
+				"tabStopWidth": 8,
+				"cursorBlink": true,
+				"theme": {
+					"background": "#1D1F21",
+					"foreground": "#F8F8F8",
+					"cursor": "#F8F8F2",
+					"black": "#282828",
+					"blue": "#0087AF",
+					"brightBlack": "#555555",
+					"brightBlue": "#87DFFF",
+					"brightCyan": "#28D1E7",
+					"brightGreen": "#A8FF60",
+					"brightMagenta": "#985EFF",
+					"brightRed": "#FFAA00",
+					"brightWhite": "#D0D0D0",
+					"brightYellow": "#F1FF52",
+					"cyan": "#87DFEB",
+					"green": "#B4EC85",
+					"magenta": "#BD99FF",
+					"red": "#FF6600",
+					"white": "#F8F8F8",
+					"yellow": "#FFFFB6"
 				}
-				});
 			});
+
+			term.open(document.getElementById("terminal"));
+			const state = daisy_init();
+			term.write(daisy_char(state, "h"));
+			term.write(daisy_char(state, "e"));
+			term.write(daisy_char(state, "l"));
+			term.write(daisy_char(state, "p"));
+			term.write(daisy_char(state, "\r"));
+			term.focus();
+
+			term.onData( data => { term.write(daisy_char(state, data)); });
 		</script>
 	</body>
 </html>
