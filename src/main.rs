@@ -98,7 +98,15 @@ pub fn main() -> Result<(), std::io::Error> {
 
 						break;
 					},
-					_ => { pb.add_char(*q); }
+
+					// Only process sane characters
+					'a'..='z' | 'A'..='Z' | '0'..='9'
+					|'!'|'@'|'#'|'$'|'%'|'^'|'&'|'*'|'('|')'
+					|'?'|'~'|','|'.'|'['|']'
+					|'<'|'>'|'/'|'_'|'-'|':'|'|'|'='|'+'|';'
+					=> { pb.add_char(*q); },
+
+					_ => {}
 				};
 			} else {
 				match c.unwrap() {
