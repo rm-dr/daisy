@@ -16,6 +16,7 @@ pub fn is_command(
 		| "vars"
 		| "consts" | "constants"
 		| "del" | "delete"
+		| "flags"
 		=> true,
 		_ => false
 	}
@@ -79,6 +80,27 @@ pub fn do_command(
 			);
 
 			return t;
+		},
+
+		"flags" => {
+			return FormattedText::new(
+				concat!(
+					"\n",
+					"A list of command-line arguments is below\n",
+					"\n",
+					"╞════ [t]Flag[n] ════╪════════════════ [t]Function[n] ════════════════╡\n",
+					"  [c]--help[n]        Show help\n",
+					"  [c]--version[n]     Show version\n",
+					"  [c]--info[n]        Show system information\n",
+					"  [c]--256color[n]    Use full color support (default)\n",
+					"  [c]--8color[n]      Use reduced colors (ANSI, no styling)\n",
+					"  [c]--nocolor[n]     Do not use colors\n",
+					"  [c]--nosub[n]       Disable inline substitution\n",
+					"  [c]--nosuper[n]     Disable superscript powers\n",
+					"  [c]--nooneover[n]   Disable \"one-over\" fractions as -1 power\n",
+					"\n\n"
+				).to_string()
+			);
 		},
 
 		"clear" => {

@@ -29,7 +29,9 @@ pub fn main() -> Result<(), std::io::Error> {
 	let mut pb: PromptBuffer = PromptBuffer::new(64);
 	let mut context = Context::new();
 
-	// Set color compatibilty
+	// Detect color compatibilty
+	// Currently unused, this is slow.
+	/*
 	let term_colors = stdout.available_colors().unwrap_or(0);
 	if term_colors >= 256 {
 		context.config.term_color_type = 2;
@@ -38,15 +40,15 @@ pub fn main() -> Result<(), std::io::Error> {
 	} else {
 		context.config.term_color_type = 0;
 	}
-
-	context.config.check();
-
+	*/
 
 
 	// Handle command-line arguments
 	let args: Vec<String> = env::args().collect();
 	if args.iter().any(|s| s == "--help") {
 		let t = command::do_command(&mut context, &String::from("help"));
+		t.write(&context, &mut stdout)?;
+		let t = command::do_command(&mut context, &String::from("flags"));
 		t.write(&context, &mut stdout)?;
 		return Ok(());
 	} else if args.iter().any(|s| s == "--version") {
@@ -62,11 +64,26 @@ pub fn main() -> Result<(), std::io::Error> {
 				"Your terminal supports {} colors.\n"
 			),
 			env!("CARGO_PKG_VERSION"),
-			term_colors
+			stdout.available_colors().unwrap_or(0)
 		));
 		t.write(&context, &mut stdout)?;
 		return Ok(());
+	} else if args.iter().any(|s| s == "--256color") {
+		context.config.term_color_type = 2;
+	} else if args.iter().any(|s| s == "--8color") {
+		context.config.term_color_type = 1;
+	} else if args.iter().any(|s| s == "--0color") {
+		context.config.term_color_type = 0;
+	} else if args.iter().any(|s| s == "--nosub") {
+		context.config.enable_substituion = false;
+	} else if args.iter().any(|s| s == "--nosuper") {
+		context.config.enable_super_powers = false;
+	} else if args.iter().any(|s| s == "--nooneover") {
+		context.config.enable_one_over_power = false;
 	}
+
+	context.config.check();
+
 
 	'outer: loop {
 
