@@ -1,0 +1,17 @@
+version: "3"
+
+networks:
+  reverse_proxy:
+    external: true
+
+services:
+  daisy:
+    build: ./.
+    container_name: daisy
+    restart: unless-stopped
+
+    networks:
+      - reverse_proxy
+  
+    #ports:
+    #  - "80:80"
