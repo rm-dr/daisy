@@ -9,6 +9,8 @@
  - cargo publish
  - Update packages
  - Build wasm & push changes
+ - Squash push
+ - Update AUR package
 
 
 ## Pre-release
