@@ -1,4 +1,4 @@
-![](./site/misc/readme-banner.png)
+![](./server/site/resources/readme-banner.png)
 
 A high-precision scientific calculator with support for units, derivatives, and more.
 

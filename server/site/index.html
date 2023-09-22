@@ -100,6 +100,11 @@
 			<a href="https://aur.archlinux.org/packages/daisy" target="_blank" rel="noopener noreferrer">AUR</a>
 		</div>
 
+		<script>
+			var mobile = (/iphone|ipad|ipod|android|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
+			if (mobile) { alert("This site may not work on mobile."); }
+		</script>
+
 		<script type="module">
 			// See wasm-pack docs
 			// Build with `wasm-pack build --release --target web --out-dir pkg`

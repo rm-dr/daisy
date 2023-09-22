@@ -1,5 +1,4 @@
 ## Version Bump checklist
- - TODO: build and publish script
  - update Cargo.toml
  - run cargo test
  - commit
@@ -7,11 +6,8 @@
  - merge
  - git tag -a v1.0.0 -m "Version 1.0.0" on merge commit
  - cargo publish
- - Update packages
  - Build wasm & push changes
- - Squash merge
  - Update AUR package
-
 
 ## Pre-release
  - Tuple operations
@@ -22,25 +18,18 @@
  - Should functions be operators?
  - Binary, hex, octal numbers
 
-
 ## General
  - Better tests (assignment, many expressions in one context)
  - Optional config file
  - Optional history file
- - evaluate straight from command line
  - Package for debian, nix
-
-
-## Internals
  - Non-recursive treeify
  - Faster factorial function. Maybe use gamma instead?
- - Arbitrary precision float (rug doesn't offer arbitrary exponents)
+ - Arbitrary precision floats
 
 ## Math Features
  - Mean, Median, Min
  - Arbitrary base logarithm
- - Derivatives
- - CAS features (trig, roots and powers)
  - Complex numbers
  - acot/acoth functions
  - Sums and products with functional arguments
@@ -50,8 +39,7 @@
  - Fix terminal color detection
  - Live syntax/output (like firefox js terminal)
  - Syntax highlighting
- - fish-style tab completion
- - Numbered expressions, history recall
+ - Numbered history recall
  - Enable/disable unit sets (defaults?)
  - Consistent unit ordering
 
