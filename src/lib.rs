@@ -68,15 +68,12 @@ cfg_if::cfg_if! {
 						return format!("\r\n{}", daisy_prompt(state));
 					}
 
-					if in_str.trim() == "quit" {
-						return "[quit]".to_string();
-					} else {
-						let r = crate::do_string( unsafe { &mut (*state).context }, &in_str);
 
-						match r {
-							Ok(t) | Err(t) => {
-								out += t;
-							}
+					let r = crate::do_string( unsafe { &mut (*state).context }, &in_str);
+
+					match r {
+						Ok(t) | Err(t) => {
+							out += t;
 						}
 					}
 				},
@@ -91,7 +88,20 @@ cfg_if::cfg_if! {
 				//'\x04' | '\x03'
 				//=> { break 'outer; },
 
-				_ => { unsafe { (*state).promptbuffer.add_char(s.chars().next().unwrap()); } },
+				// Only process sane characters
+
+				_ => {
+					let c = s.chars().next().unwrap();
+					match c {
+						'a'..='z' | 'A'..='Z' | '0'..='9'
+						|'!'|'@'|'#'|'$'|'%'|'^'|'&'|'*'|'('|')'
+						|'?'|'~'|','|'.'|'['|']'
+						|'<'|'>'|'/'|'_'|'-'|':'|'|'|'='|'+'|';'
+						=> { unsafe { (*state).promptbuffer.add_char(c); } },
+
+						_ => {}
+					}
+				},
 			};
 			
 			let t = unsafe { (*state).promptbuffer.write_prompt(&mut (*state).context) };
