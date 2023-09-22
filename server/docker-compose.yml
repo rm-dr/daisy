@@ -7,7 +7,7 @@ networks:
 
 services:
   daisy:
-    build: ./server
+    build: .
     container_name: daisy
     restart: unless-stopped
 
