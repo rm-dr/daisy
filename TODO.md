@@ -9,7 +9,6 @@
  - cargo publish
  - Update packages
  - Build wasm & push changes
- - Squash merge
  - Update AUR package
 
 
