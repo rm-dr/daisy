@@ -12,7 +12,6 @@
 ## Pre-release
  - Tuple operations
  - we don't need vectors as arguments to operators
- - Fix linelocation when evaluating functions
 
 ## Parser
  - Should functions be operators?
