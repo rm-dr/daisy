@@ -14,5 +14,5 @@ publish:
 	cargo test
 	cargo publish
 
-docker:
+docker: wasm
 	docker build ./server -t git.betalupi.com/mark/daisy
