@@ -1,6 +1,6 @@
 [package]
 name = "daisycalc"
-version = "1.1.0"
+version = "1.1.1"
 edition = "2021"
 build = "buildscript/main.rs"
 license = "GPL-3.0-only"
@@ -12,6 +12,11 @@ readme = "README.md"
 [[bin]]
 name = "daisy"
 path = "src/main.rs"
+
+[lib]
+name = "daisycalc"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
 
 [profile.release]
 opt-level = 3
@@ -25,11 +30,18 @@ panic = "abort"
 
 [dependencies]
 cfg-if = "1.0.0"
+num = "0.4.1"
+#astro-float = "0.7.1"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = true
 
 [target.'cfg(target_family = "unix")'.dependencies]
 termion = "2.0.1"
-num = "0.4.1"
-#astro-float = "0.7.1"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+
 
 [build-dependencies]
 toml = "0.7.4"

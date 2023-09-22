@@ -1,7 +1,7 @@
 // Many of these have been borrowed from insect.
-use crate::parser;
-use crate::evaluate::evaluate;
-use crate::context::Context;
+use daisycalc::parser;
+use daisycalc::evaluate;
+use daisycalc::Context;
 
 fn eval_to_str(s: &str) -> Result<String, ()> {
 	let g = match parser::parse_no_context(&String::from(s)) {
