@@ -6,6 +6,7 @@
  - push
  - merge
  - git tag -a v1.0.0 -m "Version 1.0.0" on merge commit
+ - delete branch?
  - cargo publish
  - Update packages
  - Build wasm & push changes
