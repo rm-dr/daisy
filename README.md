@@ -4,7 +4,7 @@ A high-precision scientific calculator with support for units, derivatives, and 
 
 Many features are missing, this is still under development.
 
-**Web demo: [here](daisy.betalupi.com)**
+**Web demo: [here](https://daisy.betalupi.com)**
 
 # 📦 Installation
  - **Cargo:** `cargo install daisycalc`
