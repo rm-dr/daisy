@@ -1,0 +1,18 @@
+version: "3"
+
+# You'll need to edit this file if you want to use it.
+networks:
+  reverse_proxy:
+    external: true
+
+services:
+  daisy:
+    build: ./.
+    container_name: daisy
+    restart: unless-stopped
+
+    networks:
+      - reverse_proxy
+  
+    #ports:
+    #  - "80:80"

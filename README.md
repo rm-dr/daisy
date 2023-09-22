@@ -1,8 +1,10 @@
-![](./misc/banner.png)
+![](./site/misc/readme-banner.png)
 
 A high-precision scientific calculator with support for units, derivatives, and more.
 
 Many features are missing, this is still under development.
+
+**Web demo: [here](daisy.betalupi.com)**
 
 # 📦 Installation
  - **Cargo:** `cargo install daisycalc`

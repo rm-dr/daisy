@@ -8,6 +8,7 @@
  - git tag -a v1.0.0 -m "Version 1.0.0" on merge commit
  - cargo publish
  - Update packages
+ - Build wasm & push changes
 
 
 ## Pre-release
@@ -24,7 +25,6 @@
  - Better tests (assignment, many expressions in one context)
  - Optional config file
  - Optional history file
- - Compile to WASM, publish a webapp
  - evaluate straight from command line
  - Package for debian, nix
 

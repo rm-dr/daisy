@@ -10,13 +10,95 @@ mod context;
 mod formattedtext;
 mod errors;
 mod evaluate;
+mod promptbuffer;
 
 pub use crate::formattedtext::FormattedText;
 pub use crate::context::Context;
 pub use crate::errors::DaisyError;
 pub use crate::evaluate::evaluate;
+pub use crate::promptbuffer::PromptBuffer;
 
 
+
+cfg_if::cfg_if! {
+	if #[cfg(target_arch = "wasm32")] {
+		use wasm_bindgen::prelude::*;
+
+		#[derive(Debug)]
+		pub struct State {
+			pub context: Context,
+			pub promptbuffer: PromptBuffer
+		}
+
+		#[wasm_bindgen]
+		pub extern fn daisy_init() -> *mut State {
+			Box::into_raw(Box::new(State {
+				context: Context::new(),
+				promptbuffer: PromptBuffer::new(64)
+			}))
+		}
+
+		#[wasm_bindgen]
+		pub extern fn daisy_free(state: *mut State) {
+			unsafe { drop(Box::from_raw(state)) };
+		}
+
+		#[wasm_bindgen]
+		pub fn daisy_prompt(state: *mut State) -> String {
+			let t = unsafe { (*state).promptbuffer.write_prompt(&mut (*state).context) };
+			return t.write();
+		}
+
+
+		#[wasm_bindgen]
+		pub fn daisy_char(state: *mut State, s: String) -> String {
+			let mut out = FormattedText::new("".to_string());
+
+			match &s[..] {
+				"\r" => {
+					// Print again without cursor, in case we pressed enter
+					// while inside a substitution
+					let t = unsafe { (*state).promptbuffer.write_prompt_nocursor(&mut (*state).context) };
+					out += t;
+
+
+					let in_str = unsafe { (*state).promptbuffer.enter() };
+					out += FormattedText::new("\n".to_string());
+					if in_str == "" {
+						return format!("\r\n{}", daisy_prompt(state));
+					}
+
+					if in_str.trim() == "quit" {
+						return "[quit]".to_string();
+					} else {
+						let r = crate::do_string( unsafe { &mut (*state).context }, &in_str);
+
+						match r {
+							Ok(t) | Err(t) => {
+								out += t;
+							}
+						}
+					}
+				},
+
+				"\x7F" => { unsafe { (*state).promptbuffer.backspace(); } },
+				"\x1B[3~" => { unsafe { (*state).promptbuffer.delete(); } },
+				"\x1B[D" => { unsafe { (*state).promptbuffer.cursor_left(); } },
+				"\x1B[C" => { unsafe { (*state).promptbuffer.cursor_right(); } },
+				"\x1B[A" => { unsafe { (*state).promptbuffer.hist_up(); } },
+				"\x1B[B" => { unsafe { (*state).promptbuffer.hist_down(); } },
+
+				//'\x04' | '\x03'
+				//=> { break 'outer; },
+
+				_ => { unsafe { (*state).promptbuffer.add_char(s.chars().next().unwrap()); } },
+			};
+			
+			let t = unsafe { (*state).promptbuffer.write_prompt(&mut (*state).context) };
+			return (out + t).write();
+		}
+	}
+}
 
 #[inline(always)]
 pub fn do_string(

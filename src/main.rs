@@ -1,5 +1,3 @@
-pub mod promptbuffer;
-
 use std::io::stdout;
 use std::io::stdin;
 use std::env;
@@ -11,11 +9,10 @@ use termion::{
 	color::DetectColors
 };
 
-use promptbuffer::PromptBuffer;
+use daisycalc::PromptBuffer;
 use daisycalc::command;
 use daisycalc::Context;
 use daisycalc::FormattedText;
-
 use daisycalc::do_string;
 
 #[cfg(test)]
@@ -87,7 +84,8 @@ pub fn main() -> Result<(), std::io::Error> {
 
 	'outer: loop {
 
-		pb.write_prompt(&mut context, &mut stdout)?;
+		let t = pb.write_prompt(&mut context);
+		t.write(&context, &mut stdout)?;
 
 		let stdin = stdin();
 		for c in stdin.keys() {
@@ -96,7 +94,10 @@ pub fn main() -> Result<(), std::io::Error> {
 					'\n' => {
 						// Print again without cursor, in case we pressed enter
 						// while inside a substitution
-						pb.write_prompt_nocursor(&mut context, &mut stdout)?;
+						let t = pb.write_prompt_nocursor(&mut context);
+						t.write(&context, &mut stdout)?;
+
+
 						let in_str = pb.enter();
 						FormattedText::newline(&mut stdout)?;
 						if in_str == "" { break; }
@@ -140,7 +141,8 @@ pub fn main() -> Result<(), std::io::Error> {
 				};
 			};
 
-			pb.write_prompt(&mut context, &mut stdout)?;
+			let t = pb.write_prompt(&mut context);
+			t.write(&context, &mut stdout)?;
 		}
 	}
 
