@@ -19,6 +19,7 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 
 			if args.len() != 1 {panic!()};
 			let a = &args[0];
+			let mut args_ll = op_loc.clone();
 
 			if sh_vars.len() == 1 {
 				if let Expression::Tuple(l, v) = a {
@@ -28,6 +29,7 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 					))
 				};
 
+				args_ll += a.get_linelocation();
 				context.add_shadow(sh_vars[0].clone(), Some(a.clone()));
 			} else {
 				let Expression::Tuple(l, v) = a else {
@@ -46,16 +48,26 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 
 				let mut i = 0;
 				while i < sh_vars.len() {
+					args_ll += v[i].get_linelocation();
 					context.add_shadow(sh_vars[i].clone(), Some(v[i].clone()));
 					i += 1;
 				}
 			}
 
 
-			let r = evaluate(context, &exp)?;
+			let r = evaluate(context, &exp);
 			context.clear_shadow();
 
-			return Ok(Some(r));
+			match r {
+				Ok(mut r) => {
+					r.set_linelocation(&args_ll);
+					return Ok(Some(r));
+				},
+
+				Err( (_, err) ) => {
+					return Err((args_ll, err));
+				}
+			}
 		},
 
 		Operator::Negative => {
