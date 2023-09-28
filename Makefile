@@ -14,5 +14,6 @@ publish:
 	cargo test
 	cargo publish
 
-docker:
-	docker build ./server -t git.betalupi.com/mark/daisy
+docker: wasm
+	docker build ./server -t git.betalupi.com/mark/daisy --no-cache
+	docker push git.betalupi.com/mark/daisy
