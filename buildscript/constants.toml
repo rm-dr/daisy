@@ -49,7 +49,7 @@ value = "1.602176634e-19 C"
 enum_name = "ElectronMass"
 pretty_name = "Electron mass"
 strings = ["electronmass"]
-value = "9.1093837015-31 kg"
+value = "9.1093837015e-31 kg"
 
 [[constant]]
 enum_name = "ProtonMass"
