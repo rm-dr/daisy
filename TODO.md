@@ -1,18 +1,3 @@
-## Version Bump checklist
- - update Cargo.toml
- - run cargo test
- - commit
- - push
- - merge
- - git tag -a v1.0.0 -m "Version 1.0.0" on merge commit
- - cargo publish
- - Build wasm & push changes
- - Update AUR package
-
-## Pre-release
- - Tuple operations
- - we don't need vectors as arguments to operators
-
 ## Parser
  - Should functions be operators?
  - Binary, hex, octal numbers
@@ -25,6 +10,7 @@
  - Non-recursive treeify
  - Faster factorial function. Maybe use gamma instead?
  - Arbitrary precision floats
+ - we don't need vectors as arguments to operators
 
 ## Math Features
  - Mean, Median, Min
@@ -33,6 +19,7 @@
  - acot/acoth functions
  - Sums and products with functional arguments
  - Add functions: gcd, inverse mod, dice
+ - Tuple operations
 
 ## Prompt
  - Fix terminal color detection
@@ -46,5 +33,5 @@
  - long prefixes (megatonne, etc)
  - HMS for degrees
  - Exact radians, using pi constant?
- - Weird units: flops, lumen, lux, bel
+ - Odd units: flops, lumen, lux, bel
  - Command to list units
