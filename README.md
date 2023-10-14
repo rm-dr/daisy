@@ -7,13 +7,25 @@ Many features are missing, this is still under development.
 **Web demo: [here](https://daisy.betalupi.com) (won't work on mobile)**
 
 # 📦 Installation
+ - **From source:** `cargo build --release`, binary will be at `./target/release/daisy`
  - **Cargo:** `cargo install daisycalc`
  - **Arch:** `yay -S daisy`
  - **Debian:** coming soon
+ - **Nix:** Use `default.nix`. Daisy isn't in nixpkgs yet, you'll need to add something like the following to `configuration.nix`:
 
-From source: `cargo build --release` \
-Binary will be in `target/release/daisy`
-
+```nix
+	let
+		daisy = builtins.fetchGit {
+			url = "https://github.com/rm-dr/daisy.git";
+			ref = "master";
+		} + /default.nix;
+	in
+	{
+		environment.systemPackages = with pkgs; [
+			(callPackage daisy { })
+		];
+	}
+```
 
 # 📹 Screenshot
 
@@ -22,7 +34,7 @@ Binary will be in `target/release/daisy`
 # 🛠️ Features
  - Open-source
  - Extremely high precision
-   - Uses a rational datatype when possible, and a high-precision float when not.
+	 - Uses a rational datatype when possible, and a high-precision float when not.
  - Pretty printing in prompt (with special substitutions)
  - Supports many physical units, with metric and binary prefixes
  - Supports exponential notation
