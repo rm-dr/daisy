@@ -6,14 +6,14 @@ rustPlatform.buildRustPackage rec {
 
 	src = fetchgit {
 		url = "https://github.com/rm-dr/daisy.git";
-		rev = "7658ff76ef2d2fab540dc8b8d4ee24077daebd01";
+		rev = "v${version}";
 		sha256 = "sha256-aENuKtE1+tBRN0HZzRr8Gk+dVEYTiP6FNRz817Sk88o=";
 	};
 
 	meta = with lib; {
 		description = "A pretty command-line scientific calculator";
 		homepage = "https://github.com/rm-dr/daisy";
-		license = licenses.GPL;
+		#license = licenses.GPL;
 		maintainers = [ maintainers.tailhook ];
 	};
 }
