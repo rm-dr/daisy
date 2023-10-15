@@ -14,17 +14,17 @@ Many features are missing, this is still under development.
  - **Nix:** Use `default.nix`. Daisy isn't in nixpkgs yet, you'll need to add something like the following to `configuration.nix`:
 
 ```nix
-	let
-		daisy = builtins.fetchGit {
-			url = "https://github.com/rm-dr/daisy.git";
-			ref = "master";
-		} + /default.nix;
-	in
-	{
-		environment.systemPackages = with pkgs; [
-			(callPackage daisy { })
-		];
-	}
+let
+  daisy = builtins.fetchGit {
+    url = "https://github.com/rm-dr/daisy.git";
+    ref = "master";
+  } + /default.nix;
+in
+{
+  environment.systemPackages = with pkgs; [
+    (callPackage daisy { })
+  ];
+}
 ```
 
 # 📹 Screenshot
