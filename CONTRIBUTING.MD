@@ -29,8 +29,4 @@ What to do
  - `cargo publish`
  - Update web demo & pull server (`make docker`)
  - Update aur package
-
-Test `default.nix` with
-``sh
-nix-build -E 'let pkgs = import <nixpkgs> { }; in pkgs.callPackage ./default.nix {}'
-``
+ - Update `default.nix` (test with `make nix`)
