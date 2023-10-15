@@ -152,6 +152,9 @@ pub fn do_command(
 					"  Fahrenheit to Kelvin     [c]fromF, fromFahrenheit[n]\n",
 					"  Kelvin to Fahrenheit     [c]toF,   toFahrenheit[n]\n",
 					"\n",
+					"  Celsius to Fahrenheit    [c]CtoF[n]\n",
+					"  Fahrenheit to Celsius    [c]FtoC[n]\n",
+					"\n",
 					"  convert to base unit     [c]tobase[n]\n",
 					"  remove units             [c]nounit[n]\n",
 					"\n\n"

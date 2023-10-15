@@ -75,6 +75,10 @@ Daisy instead provides four functions (`fromCelsius`, `toCelsius`, `fromFahrenhe
  - "from" functions take a scalar and return a value in Kelvin: `fromCelsius(0) = 273.15K`
  - "to" functions take a value in Kelvin and return a scalar: `toCelsius(273.15 K) = 0`
 
+Functions `FtoC` and `CtoF` are also provided:
+ - `FtoC(x) = toCelsius(fromFahrenheit(x))`
+ - `CtoF(x) = toFahrenheit(fromCelsius(x))`
+
 
 ## Multiplication Order
 
