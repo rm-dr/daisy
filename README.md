@@ -33,9 +33,7 @@ in
 
 # 🛠️ Features
  - Open-source
- - Extremely high precision
-	 - Uses a rational datatype when possible, and a high-precision float when not.
- - Pretty printing in prompt (with special substitutions)
+ - Carefully designed and easy-to-read prompt
  - Supports many physical units, with metric and binary prefixes
  - Supports exponential notation
  - Clear syntax, parsed input is always re-printed as a sanity check.
