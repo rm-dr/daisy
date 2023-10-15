@@ -247,7 +247,7 @@ pub fn do_command(
 			if args.len() != 2 {
 				return FormattedText::new(
 					format!(
-						"[c]{first}[n] [t]takes exactly one argument.[n]\n\n",
+						"[c]{first}[n] [e]takes exactly one argument.[n]\n\n",
 					)
 				);
 			}
@@ -261,7 +261,7 @@ pub fn do_command(
 				Err(()) => {
 					FormattedText::new(
 						format!(
-							"[c]{v}[n] [t]isn't a variable.[n]\n\n",
+							"[c]{v}[n] [e]isn't a variable.[n]\n\n",
 						)
 					)
 				}
