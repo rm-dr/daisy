@@ -90,6 +90,7 @@ impl Context {
 
 	pub fn delete(&mut self, s: &String) -> Result<(), ()> {
 		if !(self.is_varible(s) || self.is_function(s)) { return Err(()) };
+		if s == "ans" { return Err(()) };
 		if self.is_varible(s) { self.variables.remove(s); }
 		if self.is_function(s) { self.functions.remove(s); }
 		return Ok(());
