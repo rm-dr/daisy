@@ -1,6 +1,9 @@
 release:
 	cargo build --release
 
+nix:
+	nix-build -E 'let pkgs = import <nixpkgs> { }; in pkgs.callPackage ./default.nix {}'
+
 test:
 	cargo test
 
