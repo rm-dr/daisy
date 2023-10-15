@@ -20,6 +20,8 @@
  - Sums and products with functional arguments
  - Add functions: gcd, inverse mod, dice
  - Tuple operations
+ - Number theory: select a group, inverses, etc
+ - Negative mod
 
 ## Prompt
  - Fix terminal color detection

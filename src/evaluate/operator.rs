@@ -124,6 +124,8 @@ pub fn eval_operator(context: &mut Context, g: &Expression) -> Result<Option<Exp
 			if let Expression::Quantity(la, a) = a {
 				if let Expression::Quantity(lb, b) = b {
 					if !a.unit.compatible_with(&b.unit) {
+						let a = a.convert_to_base().unit;
+						let b = b.convert_to_base().unit;
 
 						let a_s: String;
 						let b_s: String;
