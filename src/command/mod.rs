@@ -57,8 +57,8 @@ pub fn do_command(
 
 			t.push(
 				concat!(
-					"Daisy is a high-precision, general-purpose\n",
-					"scientific calculator.\n",
+					"Daisy is a pretty, general-purpose\n",
+					"TUI scientific calculator.\n",
 					"\n",
 					" - Use Up/Down arrows to navigate history.\n",
 					" - Use Ctrl-C or Ctrl-D to quit.\n",

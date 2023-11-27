@@ -1,6 +1,6 @@
 ![](./server/site/resources/readme-banner.png)
 
-A high-precision scientific calculator with support for units, derivatives, and more.
+A pretty, general-purpose scientific calculator with support for units, derivatives, and more.
 
 Many features are missing, this is still under development.
 
