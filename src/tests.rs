@@ -232,5 +232,11 @@ fn functions() {
 
 	good_expr("2", "nounit(2 mm)");
 	good_expr("2", "nounit(2 meter * second)");
+
+	good_expr("37.778", "FtoC(100)");
+	good_expr("73.399", "CtoF(23)");
+	good_expr("-17.778", "FtoC(0)");
+	good_expr("31.999", "CtoF(0)");
+
 	//good_expr("5000 m²·g/(s²·A²)", "tobase(5H)");
 }

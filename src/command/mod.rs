@@ -57,8 +57,8 @@ pub fn do_command(
 
 			t.push(
 				concat!(
-					"Daisy is a high-precision, general-purpose\n",
-					"scientific calculator.\n",
+					"Daisy is a pretty, general-purpose\n",
+					"TUI scientific calculator.\n",
 					"\n",
 					" - Use Up/Down arrows to navigate history.\n",
 					" - Use Ctrl-C or Ctrl-D to quit.\n",
@@ -151,6 +151,9 @@ pub fn do_command(
 					"  Kelvin to Celsius        [c]toC,   toCelsius[n]\n",
 					"  Fahrenheit to Kelvin     [c]fromF, fromFahrenheit[n]\n",
 					"  Kelvin to Fahrenheit     [c]toF,   toFahrenheit[n]\n",
+					"\n",
+					"  Celsius to Fahrenheit    [c]CtoF[n]\n",
+					"  Fahrenheit to Celsius    [c]FtoC[n]\n",
 					"\n",
 					"  convert to base unit     [c]tobase[n]\n",
 					"  remove units             [c]nounit[n]\n",

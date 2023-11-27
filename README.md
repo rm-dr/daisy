@@ -1,6 +1,6 @@
 ![](./server/site/resources/readme-banner.png)
 
-A high-precision scientific calculator with support for units, derivatives, and more.
+A pretty, general-purpose scientific calculator with support for units, derivatives, and more.
 
 Many features are missing, this is still under development.
 
@@ -33,9 +33,7 @@ in
 
 # 🛠️ Features
  - Open-source
- - Extremely high precision
-	 - Uses a rational datatype when possible, and a high-precision float when not.
- - Pretty printing in prompt (with special substitutions)
+ - Carefully designed and easy-to-read prompt
  - Supports many physical units, with metric and binary prefixes
  - Supports exponential notation
  - Clear syntax, parsed input is always re-printed as a sanity check.
@@ -76,6 +74,10 @@ Celsius and Fahrenheit are not supported as first-class units because they requi
 Daisy instead provides four functions (`fromCelsius`, `toCelsius`, `fromFahrenheit`, `toFahrenheit`) which convert between scalars and Kelvin.
  - "from" functions take a scalar and return a value in Kelvin: `fromCelsius(0) = 273.15K`
  - "to" functions take a value in Kelvin and return a scalar: `toCelsius(273.15 K) = 0`
+
+Functions `FtoC` and `CtoF` are also provided:
+ - `FtoC(x) = toCelsius(fromFahrenheit(x))`
+ - `CtoF(x) = toFahrenheit(fromCelsius(x))`
 
 
 ## Multiplication Order

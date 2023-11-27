@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::parser::Expression;
 use crate::parser::Function;
 use crate::parser::Operator;
@@ -9,6 +11,7 @@ use crate::quantity::Quantity;
 use crate::quantity::Scalar;
 use crate::errors::DaisyError;
 use crate::context::Context;
+use super::evaluate;
 
 // If unitless, do nothing
 // If compatible with radians, convert to radians and return unitless
@@ -151,6 +154,33 @@ pub fn eval_function(context: &mut Context, g: &Expression) -> Result<Option<Exp
 		},
 
 
+		Function::CtoF => {
+			return Ok(evaluate(context,
+				&Expression::Operator(
+					*l + *loc,
+					Operator::Function(Function::ToFahrenheit),
+					VecDeque::from(vec![Expression::Operator(
+						*l + *loc,
+						Operator::Function(Function::FromCelsius),
+						VecDeque::from(vec![Expression::Quantity(*l, q.clone())])
+					)])
+				)
+			).ok());
+		},
+
+		Function::FtoC => {
+			return Ok(evaluate(context,
+				&Expression::Operator(
+					*l + *loc,
+					Operator::Function(Function::ToCelsius),
+					VecDeque::from(vec![Expression::Operator(
+						*l + *loc,
+						Operator::Function(Function::FromFahrenheit),
+						VecDeque::from(vec![Expression::Quantity(*l, q.clone())])
+					)])
+				)
+			).ok());
+		},
 
 		Function::ToCelsius => {
 			let mut k = Quantity::new_rational(1f64).unwrap();

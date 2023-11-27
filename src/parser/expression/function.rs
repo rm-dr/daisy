@@ -37,7 +37,9 @@ pub enum Function {
 	FromCelsius,
 	ToCelsius,
 	FromFahrenheit,
-	ToFahrenheit
+	ToFahrenheit,
+	CtoF,
+	FtoC,
 }
 
 
@@ -74,6 +76,8 @@ impl ToString for Function {
 			Function::ToCelsius => {String::from("tocelsius") },
 			Function::FromFahrenheit => { String::from("fromfahrenheit") },
 			Function::ToFahrenheit => { String::from("tofahrenheit") },
+			Function::FtoC => { String::from("FtoC") },
+			Function::CtoF => { String::from("CtoF") },
 		}
 	}
 
@@ -126,6 +130,11 @@ impl Function {
 			"fromF"          => {Some(Function::FromFahrenheit)},
 			"fromfahrenheit" => {Some(Function::FromFahrenheit)},
 			"fromFahrenheit" => {Some(Function::FromFahrenheit)},
+
+			"FtoC" => {Some(Function::FtoC)},
+			"ftoc" => {Some(Function::FtoC)},
+			"ctof" => {Some(Function::CtoF)},
+			"CtoF" => {Some(Function::CtoF)},
 			_ => None
 		}
 	}
